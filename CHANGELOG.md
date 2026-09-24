@@ -32,6 +32,10 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `--mood` on `recommend` and `palettes` (with `--design <file>`), and `mood` on
   the `recommend_product_colors` and `palettes_for_product_color` tools. HTML
   cards show the mood level as a badge.
+- Re-ranked headings in `recommend --mood` and `palettes --mood` text output
+  show `combined <n>`, the score that decided the order, beside the mood level.
+  Before, only the deterministic `score` was printed, so a pick could appear
+  below one with a lower score for no visible reason.
 - `color-picker recolor --vet` and `recolor_plans` with `vet` describe the
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
