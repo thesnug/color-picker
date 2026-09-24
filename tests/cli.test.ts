@@ -258,6 +258,43 @@ describe("cli", () => {
     });
   });
 
+  describe("palettes", () => {
+    it("lists palettes for a garment color, the garment first", async () => {
+      const c = capture();
+      expect(await run(["palettes", "blue spruce", "--limit", "3"], c.io)).toBe(0);
+      const out = c.out();
+      expect(out.split("\n")[0]).toBe("Palettes for Blue Spruce #536758 · Comfort Colors 1717");
+      expect(out).toContain("Wada equivalents: Dark Medici Blue (distance 5.63)");
+      const blocks = out.split("\n\n").slice(1);
+      expect(blocks).toHaveLength(3);
+      for (const block of blocks) expect(block.split("\n")[1]).toBe("#536758  Blue Spruce");
+    });
+
+    it("prints the library result as JSON and honors --size and --product", async () => {
+      const c = capture();
+      const argv = ["palettes", "Grey", "--size", "2", "--product", "comfort-colors-1717", "--json"];
+      expect(await run(argv, c.io)).toBe(0);
+      const json = JSON.parse(c.out());
+      expect(json.color.slug).toBe("grey");
+      expect(json.available).toBe(true);
+      expect(json.palettes.length).toBeGreaterThan(0);
+      for (const p of json.palettes) {
+        expect(p.colors).toHaveLength(2);
+        expect(p.colors[0]).toMatchObject({ anchor: true, name: "Grey", hex: "#909090" });
+      }
+    });
+
+    it("writes each palette as a garment card with its photo and the ink colors as chips", async () => {
+      const c = capture();
+      await run(["palettes", "Blue Spruce", "--limit", "2", "--html", "p.html", "--svg", "p.svg"], c.io);
+      const html = c.files.get("p.html")!;
+      expect(html.match(/<h2>Combination \d+<\/h2>/g)).toHaveLength(2);
+      expect(html.match(/<image href=/g)).toHaveLength(2);
+      expect(html).toMatch(/Red Orange · [\d.]+:1/);
+      expect(c.files.get("p.svg")).toContain("<image href=");
+    });
+  });
+
   describe("errors", () => {
     it.each([
       [["nearest", "#12345"], 'malformed hex "#12345"'],
@@ -268,6 +305,8 @@ describe("cli", () => {
       [["theme", "999"], "unknown combination 999"],
       [["recommend", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
+      [["palettes", "Emerald"], 'has no color named "Emerald". Colors: Banana, Bay,'],
+      [["palettes", "Blue Spruce", "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
       const c = capture();
       expect(await run(argv, c.io)).toBe(1);
@@ -281,11 +320,14 @@ describe("cli", () => {
       [["show"], "show needs at least one combination ID"],
       [["nearest", "red", "-k", "0"], '-k must be a positive integer, got "0"'],
       [["combos", "red", "--limit", "2.5"], "--limit must be a positive integer"],
-      [["nearest", "red", "--size", "3"], "--size applies only to combos"],
+      [["nearest", "red", "--size", "3"], "--size applies only to combos and palettes"],
       [["combos", "red", "-k", "3"], "-k applies only to nearest"],
-      [["combos", "red", "--product", "comfort-colors-1717"], "--product applies only to recommend"],
+      [["combos", "red", "--product", "comfort-colors-1717"], "--product applies only to recommend and palettes"],
       [["nearest", "red", "-n", "3"], "-n applies only to recommend"],
       [["recommend"], "recommend takes one design file"],
+      [["palettes"], "palettes needs a product color name"],
+      [["palettes", "blue", "spruce"], "quote names with spaces"],
+      [["palettes", "Blue Spruce", "-k", "3"], "-k applies only to nearest"],
       [["recommend", FLAT_MARK, "-n", "0"], '-n must be a positive integer, got "0"'],
       [["combos", "red", "--check"], "--check is coming in the products milestone"],
       [["nearest", "red", "--bogus"], "Unknown option '--bogus'"],

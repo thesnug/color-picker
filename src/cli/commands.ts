@@ -4,10 +4,12 @@
  */
 
 import { combinations, type Palette } from "../combinations.js";
+import { contrastRatio } from "../color/contrast.js";
 import { isHex } from "../color/convert.js";
 import { loadColors, loadCombinations, loadProduct, loadProductIndex, type Product } from "../data/index.js";
 import { fingerprint } from "../fingerprint/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
+import { palettesForProductColor, type ProductPalette } from "../palettes.js";
 import { recommendProductColors } from "../recommend.js";
 import {
   type HtmlSection,
@@ -145,6 +147,74 @@ export function showView(ids: readonly number[]): View {
       caption: f.combination.harmony,
     })),
   };
+}
+
+export interface PalettesArgs {
+  /** A product color name, slug, or alias. */
+  name: string;
+  limit: number;
+  size?: number;
+  product?: string;
+}
+
+/** Palettes for a garment color: the garment first, then the ink colors printed on it. */
+export function palettesView({ name, limit, size, product: productId }: PalettesArgs): View {
+  let product: Product;
+  try {
+    product = loadProduct(productId ?? loadProductIndex().default);
+  } catch (error) {
+    throw new InputError((error as Error).message);
+  }
+  const result = palettesForProductColor(name, { product, limit, ...(size !== undefined && { size }) });
+  const color = result.color;
+  if (!color) {
+    const names = product.colors.map((c) => c.name).join(", ");
+    throw new InputError(`${result.reason} Colors: ${names}.`);
+  }
+
+  const title = `Palettes for ${color.name} ${color.hex} · ${product.brand} ${product.model}`;
+  const lines = [
+    `Wada equivalents: ${result.equivalents.map((e) => `${e.name} (distance ${fmt(e.distance)})`).join(", ") || "none"}`,
+    ...(color.available ? [] : [`Warning: ${color.name} is not stocked by the print provider.`]),
+  ];
+  const heading = (p: ProductPalette) =>
+    `${productPaletteTitle(p)} · via ${p.equivalent.name} · contrast ${fmt(p.contrast)} (lowest ${fmt(p.minContrast)})`;
+  const inkSwatches = (p: ProductPalette): Swatch[] =>
+    p.colors.slice(1).map((c) => ({ hex: c.hex, name: `${c.name} · ${fmt(contrastOn(p, c.hex))}:1` }));
+
+  if (result.palettes.length === 0) {
+    return {
+      title,
+      json: result,
+      text: () => `${title}\n${lines.join("\n")}\n\n${result.reason ?? "No palettes."}\n`,
+      sections: [],
+    };
+  }
+  return {
+    title,
+    json: result,
+    text: (useColor) =>
+      [
+        `${title}\n${lines.join("\n")}\n`,
+        ...result.palettes.map((p) => `${heading(p)}\n${renderAnsi(p.colors, { color: useColor })}`),
+      ].join("\n"),
+    // One card per palette: the garment, with its photo when the product has
+    // one, and the ink colors beside it.
+    sections: result.palettes.map((p) => ({
+      title: productPaletteTitle(p),
+      svg: renderProductCard(color, { designColors: inkSwatches(p) }),
+      caption: `via ${p.equivalent.name} · contrast ${fmt(p.contrast)}, lowest ${fmt(p.minContrast)}`,
+    })),
+  };
+}
+
+function productPaletteTitle(p: ProductPalette): string {
+  if (p.source === "book") return `Combination ${p.combination.id}`;
+  return `${p.harmony[0]!.toUpperCase()}${p.harmony.slice(1)} harmony`;
+}
+
+function contrastOn(p: ProductPalette, hex: string): number {
+  return contrastRatio(hex, p.colors[0].hex);
 }
 
 /** Default `-n` for `recommend`. */

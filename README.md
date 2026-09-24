@@ -87,6 +87,34 @@ matched color, weighted three to one over hue spread) with its `contrast` and
 `hueSpread`, so callers can re-rank. A neutral input anchors on the nearest
 neutral Wada color, so a gray does not anchor on a tinted color.
 
+### Palettes for a garment color
+
+`palettesForProductColor` answers "give me palettes for Blue Spruce". It finds
+the product color by name, slug, or alias, ignoring case, and reads the
+garment's committed Wada equivalents; it never runs a nearest match. Each
+equivalent contributes its combinations: the nearest always, the others when
+they are within 6 of the garment hex (`within`).
+
+```ts
+import { palettesForProductColor } from "@thesnug/color-picker";
+
+const r = palettesForProductColor("Blue Spruce", { limit: 5 });
+r.palettes[0].colors.map((c) => c.name);
+// ["Blue Spruce", "Red Orange", "Pale Lemon Yellow", "Isabella Color"]
+palettesForProductColor("gray").color?.name; // "Grey", through its alias
+```
+
+Each palette starts with the garment (`anchor: true`, the product hex, and the
+garment image when there is one) in place of the Wada equivalent it came
+through. The Wada colors to print on it follow. Palettes are ranked by the
+mean WCAG contrast of those ink colors against the garment hex, not against
+the Wada equivalent, because ink goes on the real shirt. Book palettes come
+before harmonies, and a combination reached through two equivalents appears
+once. `contrast` and `minContrast` are on every palette. Colors the provider
+does not stock still work, and the result carries `available: false` so
+callers can warn. Options: `product` (default Comfort Colors 1717), `limit`
+(default 12), and `size` (the garment counts toward it).
+
 ### Design fingerprint
 
 `fingerprint` reduces a PNG, WebP, or JPEG design to what recommendations need:
@@ -205,6 +233,7 @@ color-picker nearest "dusty rose" -k 5        # names work too; quote spaces
 color-picker combos "hermosa pink" --size 3   # ranked three-color palettes
 color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
 color-picker show 176 227                     # book combinations by ID
+color-picker palettes "Blue Spruce"           # palettes for a garment color
 color-picker recommend art/light-ink.png -n 3 # garment colors for a design
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
@@ -228,10 +257,10 @@ output is piped or `NO_COLOR` is set.
 | Flag | Applies to | Effect |
 | --- | --- | --- |
 | `-k <n>` | `nearest` | Number of matches (default 3) |
-| `--size <n>` | `combos` | Only palettes with `n` colors |
-| `--limit <n>` | `combos` | Maximum palettes (default 8) |
+| `--size <n>` | `combos`, `palettes` | Only palettes with `n` colors |
+| `--limit <n>` | `combos`, `palettes` | Maximum palettes (default 8) |
 | `-n <n>` | `recommend` | Number of picks (default 5) |
-| `--product <id>` | `recommend` | Garment product (default `comfort-colors-1717`) |
+| `--product <id>` | `recommend`, `palettes` | Garment product (default `comfort-colors-1717`) |
 | `--format <css\|tailwind\|tokens>` | `theme` | Print CSS custom properties, a Tailwind v4 `@theme` block, or design tokens |
 | `--mode <light\|dark>` | `theme` | Light (default) or dark |
 | `--json` | any | Print the library result as JSON instead of text |
