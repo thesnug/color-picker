@@ -19,6 +19,7 @@ import {
   DEFAULT_RECOMMEND_N,
   InputError,
   nearestView,
+  palettesView,
   recommendView,
   showView,
   type ThemeFormat,
@@ -62,6 +63,8 @@ Commands:
   combos <hex|name>           Ranked palettes: the book's combinations, then
                               harmonies snapped to Wada colors
   show <combination-id...>    Specific book combinations, 1 to 348
+  palettes <product-color>    Ranked palettes for a garment color by name,
+                              the garment first, then the ink colors
   recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
                               printed as is
   theme <hex|name|id>         A web theme: background, surface, text, muted
@@ -71,10 +74,11 @@ Commands:
 
 Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
-  --size <n>                  combos: only palettes with n colors
-  --limit <n>                 combos: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
+  --size <n>                  combos, palettes: only palettes with n colors
+  --limit <n>                 combos, palettes: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
   -n <n>                      recommend: number of picks (default ${DEFAULT_RECOMMEND_N})
-  --product <id>              recommend: garment product (default Comfort Colors 1717)
+  --product <id>              recommend, palettes: garment product (default
+                              Comfort Colors 1717)
   --format <css|tailwind|tokens>
                               theme: print CSS custom properties, a Tailwind v4
                               @theme block, or W3C design tokens (JSON)
@@ -94,14 +98,15 @@ Options:
   -v, --version               Print the package version and exit
 
 Names are Wada names, CSS color names, or xkcd survey names. Quote names with
-spaces: color-picker combos "hermosa pink"
+spaces: color-picker combos "hermosa pink". Product colors are names, slugs, or
+aliases from the product file: color-picker palettes "Blue Spruce"
 
-Exit codes: 0 success, 1 unknown name, malformed hex, unknown ID or product,
+Exit codes: 0 success, 1 unknown name or product color, malformed hex, unknown ID or product,
 an unreadable design file, or a theme with no legible text and background,
 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show", "recommend", "theme"] as const;
+const COMMANDS = ["nearest", "combos", "show", "palettes", "recommend", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const RESERVED = ["check"] as const;
@@ -208,17 +213,17 @@ async function buildView(
     mode?: string;
   },
 ): Promise<View> {
-  const only = (flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode", allowed: Command) => {
-    if (values[flag] !== undefined && command !== allowed) {
+  const only = (flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode", ...allowed: Command[]) => {
+    if (values[flag] !== undefined && !allowed.includes(command)) {
       const name = flag.length === 1 ? `-${flag}` : `--${flag}`;
-      throw new UsageError(`${name} applies only to ${allowed}`);
+      throw new UsageError(`${name} applies only to ${allowed.join(" and ")}`);
     }
   };
   only("k", "nearest");
-  only("size", "combos");
-  only("limit", "combos");
+  only("size", "combos", "palettes");
+  only("limit", "combos", "palettes");
   only("n", "recommend");
-  only("product", "recommend");
+  only("product", "recommend", "palettes");
   only("format", "theme");
   only("mode", "theme");
 
@@ -232,6 +237,21 @@ async function buildView(
     return recommendView({
       file: args[0]!,
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
+      ...(values.product !== undefined && { product: values.product }),
+    });
+  }
+
+  if (command === "palettes") {
+    if (args.length !== 1) {
+      throw new UsageError(
+        args.length === 0 ? "palettes needs a product color name" : "palettes takes one color; quote names with spaces",
+      );
+    }
+    const size = optionalInt(values.size, "--size");
+    return palettesView({
+      name: args[0]!,
+      limit: optionalInt(values.limit, "--limit") ?? DEFAULT_COMBOS_LIMIT,
+      ...(size !== undefined && { size }),
       ...(values.product !== undefined && { product: values.product }),
     });
   }
