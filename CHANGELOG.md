@@ -58,9 +58,10 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ### Packaging
 
-- The `sharp` peer range accepts 0.34 as well as 0.35. The fingerprint code
-  needs nothing newer than `autoOrient`, which arrived in 0.34, and
-  print-on-demand pins 0.34.
+- The optional `sharp` peer requires 0.35.4 or newer in the 0.35 line for
+  fingerprinting and recoloring image input. Earlier releases have known
+  libvips/libheif vulnerabilities when processing untrusted images; consumers
+  pinned to 0.34 must upgrade before using this package's image paths.
 
 ### Release tooling
 
