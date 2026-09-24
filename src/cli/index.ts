@@ -13,7 +13,15 @@ import { parseArgs } from "node:util";
 
 import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
-import { combosView, InputError, nearestView, showView, type View } from "./commands.js";
+import {
+  combosView,
+  DEFAULT_RECOMMEND_N,
+  InputError,
+  nearestView,
+  recommendView,
+  showView,
+  type View,
+} from "./commands.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -51,11 +59,15 @@ Commands:
   combos <hex|name>           Ranked palettes: the book's combinations, then
                               harmonies snapped to Wada colors
   show <combination-id...>    Specific book combinations, 1 to 348
+  recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
+                              printed as is
 
 Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
   --size <n>                  combos: only palettes with n colors
   --limit <n>                 combos: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
+  -n <n>                      recommend: number of picks (default ${DEFAULT_RECOMMEND_N})
+  --product <id>              recommend: garment product (default Comfort Colors 1717)
 
 Output options (any command):
   --json                      Print the result as JSON instead of text
@@ -63,7 +75,6 @@ Output options (any command):
   --html <path>               Write a self-contained HTML review page
 
 Coming in the products milestone (reserved, not yet available):
-  --product <id>              Work against a garment product's colors
   --check                     Run accessibility checks on each palette
 
 Options:
@@ -73,22 +84,22 @@ Options:
 Names are Wada names, CSS color names, or xkcd survey names. Quote names with
 spaces: color-picker combos "hermosa pink"
 
-Exit codes: 0 success, 1 unknown name, malformed hex, or unknown ID,
-2 usage error. See https://github.com/thesnug/color-picker
+Exit codes: 0 success, 1 unknown name, malformed hex, unknown ID or product,
+or an unreadable design file, 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show"] as const;
+const COMMANDS = ["nearest", "combos", "show", "recommend"] as const;
 type Command = (typeof COMMANDS)[number];
 
-const RESERVED = ["product", "check"] as const;
+const RESERVED = ["check"] as const;
 
 class UsageError extends Error {}
 
 /**
  * Run the CLI against an argument list (without the node and script entries).
- * Returns the process exit code instead of exiting, so it can be tested.
+ * Resolves to the process exit code instead of exiting, so it can be tested.
  */
-export function run(argv: readonly string[], io: CliIo = defaultIo): number {
+export async function run(argv: readonly string[], io: CliIo = defaultIo): Promise<number> {
   let parsed;
   try {
     parsed = parseArgs({
@@ -99,6 +110,7 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
         k: { type: "string", short: "k" },
         size: { type: "string" },
         limit: { type: "string" },
+        n: { type: "string", short: "n" },
         json: { type: "boolean" },
         svg: { type: "string" },
         html: { type: "string" },
@@ -133,7 +145,7 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
         throw new UsageError(`--${flag} is coming in the products milestone and is not yet available`);
       }
     }
-    view = buildView(command as Command, args, values);
+    view = await buildView(command as Command, args, values);
   } catch (error) {
     if (error instanceof UsageError) return usage(io, error.message);
     if (error instanceof InputError) {
@@ -164,24 +176,35 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
   return 0;
 }
 
-function buildView(
+async function buildView(
   command: Command,
   args: string[],
-  values: { k?: string; size?: string; limit?: string },
-): View {
-  const only = (flag: "k" | "size" | "limit", allowed: Command) => {
+  values: { k?: string; size?: string; limit?: string; n?: string; product?: string },
+): Promise<View> {
+  const only = (flag: "k" | "size" | "limit" | "n" | "product", allowed: Command) => {
     if (values[flag] !== undefined && command !== allowed) {
-      const name = flag === "k" ? "-k" : `--${flag}`;
+      const name = flag.length === 1 ? `-${flag}` : `--${flag}`;
       throw new UsageError(`${name} applies only to ${allowed}`);
     }
   };
   only("k", "nearest");
   only("size", "combos");
   only("limit", "combos");
+  only("n", "recommend");
+  only("product", "recommend");
 
   if (command === "show") {
     if (args.length === 0) throw new UsageError("show needs at least one combination ID");
     return showView(args.map((a) => positiveInt(a, "combination ID")));
+  }
+
+  if (command === "recommend") {
+    if (args.length !== 1) throw new UsageError("recommend takes one design file");
+    return recommendView({
+      file: args[0]!,
+      n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
+      ...(values.product !== undefined && { product: values.product }),
+    });
   }
 
   if (args.length !== 1) {
