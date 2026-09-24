@@ -1,0 +1,219 @@
+{
+  "$comment": "Labeled designs for the mood re-rank evaluation (INT-2273), reused by the recolor swaps in recolor-swaps.json. Each design carries its palette and the vision description Jev reads, written by hand, so the evaluation measures Jev's judgment without a vision call. `picks` are the Comfort Colors 1717 garments Jill would choose for the design as printed, best first. Draft picks: to be reviewed by Jill. tests/jev-fixtures.test.ts checks the shape.",
+  "designs": [
+    {
+      "id": "strawberry",
+      "palette": [
+        { "hex": "#d7263d", "share": 0.55, "element": "strawberry body" },
+        { "hex": "#3a7d44", "share": 0.2, "element": "leaves" },
+        { "hex": "#f6e7b4", "share": 0.1, "element": "seeds" },
+        { "hex": "#2b2d42", "share": 0.15, "element": "outline" }
+      ],
+      "description": {
+        "subject": "A single ripe strawberry with a leafy green top, drawn with a dark outline.",
+        "mood": "Sweet, fresh, summery; bold cartoon style.",
+        "elements": [
+          { "name": "strawberry body", "color": "bright red", "hex": "#d7263d" },
+          { "name": "leaves", "color": "leaf green", "hex": "#3a7d44" },
+          { "name": "seeds", "color": "pale yellow", "hex": "#f6e7b4" },
+          { "name": "outline", "color": "near black", "hex": "#2b2d42" }
+        ]
+      },
+      "picks": ["Ivory", "Blossom", "Chalky Mint", "Butter", "Banana"]
+    },
+    {
+      "id": "retro-sunset",
+      "palette": [
+        { "hex": "#f28c28", "share": 0.3, "element": "sun" },
+        { "hex": "#d6336c", "share": 0.25, "element": "sky bands" },
+        { "hex": "#ffd166", "share": 0.15, "element": "sun highlight" },
+        { "hex": "#3d2c5e", "share": 0.3, "element": "palm trees and waves" }
+      ],
+      "description": {
+        "subject": "A striped retro sunset over the ocean with two palm tree silhouettes.",
+        "mood": "Warm, nostalgic, laid-back; 1970s surf poster style.",
+        "elements": [
+          { "name": "sun", "color": "warm orange", "hex": "#f28c28" },
+          { "name": "sky bands", "color": "hot pink", "hex": "#d6336c" },
+          { "name": "sun highlight", "color": "golden yellow", "hex": "#ffd166" },
+          { "name": "palm trees and waves", "color": "deep purple", "hex": "#3d2c5e" }
+        ]
+      },
+      "picks": ["Ivory", "Butter", "Chambray", "Banana", "Peachy"]
+    },
+    {
+      "id": "camp-badge",
+      "palette": [
+        { "hex": "#2f4f3a", "share": 0.5, "element": "pine trees and badge ring" },
+        { "hex": "#7a5230", "share": 0.2, "element": "tent and lettering" },
+        { "hex": "#efe6cf", "share": 0.3, "element": "badge background" }
+      ],
+      "description": {
+        "subject": "A round camping badge with pine trees, a tent, and the words \"Camp Out\".",
+        "mood": "Outdoorsy, rugged, wholesome; vintage scout patch style.",
+        "elements": [
+          { "name": "pine trees", "color": "dark forest green", "hex": "#2f4f3a" },
+          { "name": "badge ring", "color": "dark forest green", "hex": "#2f4f3a" },
+          { "name": "tent", "color": "wood brown", "hex": "#7a5230" },
+          { "name": "lettering", "color": "wood brown", "hex": "#7a5230" },
+          { "name": "badge background", "color": "cream", "hex": "#efe6cf" }
+        ]
+      },
+      "picks": ["Sandstone", "Khaki", "Mustard", "Butter", "Bay"]
+    },
+    {
+      "id": "coffee-logo",
+      "palette": [
+        { "hex": "#3b2418", "share": 0.6, "element": "coffee cup and lettering" },
+        { "hex": "#c68b59", "share": 0.25, "element": "steam and beans" },
+        { "hex": "#f3e6cf", "share": 0.15, "element": "cup highlight" }
+      ],
+      "description": {
+        "subject": "A steaming coffee cup with coffee beans and the words \"Daily Grind\".",
+        "mood": "Cozy, warm, artisanal; hand-lettered cafe logo.",
+        "elements": [
+          { "name": "coffee cup", "color": "espresso brown", "hex": "#3b2418" },
+          { "name": "lettering", "color": "espresso brown", "hex": "#3b2418" },
+          { "name": "steam", "color": "caramel", "hex": "#c68b59" },
+          { "name": "beans", "color": "caramel", "hex": "#c68b59" },
+          { "name": "cup highlight", "color": "cream", "hex": "#f3e6cf" }
+        ]
+      },
+      "picks": ["Butter", "Ivory", "Sandstone", "Peachy", "Khaki"]
+    },
+    {
+      "id": "jack-o-lantern",
+      "palette": [
+        { "hex": "#f77f00", "share": 0.6, "element": "pumpkin" },
+        { "hex": "#1b1b1b", "share": 0.25, "element": "carved face" },
+        { "hex": "#4a7c23", "share": 0.05, "element": "stem" },
+        { "hex": "#ffd23f", "share": 0.1, "element": "candle glow" }
+      ],
+      "description": {
+        "subject": "A grinning jack-o'-lantern with a glowing carved face.",
+        "mood": "Spooky but playful; Halloween cartoon.",
+        "elements": [
+          { "name": "pumpkin", "color": "pumpkin orange", "hex": "#f77f00" },
+          { "name": "carved face", "color": "black", "hex": "#1b1b1b" },
+          { "name": "stem", "color": "green", "hex": "#4a7c23" },
+          { "name": "candle glow", "color": "yellow", "hex": "#ffd23f" }
+        ]
+      },
+      "picks": ["Pepper", "Graphite", "Grey", "Ivory", "Espresso"]
+    },
+    {
+      "id": "great-wave",
+      "palette": [
+        { "hex": "#1d3557", "share": 0.5, "element": "wave body" },
+        { "hex": "#a8dadc", "share": 0.3, "element": "wave shading" },
+        { "hex": "#f1faee", "share": 0.2, "element": "foam" }
+      ],
+      "description": {
+        "subject": "A curling ocean wave with clawing foam, after Japanese woodblock prints.",
+        "mood": "Dramatic, calm-powerful, classic; ukiyo-e print style.",
+        "elements": [
+          { "name": "wave body", "color": "deep navy blue", "hex": "#1d3557" },
+          { "name": "wave shading", "color": "pale sea blue", "hex": "#a8dadc" },
+          { "name": "foam", "color": "off white", "hex": "#f1faee" }
+        ]
+      },
+      "picks": ["Ivory", "Sandstone", "Butter", "Bay", "Khaki"]
+    },
+    {
+      "id": "wildflowers",
+      "palette": [
+        { "hex": "#f4a6c1", "share": 0.3, "element": "petals" },
+        { "hex": "#ffd23f", "share": 0.15, "element": "flower centers" },
+        { "hex": "#6a994e", "share": 0.3, "element": "stems and leaves" },
+        { "hex": "#ffffff", "share": 0.25, "element": "daisies" }
+      ],
+      "description": {
+        "subject": "A loose bouquet of pink wildflowers and white daisies.",
+        "mood": "Gentle, cheerful, springtime; soft watercolor-like illustration.",
+        "elements": [
+          { "name": "petals", "color": "soft pink", "hex": "#f4a6c1" },
+          { "name": "flower centers", "color": "sunny yellow", "hex": "#ffd23f" },
+          { "name": "stems and leaves", "color": "sage green", "hex": "#6a994e" },
+          { "name": "daisies", "color": "white", "hex": "#ffffff" }
+        ]
+      },
+      "picks": ["Blue Spruce", "Denim", "Midnight", "Grape", "Moss"]
+    },
+    {
+      "id": "neon-skull",
+      "palette": [
+        { "hex": "#ff2e97", "share": 0.45, "element": "skull" },
+        { "hex": "#39ff14", "share": 0.35, "element": "drips and eyes" },
+        { "hex": "#111111", "share": 0.2, "element": "outline" }
+      ],
+      "description": {
+        "subject": "A dripping skull with glowing eyes.",
+        "mood": "Loud, edgy, party; neon rave flyer style.",
+        "elements": [
+          { "name": "skull", "color": "neon pink", "hex": "#ff2e97" },
+          { "name": "drips", "color": "neon green", "hex": "#39ff14" },
+          { "name": "eyes", "color": "neon green", "hex": "#39ff14" },
+          { "name": "outline", "color": "black", "hex": "#111111" }
+        ]
+      },
+      "picks": ["Black", "Graphite", "True Navy", "Pepper", "Grape"]
+    },
+    {
+      "id": "lemons",
+      "palette": [
+        { "hex": "#f9dc5c", "share": 0.5, "element": "lemons" },
+        { "hex": "#5a9e3b", "share": 0.3, "element": "leaves" },
+        { "hex": "#ffffff", "share": 0.2, "element": "blossoms" }
+      ],
+      "description": {
+        "subject": "A branch of lemons with leaves and small white blossoms.",
+        "mood": "Bright, fresh, Mediterranean summer; flat illustration.",
+        "elements": [
+          { "name": "lemons", "color": "lemon yellow", "hex": "#f9dc5c" },
+          { "name": "leaves", "color": "fresh green", "hex": "#5a9e3b" },
+          { "name": "blossoms", "color": "white", "hex": "#ffffff" }
+        ]
+      },
+      "picks": ["Navy", "Blue Jean", "True Navy", "Blue Spruce", "China Blue"]
+    },
+    {
+      "id": "mountain-poster",
+      "palette": [
+        { "hex": "#c1532b", "share": 0.3, "element": "sunset sky" },
+        { "hex": "#e0a526", "share": 0.2, "element": "sun" },
+        { "hex": "#2a7f7a", "share": 0.3, "element": "mountains" },
+        { "hex": "#f2e8cf", "share": 0.2, "element": "snowcaps and lettering" }
+      ],
+      "description": {
+        "subject": "A mountain range under a setting sun with the words \"Go Wild\".",
+        "mood": "Adventurous, warm, retro; vintage national park poster.",
+        "elements": [
+          { "name": "sunset sky", "color": "burnt orange", "hex": "#c1532b" },
+          { "name": "sun", "color": "mustard yellow", "hex": "#e0a526" },
+          { "name": "mountains", "color": "teal", "hex": "#2a7f7a" },
+          { "name": "snowcaps", "color": "cream", "hex": "#f2e8cf" },
+          { "name": "lettering", "color": "cream", "hex": "#f2e8cf" }
+        ]
+      },
+      "picks": ["Espresso", "Pepper", "Blue Spruce", "Midnight", "Graphite"]
+    },
+    {
+      "id": "valentine-heart",
+      "palette": [
+        { "hex": "#c9184a", "share": 0.6, "element": "heart" },
+        { "hex": "#ff8fab", "share": 0.25, "element": "sparkles" },
+        { "hex": "#ffffff", "share": 0.15, "element": "shine" }
+      ],
+      "description": {
+        "subject": "A big glossy heart surrounded by little sparkles.",
+        "mood": "Romantic, sweet, playful; Valentine's Day sticker style.",
+        "elements": [
+          { "name": "heart", "color": "deep red", "hex": "#c9184a" },
+          { "name": "sparkles", "color": "bubblegum pink", "hex": "#ff8fab" },
+          { "name": "shine", "color": "white", "hex": "#ffffff" }
+        ]
+      },
+      "picks": ["Ivory", "Blossom", "White", "Chambray", "Orchid"]
+    }
+  ]
+}

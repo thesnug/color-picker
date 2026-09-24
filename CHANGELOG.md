@@ -23,9 +23,17 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `vettedRecolorPlans` and `vetRecolorPlans` in `@thesnug/color-picker/jev` ask
   Jev whether each recolor swap keeps the design reading as the same subject.
   Each mapping entry gains `plausibility`; a plan below `PLAUSIBILITY_THRESHOLD`
-  (0.4) is marked `implausible`, named in `reasons`, and dropped unless
+  (0.8, from the threshold evaluation) is marked `implausible`, named in `reasons`, and dropped unless
   `includeImplausible` is set. Without Jev or a description, plans pass with
   `plausibility: null`.
+
+- `acceptedColor` in `@thesnug/color-picker/jev` returns the color a
+  `describeToColor` result can be acted on, or nothing when Jev's top match is
+  below `DESCRIBE_COLOR_ACCEPT` (0.35) or `none` won.
+- `npm run jev:evaluate` measures the Jev thresholds against labeled phrases,
+  designs, and recolor swaps and writes a report under `docs/evaluations/`.
+  The first report raised `PLAUSIBILITY_THRESHOLD` from 0.4, which flagged no
+  labeled implausible swap, to 0.8.
 
 ### CLI and MCP
 
@@ -39,6 +47,14 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `color-picker recolor --vet` and `recolor_plans` with `vet` describe the
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
+
+### Agents
+
+- `skills/color-picker/SKILL.md`, a skill for Claude Code and Codex agents in
+  other projects: when to use each MCP tool, how to register the server from a tag
+  with `npx` in either host, and how to present results as swatch
+  cards with Wada names. `release prepare` moves its pinned tag with the
+  README's.
 
 ### Packaging
 

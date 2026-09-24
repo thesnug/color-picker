@@ -50,6 +50,7 @@
     "data:build": "tsx scripts/build-data.ts",
     "data:check": "tsx scripts/build-data.ts --check",
     "jev:describe:evaluate": "tsx scripts/evaluate-describe-color.ts",
+    "jev:evaluate": "tsx scripts/evaluate-jev.ts",
     "products:check": "tsx scripts/validate-products.ts",
     "products:equivalents": "tsx scripts/build-equivalents.ts",
     "products:equivalents:check": "tsx scripts/build-equivalents.ts --check",
