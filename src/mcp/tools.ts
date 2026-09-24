@@ -23,7 +23,7 @@ import {
 } from "../cli/commands.js";
 import { DEFAULT_COMBOS_LIMIT, stackSvg } from "../cli/index.js";
 import { check, type CheckResult, type SwatchInput } from "../accessibility.js";
-import { loadCombinations, loadProduct, loadProductIndex } from "../data/index.js";
+import { hasHex, loadCombinations, loadProduct, loadProductIndex } from "../data/index.js";
 import { DEFAULT_NEAREST_K, resolveQuery } from "../nearest.js";
 import { renderCombination, renderHtml, renderSwatchGrid, type Swatch } from "../render/index.js";
 import { type Theme, type ThemeMode, toCssVariables, toDesignTokens, toTailwindTheme } from "../theme.js";
@@ -371,11 +371,15 @@ function productsView(productId: string | undefined): View {
   return {
     title,
     json: { id: found.id, name: found.name, printMethod: found.printMethod, colors },
-    text: () => colors.map((c) => `${c.name} ${c.hex}`).join("\n"),
+    text: () => colors.map((c) => `${c.name} ${c.hex ?? "hex unknown"}`).join("\n"),
     sections: [
       {
         svg: renderSwatchGrid(
-          colors.map((c): Swatch => ({ hex: c.hex, name: c.name, ...(!c.available && { note: "not stocked" }) })),
+          found.colors.filter(hasHex).map((c): Swatch => ({
+            hex: c.hex,
+            name: c.name,
+            ...(!c.available && { note: "not stocked" }),
+          })),
           { title, columns: 8 },
         ),
       },
