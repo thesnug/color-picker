@@ -691,8 +691,14 @@ function moodLine(status: MoodStatus, file: string): string {
     : `Mood: not applied. ${status.reason}`;
 }
 
+/**
+ * The mood judgment and the combined score that ranked the candidate. The
+ * deterministic score stays in the heading as `score`, so the text matches the
+ * JSON field for field and the order is explained by `combined`.
+ */
 function moodSuffix(candidate: Partial<MoodFields>): string {
-  return candidate.moodLevel ? ` · mood ${candidate.moodLevel} (${fmt(candidate.moodScore!, 2)})` : "";
+  if (!candidate.moodLevel) return "";
+  return ` · mood ${candidate.moodLevel} (${fmt(candidate.moodScore!, 2)}) · combined ${fmt(candidate.combinedScore!, 3)}`;
 }
 
 function moodBadge(candidate: Partial<MoodFields>): { badge?: string } {

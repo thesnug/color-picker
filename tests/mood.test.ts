@@ -23,6 +23,7 @@ import {
 import { palettesForProductColor } from "../src/palettes.js";
 import { recommendProductColors } from "../src/recommend.js";
 import { renderHtml } from "../src/render/index.js";
+import { fmt } from "../src/render/shared.js";
 
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
 
@@ -264,7 +265,11 @@ describe("recommend with mood", () => {
     // The second pick elevates the design; the rest are neutral, so it moves to the top.
     const client = fakeClient({ [moodCandidateId(picks[1]!)]: 3 });
     const view = await recommendView({ file: FLAT_MARK, n: 3, mood: { client, providers: [vision], cache } });
-    const json = view.json as { picks: { color: { slug: string }; moodLevel: string }[]; mood: object; design: Fingerprint };
+    const json = view.json as {
+      picks: { color: { slug: string }; moodLevel: string; score: number; combinedScore: number }[];
+      mood: object;
+      design: Fingerprint;
+    };
 
     expect(vision.calls).toBe(1);
     expect(json.design.description?.subject).toMatch(/badge/);
@@ -273,7 +278,12 @@ describe("recommend with mood", () => {
     expect(json.picks[0]).toMatchObject({ color: { slug: picks[1]!.color.slug }, moodLevel: "elevates" });
 
     expect(view.text(false)).toContain("Mood: re-ranked by Jev");
-    expect(view.text(false)).toContain("mood elevates (1)");
+    // The heading keeps the deterministic score and adds the combined score that decided the order.
+    const top = json.picks[0]!;
+    expect(top.combinedScore).toBeGreaterThan(json.picks[1]!.combinedScore);
+    expect(view.text(false)).toContain(
+      `1. ${picks[1]!.color.name} · score ${fmt(top.score, 3)} · mood elevates (1) · combined ${fmt(top.combinedScore, 3)}`,
+    );
     expect(renderHtml(view.sections)).toContain('<span class="badge">Mood: elevates</span>');
   });
 

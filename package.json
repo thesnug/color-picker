@@ -63,7 +63,7 @@
   "peerDependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@typesafe-ai/sdk": "^0.6.0",
-    "sharp": "^0.35.0",
+    "sharp": "^0.35.4",
     "zod": "^3.25 || ^4.0"
   },
   "peerDependenciesMeta": {

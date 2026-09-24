@@ -40,6 +40,10 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `--mood` on `recommend` and `palettes` (with `--design <file>`), and `mood` on
   the `recommend_product_colors` and `palettes_for_product_color` tools. HTML
   cards show the mood level as a badge.
+- Re-ranked headings in `recommend --mood` and `palettes --mood` text output
+  show `combined <n>`, the score that decided the order, beside the mood level.
+  Before, only the deterministic `score` was printed, so a pick could appear
+  below one with a lower score for no visible reason.
 - `color-picker recolor --vet` and `recolor_plans` with `vet` describe the
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
@@ -51,6 +55,13 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
   with `npx` in either host, and how to present results as swatch
   cards with Wada names. `release prepare` moves its pinned tag with the
   README's.
+
+### Packaging
+
+- The optional `sharp` peer requires 0.35.4 or newer in the 0.35 line for
+  fingerprinting and recoloring image input. Earlier releases have known
+  libvips/libheif vulnerabilities when processing untrusted images; consumers
+  pinned to 0.34 must upgrade before using this package's image paths.
 
 ### Release tooling
 
