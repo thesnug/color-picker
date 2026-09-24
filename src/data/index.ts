@@ -111,6 +111,23 @@ export interface CombinationsFile {
 }
 
 // ---------------------------------------------------------------------------
+// Color-name dictionaries. Vendored in `assets/names/`, each file citing its
+// source and license. Used to resolve names that are not Wada names.
+
+/** A bundled color-name dictionary. */
+export type ColorNameSource = "css" | "xkcd";
+
+export interface ColorNamesFile {
+  /** Where the names came from. */
+  source: string;
+  license: string;
+  /** When the source was fetched, `YYYY-MM-DD`. */
+  retrieved: string;
+  /** Sorted by name. Names are as published. */
+  colors: { name: string; hex: string }[];
+}
+
+// ---------------------------------------------------------------------------
 // Products. Shapes match assets/schemas/product.schema.json and
 // assets/schemas/products-index.schema.json.
 
@@ -207,6 +224,11 @@ export function loadColors(): DerivedColor[] {
 /** Load the book's combinations as first-class objects. */
 export function loadCombinations(): Combination[] {
   return readJson<CombinationsFile>("derived/combinations.json").combinations;
+}
+
+/** Load a bundled color-name dictionary: CSS named colors or the xkcd color survey. */
+export function loadColorNames(source: ColorNameSource): ColorNamesFile {
+  return readJson<ColorNamesFile>(`names/${source}.json`);
 }
 
 /** Load `assets/products/index.json`. */
