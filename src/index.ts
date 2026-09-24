@@ -17,4 +17,5 @@ export * from "./combinations.js";
 export * from "./equivalents.js";
 export * from "./palettes.js";
 export * from "./recommend.js";
+export * from "./recolor.js";
 export * from "./theme.js";
