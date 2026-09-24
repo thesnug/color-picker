@@ -7,6 +7,13 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+### Library
+
+- `describeToColor` in `@thesnug/color-picker/jev` resolves a free-text color
+  description ("the brick shirt", "something autumnal for a coffee brand") to a
+  Wada color or a product color. The name lookup runs first; Jev is asked only
+  when it misses, and the top three come back with their probabilities.
+
 ## [0.1.0] - 2026-09-24
 
 The first release.
