@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 
 import {
   changelogEntry,
@@ -8,6 +12,7 @@ import {
   pointReadme,
   pushFailureMessage,
   ReleaseError,
+  validateReleaseTag,
   type TagState,
 } from "../scripts/release.js";
 
@@ -144,11 +149,68 @@ describe("existingTagAction", () => {
   });
 });
 
+describe("validateReleaseTag", () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+  function fixture(): { cwd: string; git: (...args: string[]) => string; release: (files: Record<string, string>) => string } {
+    const cwd = mkdtempSync(join(tmpdir(), "release-tag-test-"));
+    dirs.push(cwd);
+    const git = (...args: string[]): string => execFileSync("git", args, {
+      cwd,
+      encoding: "utf8",
+      env: { ...process.env, GIT_AUTHOR_NAME: "Test", GIT_AUTHOR_EMAIL: "test@example.com",
+        GIT_COMMITTER_NAME: "Test", GIT_COMMITTER_EMAIL: "test@example.com" },
+    }).trim();
+    git("init", "-q");
+    writeFileSync(join(cwd, "package.json"), '{"version":"0.1.0"}\n');
+    git("add", "package.json");
+    git("commit", "-qm", "Main");
+    const release = (files: Record<string, string>): string => {
+      for (const [path, content] of Object.entries(files)) {
+        mkdirSync(join(cwd, path, ".."), { recursive: true });
+        writeFileSync(join(cwd, path), content);
+      }
+      git("add", "--force", ...Object.keys(files));
+      const tree = git("write-tree");
+      const commit = git("commit-tree", tree, "-p", "HEAD", "-m", "Release v0.1.0");
+      git("reset", "--hard", "HEAD");
+      git("tag", "-a", "v0.1.0", commit, "-m", "v0.1.0");
+      return commit;
+    };
+    return { cwd, git, release };
+  }
+
+  it("rejects a child tag without dist even when its only parent is HEAD", () => {
+    const { cwd, git } = fixture();
+    const commit = git("commit-tree", git("rev-parse", "HEAD^{tree}"), "-p", "HEAD", "-m", "Release v0.1.0");
+    git("tag", "-a", "v0.1.0", commit, "-m", "v0.1.0");
+    expect(() => validateReleaseTag("v0.1.0", ["dist/index.js"], cwd)).toThrow(/not the expected annotated release/);
+  });
+
+  it("accepts a release tag with the required dist files and no other tree changes", () => {
+    const { cwd, release } = fixture();
+    release({ "dist/index.js": "export {};", "dist/index.d.ts": "export {};" });
+    expect(() => validateReleaseTag("v0.1.0", ["dist/index.js", "dist/index.d.ts"], cwd)).not.toThrow();
+  });
+
+  it("rejects missing entrypoints and changes outside dist", () => {
+    const missing = fixture();
+    missing.release({ "dist/index.js": "export {};" });
+    expect(() => validateReleaseTag("v0.1.0", ["dist/index.js", "dist/index.d.ts"], missing.cwd)).toThrow(/not the expected/);
+    const changed = fixture();
+    changed.release({ "dist/index.js": "export {};", "package.json": '{"version":"9.9.9"}\n' });
+    expect(() => validateReleaseTag("v0.1.0", ["dist/index.js"], changed.cwd)).toThrow(/not the expected/);
+  });
+});
+
 describe("pushFailureMessage", () => {
   it("says where the tag is and gives the commands to push or delete it", () => {
     const message = pushFailureMessage("v0.1.0");
     expect(message).toContain("v0.1.0 exists locally but not on origin.");
-    expect(message).toContain("git push origin refs/tags/v0.1.0");
+    expect(message).not.toContain("git push origin refs/tags/v0.1.0");
     expect(message).toContain("npm run release -- tag 0.1.0 --push-existing");
     expect(message).toContain("git tag -d v0.1.0");
   });

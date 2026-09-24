@@ -22,8 +22,8 @@
  *
  * If the push fails, the tag is left locally and the error says how to push or
  * delete it. Rerunning `tag` with --push-existing pushes that tag as built,
- * without rebuilding, provided origin does not have it and its commit's only
- * parent is main's HEAD.
+ * without rebuilding, provided the tag is an annotated release tag on main's
+ * HEAD, with the expected version and built dist/ tree.
  *
  * Flags:
  *   --no-push         do everything locally; push nothing and open no PR
@@ -54,6 +54,8 @@ interface Options {
 
 interface Manifest {
   version: string;
+  exports: Record<string, string | Record<string, string>>;
+  bin: Record<string, string>;
 }
 
 interface Lockfile {
@@ -170,13 +172,28 @@ export function existingTagAction(tagName: string, state: TagState, pushExisting
   return "push";
 }
 
+/** Check the actual tag object and tree, not just the commit's parent. */
+export function validateReleaseTag(tagName: string, requiredFiles: string[], cwd = ROOT): void {
+  const run = (args: string[]): string => git(args, { cwd });
+  const reject = (): never => fail(
+    `${tagName} is not the expected annotated release with only built dist/ added; ` +
+      `delete it with \`git tag -d ${tagName}\` and rerun.`,
+  );
+  const commit = run(["rev-parse", `${tagName}^{commit}`]);
+  if (run(["cat-file", "-t", `refs/tags/${tagName}`]) !== "tag" ||
+      run(["show", "-s", "--format=%s", commit]) !== `Release ${tagName}`) reject();
+  const changed = run(["diff", "--name-only", "HEAD", commit]).split("\n").filter(Boolean);
+  if (!changed.length || changed.some((path) => !path.startsWith("dist/"))) reject();
+  const built = new Set(run(["ls-tree", "-r", "--name-only", commit, "dist/"]).split("\n"));
+  if (requiredFiles.some((file) => !built.has(file))) reject();
+}
+
 /** The error for a tag push that failed after the tag was created locally. */
 export function pushFailureMessage(tagName: string): string {
   const version = tagName.replace(/^v/, "");
   return [
     `Pushing ${tagName} to origin failed. ${tagName} exists locally but not on origin.`,
-    "Fix the remote or credentials, then push it with either of:",
-    `  git push origin refs/tags/${tagName}`,
+    "Fix the remote or credentials, then validate and push it with:",
     `  npm run release -- tag ${version} --push-existing`,
     "Or delete it and start over with:",
     `  git tag -d ${tagName}`,
@@ -254,15 +271,7 @@ function prepare(version: string, { push }: Options): void {
   });
 }
 
-function tag(version: string, { push, pushExisting }: Options): void {
-  const tagName = `v${version}`;
-  checkMain();
-  if (existingTagAction(tagName, tagState(tagName), pushExisting) === "push") {
-    // The tag was built and annotated by an earlier run; push it as it is.
-    pushTag(tagName);
-    return;
-  }
-
+function releaseManifest(version: string): Manifest {
   const pkg = readJson<Manifest>("package.json");
   if (pkg.version !== version) {
     fail(`package.json is at ${pkg.version}, not ${version}. Merge the release PR from "prepare" first.`);
@@ -271,6 +280,31 @@ function tag(version: string, { push, pushExisting }: Options): void {
   if (lock.version !== version || lock.packages[""]?.version !== version) {
     fail(`package-lock.json is not at ${version}.`);
   }
+  if (!changelogEntry(readText("CHANGELOG.md"), version)) fail(`CHANGELOG.md has no entry for ${version}.`);
+  return pkg;
+}
+
+/** Paths that a tag consumer needs, according to the package manifest. */
+function releaseFiles(pkg: Manifest): string[] {
+  return [...Object.values(pkg.exports).flatMap((entry) => typeof entry === "string" ? [entry] : Object.values(entry)),
+    ...Object.values(pkg.bin)]
+    .filter((path) => path.startsWith("./dist/"))
+    .map((path) => path.slice(2));
+}
+
+function tag(version: string, { push, pushExisting }: Options): void {
+  const tagName = `v${version}`;
+  checkMain();
+  const action = existingTagAction(tagName, tagState(tagName), pushExisting);
+  if (action === "push") {
+    const pkg = releaseManifest(version);
+    validateReleaseTag(tagName, releaseFiles(pkg));
+    // The tag was built and annotated by an earlier run; push it as it is.
+    pushTag(tagName);
+    return;
+  }
+
+  releaseManifest(version);
   const notes = changelogEntry(readText("CHANGELOG.md"), version);
   if (!notes) fail(`CHANGELOG.md has no entry for ${version}.`);
 
