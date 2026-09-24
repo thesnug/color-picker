@@ -37,8 +37,12 @@ are reconstructed by grouping colors that share an ID. Sizes: 124 pairs, 112 tri
 
 Known issues to handle in a cleanup pass, keeping the original text as an alias:
 
-- Typos carried from the source: "Calamine BLue", "Pomegranite Purple",
-  "Cerulian Blue", "Antwarp Blue", "Sulpher Yellow", "Krongbergs Green".
+- Typos in the web edition, checked against the printed book on 2026-09-24:
+  "Calamine BLue", "Pomegranite Purple", "Sulpher Yellow", "Krongbergs Green"
+  (the book has "Kronbergs Green", no apostrophe), and "Artemesia Green".
+  "Cerulian Blue", "Antwarp Blue", "Rosolanc Purple", "Vandar Poel's Blue", and
+  "Vistoris Lake" are the book's own spellings and stay canonical; the modern
+  spellings are aliases where the equivalence is certain.
 - Variant names such as "Eugenia Red | A" and "Grayish Lavender - A".
 - The hex values are the site's sRGB conversions from the book's CMYK, not
   authoritative. Keep the CMYK alongside.

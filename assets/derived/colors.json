@@ -950,10 +950,10 @@
     },
     {
       "index": 25,
-      "name": "Rosolane Purple",
-      "slug": "rosolane-purple",
+      "name": "Rosolanc Purple",
+      "slug": "rosolanc-purple",
       "aliases": [
-        "Rosolanc Purple"
+        "Rosolane Purple"
       ],
       "sourceName": "Rosolanc Purple",
       "sourceSlug": "rosolanc-purple",
@@ -1446,11 +1446,9 @@
     },
     {
       "index": 38,
-      "name": "Victoria Lake",
-      "slug": "victoria-lake",
-      "aliases": [
-        "Vistoris Lake"
-      ],
+      "name": "Vistoris Lake",
+      "slug": "vistoris-lake",
+      "aliases": [],
       "sourceName": "Vistoris Lake",
       "sourceSlug": "vistoris-lake",
       "hex": "#5c2c45",
@@ -2955,7 +2953,7 @@
     },
     {
       "index": 75,
-      "name": "Kronberg's Green",
+      "name": "Kronbergs Green",
       "slug": "kronbergs-green",
       "aliases": [
         "Krongbergs Green"
@@ -4546,10 +4544,10 @@
     },
     {
       "index": 116,
-      "name": "Cerulean Blue",
-      "slug": "cerulean-blue",
+      "name": "Cerulian Blue",
+      "slug": "cerulian-blue",
       "aliases": [
-        "Cerulian Blue"
+        "Cerulean Blue"
       ],
       "sourceName": "Cerulian Blue",
       "sourceSlug": "cerulian-blue",
@@ -4751,10 +4749,10 @@
     },
     {
       "index": 121,
-      "name": "Antwerp Blue",
-      "slug": "antwerp-blue",
+      "name": "Antwarp Blue",
+      "slug": "antwarp-blue",
       "aliases": [
-        "Antwarp Blue"
+        "Antwerp Blue"
       ],
       "sourceName": "Antwarp Blue",
       "sourceSlug": "antwarp-blue",
@@ -5005,10 +5003,10 @@
     },
     {
       "index": 127,
-      "name": "Vanderpoel's Blue",
-      "slug": "vanderpoels-blue",
+      "name": "Vandar Poel's Blue",
+      "slug": "vandar-poels-blue",
       "aliases": [
-        "Vandar Poel's Blue"
+        "Vanderpoel's Blue"
       ],
       "sourceName": "Vandar Poel's Blue",
       "sourceSlug": "vandar-poel's-blue",

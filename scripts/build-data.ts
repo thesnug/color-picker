@@ -9,20 +9,24 @@
  * deterministic: fixed key order, fixed rounding, sorted arrays, trailing newline.
  *
  * CHANGES applied to color names. The source name is always kept as an alias.
- * Canonical names follow Ridgway's "Color Standards and Color Nomenclature"
- * (1912), which Wada drew on, so a corrected spelling is Ridgway's spelling.
+ * The printed book is the authority: every entry below was checked against it
+ * by Jill on 2026-09-24. A name is corrected only where the web edition differs
+ * from the book. Where the book itself uses an unusual spelling, the name stays
+ * and the modern or Ridgway spelling is added as an alias for lookup.
  *
- *   Typos
+ *   Typos in the web edition, corrected to the book
  *     Calamine BLue        -> Calamine Blue
  *     Pomegranite Purple   -> Pomegranate Purple
- *     Cerulian Blue        -> Cerulean Blue
- *     Antwarp Blue         -> Antwerp Blue
  *     Sulpher Yellow       -> Sulphur Yellow   (alias Sulfur Yellow for US spelling)
- *     Krongbergs Green     -> Kronberg's Green
+ *     Krongbergs Green     -> Kronbergs Green  (no apostrophe in the book)
  *     Artemesia Green      -> Artemisia Green
- *     Rosolanc Purple      -> Rosolane Purple
- *     Vandar Poel's Blue   -> Vanderpoel's Blue
- *     Vistoris Lake        -> Victoria Lake    (least certain; Ridgway has Victoria Lake)
+ *
+ *   As printed in the book, kept, with a lookup alias
+ *     Cerulian Blue        +Cerulean Blue
+ *     Antwarp Blue         +Antwerp Blue
+ *     Rosolanc Purple      +Rosolane Purple
+ *     Vandar Poel's Blue   +Vanderpoel's Blue
+ *     Vistoris Lake        (no alias; its Ridgway source is not established)
  *
  *   Variants (the shared base name is also an alias, and `variant` records the letter)
  *     Eugenia Red | A        -> Eugenia Red A
@@ -40,7 +44,7 @@
  *     Yellow Ocher  +Yellow Ochre
  *
  *   Observed, not changed
- *     Vanderpoel's Blue (127) belongs to no combination in the source.
+ *     Vandar Poel's Blue (127) belongs to no combination in the source.
  *     Eupatorium Purple (136) and Light Mauve (137) list identical combinations,
  *     which looks like a source transcription error. Kept as vendored.
  *     The source records no order of colors within a combination, so `colors`
@@ -64,14 +68,13 @@ import type {
 const NAME_FIXES: Record<string, { name: string; aliases?: string[]; variant?: string }> = {
   "Calamine BLue": { name: "Calamine Blue" },
   "Pomegranite Purple": { name: "Pomegranate Purple" },
-  "Cerulian Blue": { name: "Cerulean Blue" },
-  "Antwarp Blue": { name: "Antwerp Blue" },
   "Sulpher Yellow": { name: "Sulphur Yellow", aliases: ["Sulfur Yellow"] },
-  "Krongbergs Green": { name: "Kronberg's Green" },
+  "Krongbergs Green": { name: "Kronbergs Green" },
   "Artemesia Green": { name: "Artemisia Green" },
-  "Rosolanc Purple": { name: "Rosolane Purple" },
-  "Vandar Poel's Blue": { name: "Vanderpoel's Blue" },
-  "Vistoris Lake": { name: "Victoria Lake" },
+  "Cerulian Blue": { name: "Cerulian Blue", aliases: ["Cerulean Blue"] },
+  "Antwarp Blue": { name: "Antwarp Blue", aliases: ["Antwerp Blue"] },
+  "Rosolanc Purple": { name: "Rosolanc Purple", aliases: ["Rosolane Purple"] },
+  "Vandar Poel's Blue": { name: "Vandar Poel's Blue", aliases: ["Vanderpoel's Blue"] },
   "Eugenia Red | A": { name: "Eugenia Red A", aliases: ["Eugenia Red"], variant: "A" },
   "Eugenia Red | B": { name: "Eugenia Red B", aliases: ["Eugenia Red"], variant: "B" },
   "Grayish Lavender - A": { name: "Grayish Lavender A", aliases: ["Grayish Lavender"], variant: "A" },

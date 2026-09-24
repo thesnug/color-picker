@@ -27,14 +27,13 @@ describe("derived colors", () => {
     for (const slug of slugs) expect(slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
   });
 
-  it("corrects the known typos and keeps the source name as an alias", () => {
+  it("corrects the web edition's typos to the book and keeps the source name as an alias", () => {
     const expected: Record<string, string> = {
       "Calamine BLue": "Calamine Blue",
       "Pomegranite Purple": "Pomegranate Purple",
-      "Cerulian Blue": "Cerulean Blue",
-      "Antwarp Blue": "Antwerp Blue",
       "Sulpher Yellow": "Sulphur Yellow",
-      "Krongbergs Green": "Kronberg's Green",
+      "Krongbergs Green": "Kronbergs Green",
+      "Artemesia Green": "Artemisia Green",
     };
     for (const [sourceName, name] of Object.entries(expected)) {
       const color = colors.find((c) => c.sourceName === sourceName);
@@ -42,6 +41,24 @@ describe("derived colors", () => {
       expect(color!.name).toBe(name);
       expect(color!.aliases).toContain(sourceName);
     }
+  });
+
+  it("keeps the book's own spellings and adds the modern spelling as an alias", () => {
+    const expected: Record<string, string> = {
+      "Cerulian Blue": "Cerulean Blue",
+      "Antwarp Blue": "Antwerp Blue",
+      "Rosolanc Purple": "Rosolane Purple",
+      "Vandar Poel's Blue": "Vanderpoel's Blue",
+    };
+    for (const [name, alias] of Object.entries(expected)) {
+      const color = colors.find((c) => c.sourceName === name);
+      expect(color, name).toBeDefined();
+      expect(color!.name).toBe(name);
+      expect(color!.aliases).toContain(alias);
+    }
+    const vistoris = colors.find((c) => c.sourceName === "Vistoris Lake")!;
+    expect(vistoris.name).toBe("Vistoris Lake");
+    expect(vistoris.aliases).toEqual([]);
   });
 
   it("gives variants a clean name, the base name as an alias, and a variant letter", () => {
