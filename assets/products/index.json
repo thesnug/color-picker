@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/products-index.schema.json",
+  "default": "comfort-colors-1717",
+  "products": [
+    {
+      "id": "comfort-colors-1717",
+      "name": "Comfort Colors 1717 Garment-Dyed Heavyweight T-Shirt"
+    }
+  ]
+}
