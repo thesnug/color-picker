@@ -59,7 +59,9 @@ function fail(message: string): never {
 }
 
 function git(args: string[], options: ExecFileSyncOptions = {}): string {
-  return execFileSync("git", args, { cwd: ROOT, ...options, encoding: "utf8" }).trim();
+  // With stdio inherited there is no captured output and execFileSync returns null.
+  const out = execFileSync("git", args, { cwd: ROOT, ...options, encoding: "utf8" }) as string | null;
+  return out?.trim() ?? "";
 }
 
 function readText(file: string): string {
@@ -207,7 +209,9 @@ function tag(version: string, { push }: Options): void {
     git(["add", "--force", "dist"], { env });
     const tree = git(["write-tree"], { env });
     const commit = git(["commit-tree", tree, "-p", "HEAD", "-m", `Release ${tagName}`]);
-    git(["tag", "--annotate", tagName, commit, "--message", `${tagName}\n\n${notes}`]);
+    // Verbatim cleanup keeps the changelog's "###" headings, which the default
+    // cleanup would strip as comments.
+    git(["tag", "--annotate", "--cleanup=verbatim", tagName, commit, "--message", `${tagName}\n\n${notes}\n`]);
     log(`Tagged ${tagName} at ${commit.slice(0, 7)} (main plus dist/).`);
   } finally {
     rmSync(scratch, { recursive: true, force: true });
