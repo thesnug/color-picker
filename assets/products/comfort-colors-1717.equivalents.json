@@ -30,82 +30,82 @@
     },
     "bay": {
       "name": "Bay",
-      "hex": "#c3cfc1",
+      "hex": "#aeb5ac",
       "oklch": {
-        "l": 0.84135,
-        "c": 0.02317,
-        "h": 141.22
+        "l": 0.76492,
+        "c": 0.01483,
+        "h": 138.72
       },
       "family": "green",
       "matches": [
         {
-          "index": 153,
-          "name": "Neutral Gray",
-          "distance": 2.093
-        },
-        {
-          "index": 89,
-          "name": "Dark Greenish Glaucous",
-          "distance": 6.05
+          "index": 155,
+          "name": "Warm Gray",
+          "distance": 3.312
         },
         {
           "index": 154,
           "name": "Mineral Gray",
-          "distance": 6.268
+          "distance": 3.664
+        },
+        {
+          "index": 54,
+          "name": "Ecru",
+          "distance": 4.247
         }
       ]
     },
     "berry": {
       "name": "Berry",
-      "hex": "#875570",
+      "hex": "#844e64",
       "oklch": {
-        "l": 0.51398,
-        "c": 0.07582,
-        "h": 346.52
+        "l": 0.49322,
+        "c": 0.07807,
+        "h": 354.38
       },
       "family": "red-pink",
       "matches": [
         {
           "index": 142,
           "name": "Purple Drab",
-          "distance": 6.368
+          "distance": 4.484
         },
         {
           "index": 78,
           "name": "Sudan Brown",
-          "distance": 6.833
+          "distance": 6.535
         },
         {
           "index": 21,
           "name": "Ochre Red",
-          "distance": 8.699
+          "distance": 7.819
         }
       ]
     },
     "black": {
       "name": "Black",
-      "hex": "#000000",
+      "hex": "#1f1d1e",
       "oklch": {
-        "l": 0,
-        "c": 0,
-        "h": 0
+        "l": 0.23338,
+        "c": 0.00358,
+        "h": 345.54
       },
       "family": "neutral",
       "matches": [
         {
-          "index": 157,
-          "name": "Black",
-          "distance": 0
+          "index": 131,
+          "name": "Deep Slate Green",
+          "distance": 3.848
         },
         {
-          "index": 130,
-          "name": "Deep Indigo",
-          "distance": 18.397
+          "index": 108,
+          "name": "Deep Slate Olive",
+          "distance": 4.916
         },
         {
-          "index": 129,
-          "name": "Dull Violet Black",
-          "distance": 23.71
+          "index": 86,
+          "name": "Vandyke Brown",
+          "distance": 6.628
         }
       ]
     },
@@ -219,28 +219,28 @@
     },
     "bright-orange": {
       "name": "Bright Orange",
-      "hex": "#ffad4f",
+      "hex": "#fa8b2b",
       "oklch": {
-        "l": 0.8107,
-        "c": 0.14435,
-        "h": 66.7
+        "l": 0.74374,
+        "c": 0.16776,
+        "h": 55.58
       },
       "family": "orange-yellow",
       "matches": [
         {
-          "index": 47,
-          "name": "Cream Yellow",
-          "distance": 2.611
+          "index": 62,
+          "name": "Yellow Orange",
+          "distance": 1.555
         },
         {
-          "index": 61,
-          "name": "Orange Yellow",
-          "distance": 3.332
+          "index": 48,
+          "name": "Golden Yellow",
+          "distance": 2.11
         },
         {
-          "index": 45,
-          "name": "Pinkish Cinnamon",
-          "distance": 4.335
+          "index": 63,
+          "name": "Apricot Orange",
+          "distance": 5.785
         }
       ]
     },
@@ -705,28 +705,28 @@
     },
     "grape": {
       "name": "Grape",
-      "hex": "#645c81",
+      "hex": "#645a76",
       "oklch": {
-        "l": 0.497,
-        "c": 0.0589,
-        "h": 294.07
+        "l": 0.48777,
+        "c": 0.04571,
+        "h": 301.05
       },
       "family": "purple",
       "matches": [
         {
           "index": 143,
           "name": "Deep Violet",
-          "distance": 6.24
+          "distance": 6.751
         },
         {
           "index": 142,
           "name": "Purple Drab",
-          "distance": 7.848
+          "distance": 6.861
         },
         {
           "index": 123,
           "name": "Dark Medici Blue",
-          "distance": 9.496
+          "distance": 9.366
         }
       ]
     },
@@ -1110,28 +1110,28 @@
     },
     "moss": {
       "name": "Moss",
-      "hex": "#747f66",
+      "hex": "#6d705e",
       "oklch": {
-        "l": 0.58014,
-        "c": 0.03933,
-        "h": 126.93
+        "l": 0.53721,
+        "c": 0.02743,
+        "h": 115.01
       },
       "family": "green",
       "matches": [
         {
-          "index": 95,
-          "name": "Andover Green",
-          "distance": 3.937
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 5.241
         },
         {
-          "index": 74,
-          "name": "Light Grayish Olive",
-          "distance": 4.008
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 5.974
         },
         {
-          "index": 73,
-          "name": "Dark Citrine",
-          "distance": 5.818
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 6.403
         }
       ]
     },
@@ -1191,28 +1191,28 @@
     },
     "navy": {
       "name": "Navy",
-      "hex": "#52525e",
+      "hex": "#3b4153",
       "oklch": {
-        "l": 0.44303,
-        "c": 0.01951,
-        "h": 285.58
+        "l": 0.37722,
+        "c": 0.03191,
+        "h": 270.43
       },
       "family": "blue",
       "matches": [
         {
-          "index": 142,
-          "name": "Purple Drab",
-          "distance": 7.368
+          "index": 156,
+          "name": "Slate Color",
+          "distance": 6.435
         },
         {
-          "index": 81,
-          "name": "Deep Grayish Olive",
-          "distance": 9.073
+          "index": 38,
+          "name": "Vistoris Lake",
+          "distance": 7.864
         },
         {
-          "index": 82,
-          "name": "Pale Raw Umber",
-          "distance": 9.794
+          "index": 107,
+          "name": "Blackish Olive",
+          "distance": 9.276
         }
       ]
     },
@@ -1839,28 +1839,28 @@
     },
     "white": {
       "name": "White",
-      "hex": "#ffffff",
+      "hex": "#e7e7ea",
       "oklch": {
-        "l": 1,
-        "c": 0,
-        "h": 0
+        "l": 0.92883,
+        "c": 0.00402,
+        "h": 286.32
       },
       "family": "neutral",
       "matches": [
         {
+          "index": 43,
+          "name": "Seashell Pink",
+          "distance": 6.805
+        },
+        {
           "index": 152,
           "name": "White",
-          "distance": 0
+          "distance": 7.129
         },
         {
-          "index": 109,
-          "name": "Nile Blue",
-          "distance": 8.791
-        },
-        {
-          "index": 39,
-          "name": "Sulphur Yellow",
-          "distance": 8.983
+          "index": 110,
+          "name": "Pale King's Blue",
+          "distance": 7.516
         }
       ]
     },

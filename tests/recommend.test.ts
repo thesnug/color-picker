@@ -43,7 +43,7 @@ describe("recommendProductColors", () => {
     const navy = recommendProductColors(navyBadge, everyColor).find((p) => p.color.slug === "navy")!;
     expect(navy.components.vanish).toBeGreaterThan(0.3);
     expect(navy.warnings).toHaveLength(1);
-    expect(navy.warnings[0]).toMatch(/^#4f5060 .*only 0\.\d from Navy.*vanish/);
+    expect(navy.warnings[0]).toMatch(/^#4f5060 .*only \d+(\.\d+)? from Navy.*vanish/);
     expect(navy.designColors.find((c) => c.hex === "#4f5060")?.vanishes).toBe(true);
   });
 
