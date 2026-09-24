@@ -7,6 +7,10 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+- The release script reports a failed tag push with the commands to push or
+  delete the local tag, and `tag X.Y.Z --push-existing` pushes a tag left by a
+  failed push without rebuilding it.
+
 ## [0.1.0] - 2026-09-24
 
 The first release.

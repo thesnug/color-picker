@@ -20,8 +20,14 @@
  * only from the tag: main never tracks dist/ and never receives a direct commit.
  * The tag is annotated with the changelog entry and pushed.
  *
+ * If the push fails, the tag is left locally and the error says how to push or
+ * delete it. Rerunning `tag` with --push-existing pushes that tag as built,
+ * without rebuilding, provided origin does not have it and its commit's only
+ * parent is main's HEAD.
+ *
  * Flags:
- *   --no-push   do everything locally; push nothing and open no PR
+ *   --no-push         do everything locally; push nothing and open no PR
+ *   --push-existing   (tag only) push a local tag left by a failed push
  */
 
 import { execFileSync, type ExecFileSyncOptions } from "node:child_process";
@@ -37,12 +43,13 @@ const UNRELEASED = /^## Unreleased[ \t]*\n/m;
 /** Every check CI runs, in CI's order, ending with the build that fills dist/. */
 const CHECKS = ["typecheck", "data:check", "products:check", "products:equivalents:check", "test", "build"];
 
-const USAGE = "Usage: npm run release -- <prepare|tag> <version> [--no-push]";
+const USAGE = "Usage: npm run release -- <prepare|tag> <version> [--no-push | --push-existing]";
 
 export class ReleaseError extends Error {}
 
 interface Options {
   push: boolean;
+  pushExisting: boolean;
 }
 
 interface Manifest {
@@ -117,12 +124,63 @@ export function pointReadme(readme: string, version: string): string {
 
 /** Parse the command line; throws ReleaseError on anything unexpected. */
 export function parseArgs(argv: string[]): { command: "prepare" | "tag"; version: string } & Options {
+  const flags = new Set(["--no-push", "--push-existing"]);
   const push = !argv.includes("--no-push");
-  const [command, version, ...rest] = argv.filter((arg) => arg !== "--no-push");
+  const pushExisting = argv.includes("--push-existing");
+  const [command, version, ...rest] = argv.filter((arg) => !flags.has(arg));
   if ((command !== "prepare" && command !== "tag") || !version || rest.length > 0) fail(USAGE);
   const bare = version.replace(/^v/, "");
   if (!SEMVER.test(bare)) fail(`"${version}" is not a version like 0.1.0.`);
-  return { command, version: bare, push };
+  if (pushExisting && command !== "tag") fail("--push-existing applies only to tag.");
+  if (pushExisting && !push) fail("--push-existing and --no-push contradict each other.");
+  return { command, version: bare, push, pushExisting };
+}
+
+/** What git says about a release tag before `tag` runs. */
+export interface TagState {
+  local: boolean;
+  remote: boolean;
+  /** Parents of the local tag's commit; empty when there is no local tag. */
+  parents: string[];
+  head: string;
+}
+
+/**
+ * Whether `tag` should build and create the tag, or push the local one it
+ * built on an earlier run. Refuses whenever origin has the tag.
+ */
+export function existingTagAction(tagName: string, state: TagState, pushExisting: boolean): "create" | "push" {
+  const version = tagName.replace(/^v/, "");
+  const deleteIt = `delete it with \`git tag -d ${tagName}\``;
+  if (state.remote) fail(`${tagName} already exists on origin.`);
+  if (!state.local) {
+    if (pushExisting) fail(`--push-existing was given, but there is no local ${tagName} to push.`);
+    return "create";
+  }
+  const fromHead = state.parents.length === 1 && state.parents[0] === state.head;
+  if (!fromHead) {
+    fail(`${tagName} exists locally but its commit is not a release commit on main's HEAD; ${deleteIt} and rerun.`);
+  }
+  if (!pushExisting) {
+    fail(
+      `${tagName} exists locally but not on origin. Push it with ` +
+        `\`npm run release -- tag ${version} --push-existing\`, or ${deleteIt} and rerun.`,
+    );
+  }
+  return "push";
+}
+
+/** The error for a tag push that failed after the tag was created locally. */
+export function pushFailureMessage(tagName: string): string {
+  const version = tagName.replace(/^v/, "");
+  return [
+    `Pushing ${tagName} to origin failed. ${tagName} exists locally but not on origin.`,
+    "Fix the remote or credentials, then push it with either of:",
+    `  git push origin refs/tags/${tagName}`,
+    `  npm run release -- tag ${version} --push-existing`,
+    "Or delete it and start over with:",
+    `  git tag -d ${tagName}`,
+  ].join("\n");
 }
 
 /** Refuse unless on a clean main that matches origin/main. */
@@ -136,10 +194,27 @@ function checkMain(): void {
   }
 }
 
+function tagState(tag: string): TagState {
+  const local = git(["tag", "--list", tag]) !== "";
+  const remote = git(["ls-remote", "--tags", "origin", `refs/tags/${tag}`]) !== "";
+  // rev-list --parents prints the commit followed by its parents.
+  const parents = local ? git(["rev-list", "--parents", "-n", "1", `${tag}^{commit}`]).split(" ").slice(1) : [];
+  return { local, remote, parents, head: git(["rev-parse", "HEAD"]) };
+}
+
 function checkTagFree(tag: string): void {
-  const local = git(["tag", "--list", tag]);
-  const remote = git(["ls-remote", "--tags", "origin", `refs/tags/${tag}`]);
-  if (local !== "" || remote !== "") fail(`${tag} already exists.`);
+  const { local, remote } = tagState(tag);
+  if (local || remote) fail(`${tag} already exists.`);
+}
+
+function pushTag(tagName: string): void {
+  try {
+    git(["push", "--quiet", "origin", `refs/tags/${tagName}`], { stdio: "inherit" });
+  } catch {
+    // git has already printed its own reason to stderr.
+    fail(pushFailureMessage(tagName));
+  }
+  log(`Pushed ${tagName}. Install with: npm install github:thesnug/color-picker#${tagName}`);
 }
 
 function prepare(version: string, { push }: Options): void {
@@ -179,10 +254,14 @@ function prepare(version: string, { push }: Options): void {
   });
 }
 
-function tag(version: string, { push }: Options): void {
+function tag(version: string, { push, pushExisting }: Options): void {
   const tagName = `v${version}`;
   checkMain();
-  checkTagFree(tagName);
+  if (existingTagAction(tagName, tagState(tagName), pushExisting) === "push") {
+    // The tag was built and annotated by an earlier run; push it as it is.
+    pushTag(tagName);
+    return;
+  }
 
   const pkg = readJson<Manifest>("package.json");
   if (pkg.version !== version) {
@@ -221,14 +300,13 @@ function tag(version: string, { push }: Options): void {
     log("Not pushed (--no-push).");
     return;
   }
-  git(["push", "--quiet", "origin", `refs/tags/${tagName}`], { stdio: "inherit" });
-  log(`Pushed ${tagName}. Install with: npm install github:thesnug/color-picker#${tagName}`);
+  pushTag(tagName);
 }
 
 function main(argv: string[]): number {
   try {
-    const { command, version, push } = parseArgs(argv);
-    (command === "prepare" ? prepare : tag)(version, { push });
+    const { command, version, ...options } = parseArgs(argv);
+    (command === "prepare" ? prepare : tag)(version, options);
     return 0;
   } catch (error) {
     if (!(error instanceof ReleaseError)) throw error;
