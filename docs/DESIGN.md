@@ -119,6 +119,7 @@ any combination against these and returns pass/fail with reasons.
 | `@thesnug/color-picker` | Color math, nearest match, combinations, recommendations, recolor plans |
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
+| `@thesnug/color-picker/fingerprint` | Design fingerprints from image files, cached on disk |
 | `bin: color-picker` | CLI |
 | `bin: color-picker-mcp` | MCP server |
 
@@ -142,6 +143,11 @@ Decisions and their reasons:
 - **OKLab/OKLCH for all color math.** Distance, harmonies, ramps, and family
   grouping. The picker's existing HSL grouping and WCAG luminance in `palette.ts`
   move into this library and the picker consumes them, so both tools agree.
+- **Fingerprinting is its own entry point, decoding through `sharp`.** It reads
+  files and writes a cache, which the core does not do. `sharp` is an optional peer
+  like the MCP SDK: it decodes PNG, WebP, and JPEG and applies EXIF orientation,
+  which no small pure-JS decoder covers (WebP in particular). Callers without it
+  pass their own decoder.
 
 ## Pipelines
 
@@ -157,6 +163,11 @@ Rank by contrast against the anchor.
 
 **Design fingerprint.** Quantize a design's opaque pixels to its top five colors
 with coverage percentages; measure ink luminance; note transparency; hash the file.
+Quantization is median cut in OKLab refined by k-means; clusters closer than
+about two and a half just-noticeable differences merge, and small clusters lying
+between two larger ones (antialiased edges) fold into them. Ink luminance is the picker's
+`measureInk`: alpha-weighted mean WCAG luminance over every visible pixel, not
+over the five-color palette, so the two tools agree on photographic art too.
 One vision pass per design writes a two-line subject-and-mood description, cached by
 hash. Everything downstream is keyed on the fingerprint so a design is analyzed once.
 
