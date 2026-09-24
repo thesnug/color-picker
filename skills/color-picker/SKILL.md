@@ -34,12 +34,13 @@ command = "npx"
 args = ["-y", "-p", "github:thesnug/color-picker#v0.1.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
 startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
-default_tools_approval_mode = "approve"
 ```
 
-The tools only read, apart from `recolor_plans` writing PNGs to an `outDir`
-you name, so approving them up front is safe, and `codex exec` needs it:
-without it every call fails with "requires approval".
+Keep the host's tool approval prompts enabled. Before a design-processing call,
+confirm the user wants that local design read; with a vision provider configured,
+its image may leave this machine for the provider before Jev judges it. For
+`recolor_plans`, choose an `outDir` the user controls: it can create directories
+and overwrite output PNGs there. Do not approve these calls by default.
 
 The first start downloads the package, so it can take a minute; later starts
 use npm's cache.
