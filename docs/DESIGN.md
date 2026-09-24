@@ -153,7 +153,11 @@ dictionary before falling back to a model.
 for the second and third match when within a distance threshold). When the book gives
 too few, generate Wada-snapped harmonies: complementary, split-complementary,
 triadic, and analogous computed in OKLCH and snapped to the nearest Wada color.
-Rank by contrast against the anchor.
+Rank by contrast against the anchor: book palettes first, grouped by which match
+they came from, then harmonies, each by a score weighting contrast three to one over
+hue spread. A neutral input (OKLab chroma at or below 0.045) anchors on the nearest
+neutral Wada color rather than the overall nearest, which for a mid-gray is a tinted
+color; `nearest` itself stays pure distance.
 
 **Design fingerprint.** Quantize a design's opaque pixels to its top five colors
 with coverage percentages; measure ink luminance; note transparency; hash the file.

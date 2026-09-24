@@ -10,3 +10,4 @@ export type { DerivedColor, WadaColor, WadaDataset } from "./data/index.js";
 
 export * from "./color/index.js";
 export * from "./nearest.js";
+export * from "./combinations.js";

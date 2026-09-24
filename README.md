@@ -64,6 +64,28 @@ Names are matched ignoring case, spacing, and punctuation, with "grey" read as
 "gray". Wada names and aliases come first, then CSS named colors, then the xkcd
 color survey.
 
+### Combinations
+
+`combinations` returns ranked palettes for any color: the book's combinations for
+the nearest match, plus those of the second and third matches when they are
+within 6. When the book gives fewer than 6 palettes, it adds complementary,
+split-complementary, triadic, and analogous harmonies computed in OKLCH and
+snapped to Wada colors.
+
+```ts
+import { combinations } from "@thesnug/color-picker";
+
+combinations("Hermosa Pink");            // book palettes: 176, 227, 273, then neighbors'
+combinations("#c0737a", { size: 3 });    // three-color palettes only
+combinations("#808080").anchor;          // { color: Deep Violet, via: "nearest-neutral", ... }
+```
+
+Book palettes come first, grouped by which match they came from, then
+harmonies. Each palette carries a `score` from 0 to 1 (contrast against the
+matched color, weighted three to one over hue spread) with its `contrast` and
+`hueSpread`, so callers can re-rank. A neutral input anchors on the nearest
+neutral Wada color, so a gray does not anchor on a tinted color.
+
 ### CLI
 
 ```bash
