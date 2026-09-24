@@ -11,12 +11,13 @@ import { distance, type Hex, normalizeHex } from "./color/convert.js";
 import {
   type Accessibility,
   type DerivedColor,
+  hasHex,
   loadAccessibility,
   loadColors,
   loadProduct,
   loadProductIndex,
   type Product,
-  type ProductColor,
+  type ProductColorWithHex,
 } from "./data/index.js";
 import { equivalentsFor } from "./equivalents.js";
 import { nearest } from "./nearest.js";
@@ -117,7 +118,7 @@ export interface DesignColorOnGarment {
 }
 
 export interface ProductColorRecommendation {
-  color: ProductColor;
+  color: ProductColorWithHex;
   /** Weighted sum of `components`, rounded to three places. */
   score: number;
   components: ScoreComponents;
@@ -162,7 +163,7 @@ function nearestWada(hex: string): DerivedColor {
 }
 
 /** The stored equivalent when the product has one, so the answer matches `equivalentsFor`. */
-function garmentWada(product: Product, color: ProductColor): DerivedColor {
+function garmentWada(product: Product, color: ProductColorWithHex): DerivedColor {
   let stored: number | undefined;
   try {
     stored = equivalentsFor(product, color.slug)?.matches[0]?.index;
@@ -275,7 +276,8 @@ export function recommendProductColors(design: DesignSummary, options: Recommend
   const dominantCombos = new Set(dominant.combinations);
 
   const picks = product.colors
-    .filter((color) => color.hex && (!availableOnly || color.available))
+    .filter(hasHex)
+    .filter((color) => !availableOnly || color.available)
     .map((color): ProductColorRecommendation => {
       const garment = color.name;
       const designColors = palette.map((c): DesignColorOnGarment => {

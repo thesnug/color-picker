@@ -95,7 +95,11 @@ Three rules follow:
 
 1. **Gap fill.** Colors on the 2026 retail chart that Printify does not stock
    (Emerald, Dusk, Rose Quartz, Neon Cantaloupe at the time of writing) enter with a
-   chart hex, `available: false`, and `source` naming the chart.
+   chart hex, `available: false`, `source` naming the chart, and the chart page as
+   `sourceUrl`. A color no chart publishes a hex for enters with `hex: null`. Emerald
+   is listed without a hex on the 2026 chart; its value comes from an older
+   Comfort Colors chart and says so in `sourceNote`. Renderers mark unstocked
+   colors "not stocked" with a dashed outline.
 2. **Review pass.** The first swatch card renders each hex tile beside its garment
    image so mismatches are corrected once. A corrected value gets `source: reviewed`
    and the import script never overwrites it. Regenerating a mockup is cheaper than

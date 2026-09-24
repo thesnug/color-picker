@@ -81,6 +81,12 @@ describe("renderSwatchGrid", () => {
     expect(svg).toContain("distance 4");
   });
 
+  it("marks unstocked colors with a label and a dashed outline", () => {
+    const svg = renderSwatchGrid([{ hex: "#735b6a", name: "Dusk", available: false }, { hex: "#4f4b48", name: "Pepper" }]);
+    expect(svg.match(/not stocked/g)).toHaveLength(2); // the tile text and the tile title
+    expect(svg.match(/stroke-dasharray/g)).toHaveLength(1);
+  });
+
   it("renders an empty list without throwing", () => {
     expect(renderSwatchGrid([])).toContain("No colors");
   });
@@ -154,6 +160,12 @@ describe("renderAnsi", () => {
   it("prints a truecolor block with the hex and name", () => {
     const out = renderAnsi([byIndex.get(1)!]);
     expect(out).toBe("\u001b[48;2;255;179;240m      \u001b[0m  #ffb3f0  Hermosa Pink\n");
+  });
+
+  it("marks unstocked colors", () => {
+    expect(renderAnsi([{ hex: "#735b6a", name: "Dusk", available: false }], { color: false })).toBe(
+      "#735b6a  Dusk  (not stocked)\n",
+    );
   });
 
   it("drops escape codes when color is off", () => {

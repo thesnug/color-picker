@@ -52,12 +52,22 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "slug", "hex", "aliases", "family", "available", "source", "sourceDate"],
+      "allOf": [
+        {
+          "if": { "properties": { "hex": { "type": "null" } }, "required": ["hex"] },
+          "then": { "properties": { "available": { "const": false } } }
+        },
+        {
+          "if": { "properties": { "source": { "type": "string", "pattern": "^retail-chart:" } }, "required": ["source"] },
+          "then": { "required": ["sourceUrl"] }
+        }
+      ],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "slug": { "$ref": "#/$defs/slug" },
         "hex": {
-          "description": "Lowercase #rrggbb.",
-          "type": "string",
+          "description": "Lowercase #rrggbb. Null only when available is false and no chart publishes a hex.",
+          "type": ["string", "null"],
           "pattern": "^#[0-9a-f]{6}$"
         },
         "aliases": {
@@ -81,6 +91,16 @@
         "sourceDate": {
           "description": "When the hex was fetched or reviewed.",
           "$ref": "#/$defs/date"
+        },
+        "sourceUrl": {
+          "description": "The chart page a retail-chart hex came from. Required for retail-chart sources.",
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "sourceNote": {
+          "description": "Free-text provenance note, for example why a chart value is uncertain.",
+          "type": "string",
+          "minLength": 1
         },
         "image": {
           "description": "Public garment image. A pointer, never the bytes.",

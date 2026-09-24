@@ -305,7 +305,7 @@ describe("cli", () => {
       [["theme", "999"], "unknown combination 999"],
       [["recommend", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
-      [["palettes", "Emerald"], 'has no color named "Emerald". Colors: Banana, Bay,'],
+      [["palettes", "Chartreuse"], 'has no color named "Chartreuse". Colors: Banana, Bay,'],
       [["palettes", "Blue Spruce", "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
       const c = capture();
