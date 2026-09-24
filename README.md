@@ -193,6 +193,37 @@ To add a product:
 npm run products:check  # validate assets/products/
 ```
 
+### Refreshing product colors
+
+`scripts/import-printify.ts` fills `assets/products/comfort-colors-1717.json` from
+Printify directly: blueprint 706 (Comfort Colors 1717) from print provider 99
+(Printify Choice), the provider on POD's 1717 template. The catalog lists which
+colors are stocked, including those temporarily out of stock. It has no hex values,
+so swatches come from the color option of existing shop products on the same
+blueprint, as POD does. See docs/DESIGN.md, "Hex provenance for Comfort Colors 1717".
+
+```bash
+PRINTIFY_API_TOKEN=... npm run products:import -- \
+  --color-study ../maker-method-picker/app/prototype/color-study/colors.json
+npm run products:check
+```
+
+- The token is read from the environment only. Never commit it.
+- Every color gets `source: "printify"`, today's `sourceDate`, and a `family` from
+  `colorFamily`. A rerun with unchanged upstream data writes no diff; `--touch`
+  moves `sourceDate` to today on every Printify color. `--dry-run` prints the log
+  without writing.
+- `reviewed` colors keep their hex. When Printify's swatch differs, the script
+  prints both values so the drift is visible.
+- A color that Printify no longer lists is set to `"available": false`, never
+  deleted, and the script says so.
+- `--color-study` takes the path to the maker-method-picker's color study. For
+  each color found there by name, its garment image `url` and `sha256` become
+  `image` and its `colorAssetVersionId` becomes `pod`. Its hex values are not used.
+  The file is read in place, not copied into this repo.
+- Printify spells one color "Grey". The name stays as Printify has it, with "Gray"
+  as an alias.
+
 ## License
 
 MIT.

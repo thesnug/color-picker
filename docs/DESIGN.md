@@ -84,7 +84,10 @@ Why:
 - POD's `services/catalog/normalize.ts` resolves a color name through a generic
   hardcoded map *before* the provider hex, so Black and White arrived as pure
   `#000000` and `#FFFFFF`. A fix in POD is tracked separately; this repo avoids
-  the path entirely.
+  the path entirely. (The first direct import, 2026-09-24, found Printify's own
+  swatches for Black and White are also pure `#000000` and `#ffffff`, so those two
+  need the review pass regardless of path. Every other swatch matched the color
+  study exactly.)
 - Retail charts disagree with each other as much as with Printify (median OKLab
   distance about 9 between two charts, 40 apart on Hemp). They are not measurements.
 

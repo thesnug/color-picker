@@ -6,5 +6,1140 @@
   "name": "Comfort Colors 1717 Garment-Dyed Heavyweight T-Shirt",
   "printMethod": "dtg",
   "printAreas": [],
-  "colors": []
+  "colors": [
+    {
+      "name": "Banana",
+      "slug": "banana",
+      "hex": "#ffecb9",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/121712d5c1aff79b695f0454f625fd00076a33b1b6f6b4de493d303173849242.png",
+        "sha256": "121712d5c1aff79b695f0454f625fd00076a33b1b6f6b4de493d303173849242"
+      },
+      "pod": {
+        "colorAssetVersionId": "84c1cddb-9730-495f-88d0-b119110a33b7"
+      }
+    },
+    {
+      "name": "Bay",
+      "slug": "bay",
+      "hex": "#c3cfc1",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/19668c23c54d585f0f4139c9e442e7ed0a49e5666125a19f951d89ccc6da8113.png",
+        "sha256": "19668c23c54d585f0f4139c9e442e7ed0a49e5666125a19f951d89ccc6da8113"
+      },
+      "pod": {
+        "colorAssetVersionId": "d47d7f26-a6e0-44ff-9b2b-34b5d092bd9f"
+      }
+    },
+    {
+      "name": "Berry",
+      "slug": "berry",
+      "hex": "#875570",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/b9402c4fed8bbd35a9adf61db3f032f6d7169a18e4cf79452a2f2423f2ac7bf5.png",
+        "sha256": "b9402c4fed8bbd35a9adf61db3f032f6d7169a18e4cf79452a2f2423f2ac7bf5"
+      },
+      "pod": {
+        "colorAssetVersionId": "a3df43c2-9e4f-4f02-a8e4-167d13abcfbf"
+      }
+    },
+    {
+      "name": "Black",
+      "slug": "black",
+      "hex": "#000000",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/b4873d9a3deb7d5d25cc13b11f6d94f4796c930fa6d4655bb832be068687d38f.png",
+        "sha256": "b4873d9a3deb7d5d25cc13b11f6d94f4796c930fa6d4655bb832be068687d38f"
+      },
+      "pod": {
+        "colorAssetVersionId": "8d03644d-5f6b-4098-ba8a-224a2c0078ed"
+      }
+    },
+    {
+      "name": "Blossom",
+      "slug": "blossom",
+      "hex": "#f8d1e2",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/bca1dbe307d6d6ad8a8f13361c699a4d2e5207973ab77987acdb3d9347062c87.png",
+        "sha256": "bca1dbe307d6d6ad8a8f13361c699a4d2e5207973ab77987acdb3d9347062c87"
+      },
+      "pod": {
+        "colorAssetVersionId": "3c168dbb-159d-4b90-9130-6b9b6e041073"
+      }
+    },
+    {
+      "name": "Blue Jean",
+      "slug": "blue-jean",
+      "hex": "#636d82",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/1e9802d927ecc3ea4bdec23220b3c97cd8faf44ca345ff40db56830d327a068c.png",
+        "sha256": "1e9802d927ecc3ea4bdec23220b3c97cd8faf44ca345ff40db56830d327a068c"
+      },
+      "pod": {
+        "colorAssetVersionId": "1243c57a-d3a4-420f-96a2-81faa9c7d3bc"
+      }
+    },
+    {
+      "name": "Blue Spruce",
+      "slug": "blue-spruce",
+      "hex": "#536758",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/66619371fe762cd0054848af2d6a3107d147019652fd8b5b2a5b21d8b01c7841.png",
+        "sha256": "66619371fe762cd0054848af2d6a3107d147019652fd8b5b2a5b21d8b01c7841"
+      },
+      "pod": {
+        "colorAssetVersionId": "7925cedd-d7d7-4aac-9585-beabe36160d9"
+      }
+    },
+    {
+      "name": "Brick",
+      "slug": "brick",
+      "hex": "#914a4a",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/27d86903ef1c12cf4db718e9a6e238e59ba2e6c6e1d416377bb886faee1a1433.png",
+        "sha256": "27d86903ef1c12cf4db718e9a6e238e59ba2e6c6e1d416377bb886faee1a1433"
+      },
+      "pod": {
+        "colorAssetVersionId": "c799836d-b026-4c17-8248-1d997be94516"
+      }
+    },
+    {
+      "name": "Bright Orange",
+      "slug": "bright-orange",
+      "hex": "#ffad4f",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/01cf1300c74fe09571c7354507578aab3ced6f4fd9d9e59fe6715bcce91fa000.png",
+        "sha256": "01cf1300c74fe09571c7354507578aab3ced6f4fd9d9e59fe6715bcce91fa000"
+      },
+      "pod": {
+        "colorAssetVersionId": "2bc0edd1-9ee6-4ebc-b23f-a3ccbb28f3fb"
+      }
+    },
+    {
+      "name": "Bright Salmon",
+      "slug": "bright-salmon",
+      "hex": "#ff6b50",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/ff3e565cf56519419f899383328c31f6179e35b4781c0001a6bc4ff2153236ad.png",
+        "sha256": "ff3e565cf56519419f899383328c31f6179e35b4781c0001a6bc4ff2153236ad"
+      },
+      "pod": {
+        "colorAssetVersionId": "b5290867-49c2-4ceb-9d00-5b9e48002daa"
+      }
+    },
+    {
+      "name": "Burnt Orange",
+      "slug": "burnt-orange",
+      "hex": "#e27c4b",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/62bb4a521f288f265ebd73b410dc185ee4ad74aa90e06f629119e0e87fb7be19.png",
+        "sha256": "62bb4a521f288f265ebd73b410dc185ee4ad74aa90e06f629119e0e87fb7be19"
+      },
+      "pod": {
+        "colorAssetVersionId": "87db8353-521d-4aaf-892d-3c49deed9149"
+      }
+    },
+    {
+      "name": "Butter",
+      "slug": "butter",
+      "hex": "#f5e1a4",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/e3209d149c2575234bc9bc57221aac1bc85845066dfac37ed8fb377c196347c4.png",
+        "sha256": "e3209d149c2575234bc9bc57221aac1bc85845066dfac37ed8fb377c196347c4"
+      },
+      "pod": {
+        "colorAssetVersionId": "b65e32eb-66e4-490a-8718-fb8c7c6cd9a4"
+      }
+    },
+    {
+      "name": "Chalky Mint",
+      "slug": "chalky-mint",
+      "hex": "#a7dcd4",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/637ba52881954d767674b12e94400471f874690ea20b65c0a3ac7996cda501af.png",
+        "sha256": "637ba52881954d767674b12e94400471f874690ea20b65c0a3ac7996cda501af"
+      },
+      "pod": {
+        "colorAssetVersionId": "bf02f640-5458-4cac-bc25-71f962f7564a"
+      }
+    },
+    {
+      "name": "Chambray",
+      "slug": "chambray",
+      "hex": "#e2f7ff",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/095d6377cf4df7dc6969709bc8987cb7b621b2a140d8454f974d3c291f8a1ce3.png",
+        "sha256": "095d6377cf4df7dc6969709bc8987cb7b621b2a140d8454f974d3c291f8a1ce3"
+      },
+      "pod": {
+        "colorAssetVersionId": "9a49e808-a14a-4319-95dc-f66feaa10074"
+      }
+    },
+    {
+      "name": "Chili",
+      "slug": "chili",
+      "hex": "#853f44",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/6e419bc239efe081f292ddc609ec1cf1a3524006c12f86a5a6f38fd42b0548a1.png",
+        "sha256": "6e419bc239efe081f292ddc609ec1cf1a3524006c12f86a5a6f38fd42b0548a1"
+      },
+      "pod": {
+        "colorAssetVersionId": "77e39266-3c9a-48b2-934e-026e5a8ad088"
+      }
+    },
+    {
+      "name": "China Blue",
+      "slug": "china-blue",
+      "hex": "#43516e",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/a61f7899343afbe4b3fc6910b5118fc6d034e5c26552d8f02b9a311e2af226a2.png",
+        "sha256": "a61f7899343afbe4b3fc6910b5118fc6d034e5c26552d8f02b9a311e2af226a2"
+      },
+      "pod": {
+        "colorAssetVersionId": "a6420145-85f2-46a9-bb3f-d2037da402ee"
+      }
+    },
+    {
+      "name": "Citrus",
+      "slug": "citrus",
+      "hex": "#ffc86e",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/65ca769ee52cd9d996a31fb96277cacc22503017bf5e41987b66294ef12d6e2d.png",
+        "sha256": "65ca769ee52cd9d996a31fb96277cacc22503017bf5e41987b66294ef12d6e2d"
+      },
+      "pod": {
+        "colorAssetVersionId": "2f4b75cc-3253-4450-b22b-91e3a878f696"
+      }
+    },
+    {
+      "name": "Crimson",
+      "slug": "crimson",
+      "hex": "#b65858",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/f7eb96a880690629b8575f25d76f70b17e6ca0d7cea85b4428d9543215c11b7a.png",
+        "sha256": "f7eb96a880690629b8575f25d76f70b17e6ca0d7cea85b4428d9543215c11b7a"
+      },
+      "pod": {
+        "colorAssetVersionId": "2175d81a-3abb-4f66-886b-682c486abb8a"
+      }
+    },
+    {
+      "name": "Crunchberry",
+      "slug": "crunchberry",
+      "hex": "#eb7ca2",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/868762d13f247c5e08679e85531071c4b90bd50f91bfaca85d8417e504c64189.png",
+        "sha256": "868762d13f247c5e08679e85531071c4b90bd50f91bfaca85d8417e504c64189"
+      },
+      "pod": {
+        "colorAssetVersionId": "33d1b7e6-f76f-4cd3-8425-16b5953c599e"
+      }
+    },
+    {
+      "name": "Cumin",
+      "slug": "cumin",
+      "hex": "#b06c62",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24"
+    },
+    {
+      "name": "Denim",
+      "slug": "denim",
+      "hex": "#4e5064",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/a0b847b698f895f256da073d63775293e8c61fb8413ca9157c4296bb0f9502fc.png",
+        "sha256": "a0b847b698f895f256da073d63775293e8c61fb8413ca9157c4296bb0f9502fc"
+      },
+      "pod": {
+        "colorAssetVersionId": "c947146f-2a3d-4060-a2c5-4d993fb418d6"
+      }
+    },
+    {
+      "name": "Espresso",
+      "slug": "espresso",
+      "hex": "#846b5b",
+      "aliases": [],
+      "family": "earth",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/938637a45a71dd60de8c0cf91aadcb832d94de0da88fd61dc4264f8cea6de854.png",
+        "sha256": "938637a45a71dd60de8c0cf91aadcb832d94de0da88fd61dc4264f8cea6de854"
+      },
+      "pod": {
+        "colorAssetVersionId": "e206f0ee-2c1b-4ec0-94d7-444770f5d070"
+      }
+    },
+    {
+      "name": "Flo Blue",
+      "slug": "flo-blue",
+      "hex": "#7682c2",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/90cf98bd2751d912e31f4bf2430a3d811b64049538ae89f67d9bce9006ee3a75.png",
+        "sha256": "90cf98bd2751d912e31f4bf2430a3d811b64049538ae89f67d9bce9006ee3a75"
+      },
+      "pod": {
+        "colorAssetVersionId": "b3adcd0e-fe73-4cbc-acea-285a4f0623c4"
+      }
+    },
+    {
+      "name": "Granite",
+      "slug": "granite",
+      "hex": "#8a8e90",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/43c45a3ae81e5e62830486b1785711300c603c5c33d7f6b0bf3a810e2333abf2.png",
+        "sha256": "43c45a3ae81e5e62830486b1785711300c603c5c33d7f6b0bf3a810e2333abf2"
+      },
+      "pod": {
+        "colorAssetVersionId": "db48a7ae-93e2-4eea-bb15-dc46edf13dfb"
+      }
+    },
+    {
+      "name": "Grape",
+      "slug": "grape",
+      "hex": "#645c81",
+      "aliases": [],
+      "family": "purple",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/4a937701b665327e7f8e9ceceda5260a9f921e0355efb9fc5d0d3f38f421cc28.png",
+        "sha256": "4a937701b665327e7f8e9ceceda5260a9f921e0355efb9fc5d0d3f38f421cc28"
+      },
+      "pod": {
+        "colorAssetVersionId": "5a7413fe-f9d8-4f0b-bd4f-a02f5e29cc15"
+      }
+    },
+    {
+      "name": "Graphite",
+      "slug": "graphite",
+      "hex": "#373231",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/9324c8dabbb91338b8eb57bcb89bde3acc68b6ca3e0ea0c9531bdd031b14adb6.png",
+        "sha256": "9324c8dabbb91338b8eb57bcb89bde3acc68b6ca3e0ea0c9531bdd031b14adb6"
+      },
+      "pod": {
+        "colorAssetVersionId": "55dd5224-3a94-49aa-b50b-c96af25b56ad"
+      }
+    },
+    {
+      "name": "Grey",
+      "slug": "grey",
+      "hex": "#909090",
+      "aliases": [
+        "Gray"
+      ],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/794602ccd136ffe2bd645ee23d03506bc8d6e4592c9f3b38b869886e78ac5545.png",
+        "sha256": "794602ccd136ffe2bd645ee23d03506bc8d6e4592c9f3b38b869886e78ac5545"
+      },
+      "pod": {
+        "colorAssetVersionId": "51c63c75-96a6-461b-9054-9a2e6dd2c5f5"
+      }
+    },
+    {
+      "name": "Hemp",
+      "slug": "hemp",
+      "hex": "#676a4a",
+      "aliases": [],
+      "family": "earth",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/c7d3d71c0113c52c97eb934c054d50ebecb6e0fb3ce966e96f7c0b7a839eba87.png",
+        "sha256": "c7d3d71c0113c52c97eb934c054d50ebecb6e0fb3ce966e96f7c0b7a839eba87"
+      },
+      "pod": {
+        "colorAssetVersionId": "ee1e84f0-be1b-4963-be52-cfe7551ecdf4"
+      }
+    },
+    {
+      "name": "Hydrangea",
+      "slug": "hydrangea",
+      "hex": "#b2daf3",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/7a4e28a80d0918a627efc25bd5ffea22a074f1e07a77c444f10335b77d002bfc.png",
+        "sha256": "7a4e28a80d0918a627efc25bd5ffea22a074f1e07a77c444f10335b77d002bfc"
+      },
+      "pod": {
+        "colorAssetVersionId": "9a3b53cc-88bd-46c5-afb2-94ac5d4c3919"
+      }
+    },
+    {
+      "name": "Ice Blue",
+      "slug": "ice-blue",
+      "hex": "#7b8e95",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/f00c60f16632d1a195a89ce9274c93e3a9fa820f002c53cd308dfa689335a89a.png",
+        "sha256": "f00c60f16632d1a195a89ce9274c93e3a9fa820f002c53cd308dfa689335a89a"
+      },
+      "pod": {
+        "colorAssetVersionId": "b702b220-d206-405f-9311-4ab53f5509a7"
+      }
+    },
+    {
+      "name": "Island Green",
+      "slug": "island-green",
+      "hex": "#54b188",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/92af28ed49c1b1e01a494914d58b2020251265698c1a7c86e4304425dff24e6e.png",
+        "sha256": "92af28ed49c1b1e01a494914d58b2020251265698c1a7c86e4304425dff24e6e"
+      },
+      "pod": {
+        "colorAssetVersionId": "2ad4e9f4-dcd7-46d5-892d-3e7a790e1ec4"
+      }
+    },
+    {
+      "name": "Island Reef",
+      "slug": "island-reef",
+      "hex": "#a2d8c2",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/8bcb7e479a1ad94b23cd13ce3df939bd117e36501a22017c0710e1b5066e32c6.png",
+        "sha256": "8bcb7e479a1ad94b23cd13ce3df939bd117e36501a22017c0710e1b5066e32c6"
+      },
+      "pod": {
+        "colorAssetVersionId": "86f6619c-1e36-4dbc-81b0-a00e7b17d248"
+      }
+    },
+    {
+      "name": "Ivory",
+      "slug": "ivory",
+      "hex": "#fff7e7",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/5ad06a66682fc7d58825a34e54c06fd54d686241172bef0c08eacd7f6df4bc5e.png",
+        "sha256": "5ad06a66682fc7d58825a34e54c06fd54d686241172bef0c08eacd7f6df4bc5e"
+      },
+      "pod": {
+        "colorAssetVersionId": "c9b10f2e-0d26-434c-a980-b3fa2fc06b95"
+      }
+    },
+    {
+      "name": "Khaki",
+      "slug": "khaki",
+      "hex": "#aea583",
+      "aliases": [],
+      "family": "earth",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/abf995b5ba5a5f2895a831d806aa52de6ec10a442c1a755910cfa472028c1972.png",
+        "sha256": "abf995b5ba5a5f2895a831d806aa52de6ec10a442c1a755910cfa472028c1972"
+      },
+      "pod": {
+        "colorAssetVersionId": "f21d73a0-2440-4e9c-a99d-f6914e66b72b"
+      }
+    },
+    {
+      "name": "Lagoon",
+      "slug": "lagoon",
+      "hex": "#3ba5b5",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/353bbe4444078482d0d7bba97ae44d752cb7a1787df79d87c497a83f1e044ebd.png",
+        "sha256": "353bbe4444078482d0d7bba97ae44d752cb7a1787df79d87c497a83f1e044ebd"
+      },
+      "pod": {
+        "colorAssetVersionId": "c1b2cd3a-6f28-4f67-a93a-a64b5fce6cdd"
+      }
+    },
+    {
+      "name": "Lagoon Blue",
+      "slug": "lagoon-blue",
+      "hex": "#89e4ed",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/1fc792d718c695d92dcf3897166b14464437c56c9a10142784a33b8475479a4c.png",
+        "sha256": "1fc792d718c695d92dcf3897166b14464437c56c9a10142784a33b8475479a4c"
+      },
+      "pod": {
+        "colorAssetVersionId": "3741794c-1950-4d4e-a295-7b293f6ccc92"
+      }
+    },
+    {
+      "name": "Light Green",
+      "slug": "light-green",
+      "hex": "#69826a",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/55e4c3de277a0e54ff9c91c489bd553f878b46f52000bf230e928370d22cb749.png",
+        "sha256": "55e4c3de277a0e54ff9c91c489bd553f878b46f52000bf230e928370d22cb749"
+      },
+      "pod": {
+        "colorAssetVersionId": "8088aa31-4a09-4897-bed8-78bad5f25e43"
+      }
+    },
+    {
+      "name": "Melon",
+      "slug": "melon",
+      "hex": "#ff9a5f",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/44ae0dbfd3dc1c5f793b2334e643642898b384a049d55085021392800258007e.png",
+        "sha256": "44ae0dbfd3dc1c5f793b2334e643642898b384a049d55085021392800258007e"
+      },
+      "pod": {
+        "colorAssetVersionId": "dc737014-5fd9-4238-ba97-e6cbf9002fe4"
+      }
+    },
+    {
+      "name": "Midnight",
+      "slug": "midnight",
+      "hex": "#414a5b",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/df792402c9b8e2112ec94bac3a7fc925acc464bffb7b35686c7a1bcd21035787.png",
+        "sha256": "df792402c9b8e2112ec94bac3a7fc925acc464bffb7b35686c7a1bcd21035787"
+      },
+      "pod": {
+        "colorAssetVersionId": "1be6b658-829a-4879-b612-f7d757ea7bc7"
+      }
+    },
+    {
+      "name": "Moss",
+      "slug": "moss",
+      "hex": "#747f66",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/5d95bb7d97c21dbfc36fd35db3bea611c98818e84d7e88fb349ea1726fea6f03.png",
+        "sha256": "5d95bb7d97c21dbfc36fd35db3bea611c98818e84d7e88fb349ea1726fea6f03"
+      },
+      "pod": {
+        "colorAssetVersionId": "f0854d9d-4d41-40cc-9a01-d7cb67a41a3e"
+      }
+    },
+    {
+      "name": "Mustard",
+      "slug": "mustard",
+      "hex": "#d0ae6e",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/7f5f237992dcefee5e7456f03d4f430694206644efbc62a5bb78991d7d73c484.png",
+        "sha256": "7f5f237992dcefee5e7456f03d4f430694206644efbc62a5bb78991d7d73c484"
+      },
+      "pod": {
+        "colorAssetVersionId": "b1e8fcee-94d3-41e3-a9d4-953aeecfcaa7"
+      }
+    },
+    {
+      "name": "Mystic Blue",
+      "slug": "mystic-blue",
+      "hex": "#647ca3",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/9a882b6ac24859da7ff5a97873467cd46244354823678eb81d5c2f91d65a631c.png",
+        "sha256": "9a882b6ac24859da7ff5a97873467cd46244354823678eb81d5c2f91d65a631c"
+      },
+      "pod": {
+        "colorAssetVersionId": "018a274c-f523-40f1-b7d8-d86c676d6302"
+      }
+    },
+    {
+      "name": "Navy",
+      "slug": "navy",
+      "hex": "#52525e",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/3daf21468155711f1a1cb7e25e8ab090a150fb079713f377b298737bc20c1dbb.png",
+        "sha256": "3daf21468155711f1a1cb7e25e8ab090a150fb079713f377b298737bc20c1dbb"
+      },
+      "pod": {
+        "colorAssetVersionId": "15e2438b-0bad-4772-b74e-f436d73197e6"
+      }
+    },
+    {
+      "name": "Neon Lemon",
+      "slug": "neon-lemon",
+      "hex": "#c9db78",
+      "aliases": [],
+      "family": "neon",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/a1395de2a98050e3a0625ca721e680d69122432d4690b09bfa3f6afca2ebfe3e.png",
+        "sha256": "a1395de2a98050e3a0625ca721e680d69122432d4690b09bfa3f6afca2ebfe3e"
+      },
+      "pod": {
+        "colorAssetVersionId": "8d1763dd-2871-45ed-972a-9df3a2eeaff2"
+      }
+    },
+    {
+      "name": "Neon Pink",
+      "slug": "neon-pink",
+      "hex": "#f57caf",
+      "aliases": [],
+      "family": "neon",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/143c528ee494f27b424212cbce43e188be4eca25253a107a285e8030bd2a2417.png",
+        "sha256": "143c528ee494f27b424212cbce43e188be4eca25253a107a285e8030bd2a2417"
+      },
+      "pod": {
+        "colorAssetVersionId": "63e9dd63-d9dc-42ad-917a-cf484b3004f7"
+      }
+    },
+    {
+      "name": "Neon Red Orange",
+      "slug": "neon-red-orange",
+      "hex": "#ff867b",
+      "aliases": [],
+      "family": "neon",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/41271323979f6a6d2ee120ffd8d6c4dbfd80d846aea74d63f7fa358d54ab0cff.png",
+        "sha256": "41271323979f6a6d2ee120ffd8d6c4dbfd80d846aea74d63f7fa358d54ab0cff"
+      },
+      "pod": {
+        "colorAssetVersionId": "ad758417-e57b-4e0b-abfe-2c1c0b013d34"
+      }
+    },
+    {
+      "name": "Neon Violet",
+      "slug": "neon-violet",
+      "hex": "#e8ace3",
+      "aliases": [],
+      "family": "neon",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/a4dbdcd4a688f3a2fffd3285ca7812daff2c9341f08ea4ee36fcd5aa1548482a.png",
+        "sha256": "a4dbdcd4a688f3a2fffd3285ca7812daff2c9341f08ea4ee36fcd5aa1548482a"
+      },
+      "pod": {
+        "colorAssetVersionId": "2c3c3a0e-ad35-40fb-bb94-b7e6e7e95d6e"
+      }
+    },
+    {
+      "name": "Orchid",
+      "slug": "orchid",
+      "hex": "#cbb3cc",
+      "aliases": [],
+      "family": "purple",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/f907f617cf9cf784c26d6e6e08bf4100f199eeecce98f116435b861686b4312c.png",
+        "sha256": "f907f617cf9cf784c26d6e6e08bf4100f199eeecce98f116435b861686b4312c"
+      },
+      "pod": {
+        "colorAssetVersionId": "9d96cfd7-a564-4cad-8da7-457aaf0dd2a0"
+      }
+    },
+    {
+      "name": "Paprika",
+      "slug": "paprika",
+      "hex": "#ff4645",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/fce618f20054a5bf3f51185ca11673ba629b1ab9fdcd42cdee8c19f57980cd84.png",
+        "sha256": "fce618f20054a5bf3f51185ca11673ba629b1ab9fdcd42cdee8c19f57980cd84"
+      },
+      "pod": {
+        "colorAssetVersionId": "2ee7d0f1-b319-4154-b55c-f96a2683387b"
+      }
+    },
+    {
+      "name": "Peachy",
+      "slug": "peachy",
+      "hex": "#f7c3ae",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/ba273029fc52d1dccf77a50839b712f97c0e36262228ad6591b237e7e1018f36.png",
+        "sha256": "ba273029fc52d1dccf77a50839b712f97c0e36262228ad6591b237e7e1018f36"
+      },
+      "pod": {
+        "colorAssetVersionId": "2ee2b154-809d-410b-af24-5274007ca965"
+      }
+    },
+    {
+      "name": "Pepper",
+      "slug": "pepper",
+      "hex": "#5f605b",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/b04d1a212e53be2a93d2dc5c6e09705fe2f86f1c7ced3cde2c0d9f8cccb0130f.png",
+        "sha256": "b04d1a212e53be2a93d2dc5c6e09705fe2f86f1c7ced3cde2c0d9f8cccb0130f"
+      },
+      "pod": {
+        "colorAssetVersionId": "a0db1203-90cf-4c8b-90be-349fa5eb97ae"
+      }
+    },
+    {
+      "name": "Periwinkle",
+      "slug": "periwinkle",
+      "hex": "#6570af",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/d36fc15e4f94382ad685821cd7ed0e1140ea7b5811025590cc0906c560a49310.png",
+        "sha256": "d36fc15e4f94382ad685821cd7ed0e1140ea7b5811025590cc0906c560a49310"
+      },
+      "pod": {
+        "colorAssetVersionId": "ea565f60-d32f-4b04-b776-68e779e9ec1a"
+      }
+    },
+    {
+      "name": "Red",
+      "slug": "red",
+      "hex": "#a80d27",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/1077fcd36ee2b4bb41a76529fc0d2bcae0fba252573b790bcceb5b66db919c68.png",
+        "sha256": "1077fcd36ee2b4bb41a76529fc0d2bcae0fba252573b790bcceb5b66db919c68"
+      },
+      "pod": {
+        "colorAssetVersionId": "58c1ab16-1877-4eb1-a326-929c20d43332"
+      }
+    },
+    {
+      "name": "Royal Caribe",
+      "slug": "royal-caribe",
+      "hex": "#5d8ac7",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/2dec853340e2e2a77cfaed65000cdb4cf2363d9565f257dc4d820009a6029bf8.png",
+        "sha256": "2dec853340e2e2a77cfaed65000cdb4cf2363d9565f257dc4d820009a6029bf8"
+      },
+      "pod": {
+        "colorAssetVersionId": "9cbae72f-e93a-4c3b-a5d1-9f38acc08222"
+      }
+    },
+    {
+      "name": "Sage",
+      "slug": "sage",
+      "hex": "#6d775c",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/709b1a0468b91fd204a6597519d44d23394df363e6dee2fb2115066c9fd7be0a.png",
+        "sha256": "709b1a0468b91fd204a6597519d44d23394df363e6dee2fb2115066c9fd7be0a"
+      },
+      "pod": {
+        "colorAssetVersionId": "3cf469eb-bd8b-45c1-90c6-7acac2d17a39"
+      }
+    },
+    {
+      "name": "Sandstone",
+      "slug": "sandstone",
+      "hex": "#a69f88",
+      "aliases": [],
+      "family": "earth",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/634af0666f7676cd856b3ad60d2514feb80d4d71a882a571a050f02bb44d0c9d.png",
+        "sha256": "634af0666f7676cd856b3ad60d2514feb80d4d71a882a571a050f02bb44d0c9d"
+      },
+      "pod": {
+        "colorAssetVersionId": "0d89f25f-d483-4ad4-af60-e2f2db3e930b"
+      }
+    },
+    {
+      "name": "Sapphire",
+      "slug": "sapphire",
+      "hex": "#03b2d3",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/92073dde1eb11784f2eec3a07d0f734cd5aa5a28a425a664d0b3c8b72dac21d9.png",
+        "sha256": "92073dde1eb11784f2eec3a07d0f734cd5aa5a28a425a664d0b3c8b72dac21d9"
+      },
+      "pod": {
+        "colorAssetVersionId": "9abe5e2a-2c83-4f97-a94f-486ce3b685a6"
+      }
+    },
+    {
+      "name": "Seafoam",
+      "slug": "seafoam",
+      "hex": "#609a95",
+      "aliases": [],
+      "family": "green",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/5ee1fe08f5fe3fdf7d047666e7928431ee757f29f9dcfdfd04b204ae7df14911.png",
+        "sha256": "5ee1fe08f5fe3fdf7d047666e7928431ee757f29f9dcfdfd04b204ae7df14911"
+      },
+      "pod": {
+        "colorAssetVersionId": "dd8c746b-c1a4-44c4-8362-48c8a9ac1387"
+      }
+    },
+    {
+      "name": "Terracotta",
+      "slug": "terracotta",
+      "hex": "#db8c76",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/f983b684988b383e02f56eee59bca48c26644c53389ddefbc97dc27ef4655e0f.png",
+        "sha256": "f983b684988b383e02f56eee59bca48c26644c53389ddefbc97dc27ef4655e0f"
+      },
+      "pod": {
+        "colorAssetVersionId": "2b3cf1e4-5fbd-4d0c-952d-da2b3389503a"
+      }
+    },
+    {
+      "name": "Topaz Blue",
+      "slug": "topaz-blue",
+      "hex": "#1f6171",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/5d9f3b4e839ce11b59764727a2e3ec5a1161703707c186f96f14dacf94c3fca2.png",
+        "sha256": "5d9f3b4e839ce11b59764727a2e3ec5a1161703707c186f96f14dacf94c3fca2"
+      },
+      "pod": {
+        "colorAssetVersionId": "f4e8a9d7-add6-4bcf-ab55-7161c06c7094"
+      }
+    },
+    {
+      "name": "True Navy",
+      "slug": "true-navy",
+      "hex": "#1c1b32",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/22b8a58b37b2634e31a7c870bc46662b419d18566cf22e9f0c60a08d8c6b7a8f.png",
+        "sha256": "22b8a58b37b2634e31a7c870bc46662b419d18566cf22e9f0c60a08d8c6b7a8f"
+      },
+      "pod": {
+        "colorAssetVersionId": "0aeb67ba-19e8-43a8-8258-998920405825"
+      }
+    },
+    {
+      "name": "Violet",
+      "slug": "violet",
+      "hex": "#a88fd7",
+      "aliases": [],
+      "family": "purple",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/def20d1072ec33c58aa503b3bf876a85f2a7712bb883f9f1f3f189613f73afcc.png",
+        "sha256": "def20d1072ec33c58aa503b3bf876a85f2a7712bb883f9f1f3f189613f73afcc"
+      },
+      "pod": {
+        "colorAssetVersionId": "a4702fea-3802-43a7-86b3-f3abb5a8e25e"
+      }
+    },
+    {
+      "name": "Washed Denim",
+      "slug": "washed-denim",
+      "hex": "#8595b8",
+      "aliases": [],
+      "family": "blue",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/ae1304097c6cf09b83e2c41eea9858e4759ba7f220e825922de0d991767ef806.png",
+        "sha256": "ae1304097c6cf09b83e2c41eea9858e4759ba7f220e825922de0d991767ef806"
+      },
+      "pod": {
+        "colorAssetVersionId": "a1dfbb0e-0f14-4b67-a6a5-b0ca8baaa34b"
+      }
+    },
+    {
+      "name": "Watermelon",
+      "slug": "watermelon",
+      "hex": "#da665f",
+      "aliases": [],
+      "family": "red-pink",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/02c30f5eb3ec739b0c04da8c2000323068d530972e78c358aa53b6e078547167.png",
+        "sha256": "02c30f5eb3ec739b0c04da8c2000323068d530972e78c358aa53b6e078547167"
+      },
+      "pod": {
+        "colorAssetVersionId": "d15ba526-bc31-44c4-ab41-b42b1300a9ec"
+      }
+    },
+    {
+      "name": "White",
+      "slug": "white",
+      "hex": "#ffffff",
+      "aliases": [],
+      "family": "neutral",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/944e214886eab358344ad31446c18367623c44b7dc9b60cd321ba32a29afdef8.png",
+        "sha256": "944e214886eab358344ad31446c18367623c44b7dc9b60cd321ba32a29afdef8"
+      },
+      "pod": {
+        "colorAssetVersionId": "1d02be36-b359-41e4-9f6d-9b1a1cf5579e"
+      }
+    },
+    {
+      "name": "Wine",
+      "slug": "wine",
+      "hex": "#5e5266",
+      "aliases": [],
+      "family": "purple",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/62b277e395f7506dfb19adbefac5925902f1ba99752bf79623a8d801bb3de010.png",
+        "sha256": "62b277e395f7506dfb19adbefac5925902f1ba99752bf79623a8d801bb3de010"
+      },
+      "pod": {
+        "colorAssetVersionId": "d4a9ce7c-a816-4bb7-989c-fbac54633a20"
+      }
+    },
+    {
+      "name": "Yam",
+      "slug": "yam",
+      "hex": "#c9814f",
+      "aliases": [],
+      "family": "orange-yellow",
+      "available": true,
+      "source": "printify",
+      "sourceDate": "2026-09-24",
+      "image": {
+        "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/45ae46967e5fb81ab052ae3e8f18be9fe934afb1dfc431620da017659ebd0a25.png",
+        "sha256": "45ae46967e5fb81ab052ae3e8f18be9fe934afb1dfc431620da017659ebd0a25"
+      },
+      "pod": {
+        "colorAssetVersionId": "97b3a1fc-1457-4fa9-82c9-edc0e82bbee5"
+      }
+    }
+  ]
 }
