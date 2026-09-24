@@ -6,4 +6,5 @@
 export * from "./contrast.js";
 export * from "./convert.js";
 export * from "./cvd.js";
+export * from "./family.js";
 export * from "./harmony.js";
