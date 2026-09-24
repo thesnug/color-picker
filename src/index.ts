@@ -13,3 +13,4 @@ export type { Accessibility } from "./data/index.js";
 export * from "./accessibility.js";
 export * from "./color/index.js";
 export * from "./nearest.js";
+export * from "./combinations.js";

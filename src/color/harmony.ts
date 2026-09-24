@@ -9,6 +9,25 @@
 
 import { type ColorInput, type Oklch, reduceChroma, toOklch } from "./convert.js";
 
+/**
+ * OKLab chroma at or below which a color counts as neutral. Chosen so White,
+ * Black, the four named grays, Slate Color, Deep Slate Olive, Deep Slate Green,
+ * Deep Violet (Plumbeous), and Fawn are neutral while Ecru (0.051) is not.
+ */
+export const NEUTRAL_CHROMA = 0.045;
+
+/** Smallest arc containing every hue, in degrees. 0 for fewer than two hues. */
+export function hueArc(hues: readonly number[]): number {
+  if (hues.length < 2) return 0;
+  const sorted = [...hues].sort((a, b) => a - b);
+  let largestGap = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    const next = i + 1 < sorted.length ? sorted[i + 1]! : sorted[0]! + 360;
+    largestGap = Math.max(largestGap, next - sorted[i]!);
+  }
+  return 360 - largestGap;
+}
+
 function rotate(base: Oklch, degrees: number): Oklch {
   return reduceChroma({ ...base, h: (((base.h + degrees) % 360) + 360) % 360 });
 }

@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildDerived,
-  classifyHarmony,
-  hueArc,
-  serialize,
-} from "../scripts/build-data.js";
+import { buildDerived, classifyHarmony, serialize } from "../scripts/build-data.js";
+import { hueArc } from "../src/color/harmony.js";
 import { loadColors, loadCombinations, loadWadaDataset } from "../src/data/index.js";
 
 const source = loadWadaDataset();
