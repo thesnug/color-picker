@@ -13,6 +13,10 @@
  * - `photo-square.png`: an opaque photographic-style scene with smooth
  *   gradients and per-pixel noise: sky, sun, two hills, and a lake. It stands in
  *   for a photo, which has no flat colors at all.
+ * - `navy-badge.png`: a flat cream (#f3e9d2) badge with a near-Navy
+ *   (#4f5060) band on a transparent background. The band is within the print
+ *   minimum distance of Comfort Colors 1717 Navy, so recommendations must warn
+ *   that it vanishes on that shirt.
  */
 
 import { mkdirSync } from "node:fs";
@@ -75,6 +79,13 @@ function flatMark(x: number, y: number): Rgba {
   return [0, 0, 0, 0];
 }
 
+function navyBadge(x: number, y: number): Rgba {
+  const inside = x >= 48 && x < 208 && y >= 64 && y < 192;
+  if (!inside) return [0, 0, 0, 0];
+  if (y >= 104 && y < 152) return [0x4f, 0x50, 0x60, 1];
+  return [0xf3, 0xe9, 0xd2, 1];
+}
+
 function photoSquare(seed: number): (x: number, y: number) => Rgba {
   const rand = random(seed);
   const mix = (a: number[], b: number[], t: number) => a.map((v, i) => v + (b[i]! - v) * t);
@@ -109,4 +120,5 @@ function photoSquare(seed: number): (x: number, y: number) => Rgba {
 mkdirSync(OUT, { recursive: true });
 await write("flat-mark.png", flatMark, 4);
 await write("photo-square.png", photoSquare(1717));
+await write("navy-badge.png", navyBadge);
 console.log(`Wrote fixtures to ${OUT}`);

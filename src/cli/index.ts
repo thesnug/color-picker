@@ -5,7 +5,8 @@
  * dependencies to the package. See docs/DESIGN.md, "Architecture".
  *
  * Exit codes: 0 on success, 1 for input that cannot be resolved (an unknown
- * name, a malformed hex, an unknown combination ID), 2 for usage errors.
+ * name, a malformed hex, an unknown combination ID, a theme with no legible
+ * text and background), 2 for usage errors.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -15,8 +16,10 @@ import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
 import {
   combosView,
+  DEFAULT_RECOMMEND_N,
   InputError,
   nearestView,
+  recommendView,
   showView,
   type ThemeFormat,
   themeView,
@@ -59,6 +62,8 @@ Commands:
   combos <hex|name>           Ranked palettes: the book's combinations, then
                               harmonies snapped to Wada colors
   show <combination-id...>    Specific book combinations, 1 to 348
+  recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
+                              printed as is
   theme <hex|name|id>         A web theme: background, surface, text, muted
                               text, accent, and text on the accent, each pair
                               checked against WCAG AA. A bare number is a
@@ -68,6 +73,8 @@ Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
   --size <n>                  combos: only palettes with n colors
   --limit <n>                 combos: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
+  -n <n>                      recommend: number of picks (default ${DEFAULT_RECOMMEND_N})
+  --product <id>              recommend: garment product (default Comfort Colors 1717)
   --format <css|tailwind|tokens>
                               theme: print CSS custom properties, a Tailwind v4
                               @theme block, or W3C design tokens (JSON)
@@ -80,7 +87,6 @@ Output options (any command):
                               theme, a sample UI in light and dark mode
 
 Coming in the products milestone (reserved, not yet available):
-  --product <id>              Work against a garment product's colors
   --check                     Run accessibility checks on each palette
 
 Options:
@@ -90,22 +96,23 @@ Options:
 Names are Wada names, CSS color names, or xkcd survey names. Quote names with
 spaces: color-picker combos "hermosa pink"
 
-Exit codes: 0 success, 1 unknown name, malformed hex, or unknown ID,
+Exit codes: 0 success, 1 unknown name, malformed hex, unknown ID or product,
+an unreadable design file, or a theme with no legible text and background,
 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show", "theme"] as const;
+const COMMANDS = ["nearest", "combos", "show", "recommend", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
-const RESERVED = ["product", "check"] as const;
+const RESERVED = ["check"] as const;
 
 class UsageError extends Error {}
 
 /**
  * Run the CLI against an argument list (without the node and script entries).
- * Returns the process exit code instead of exiting, so it can be tested.
+ * Resolves to the process exit code instead of exiting, so it can be tested.
  */
-export function run(argv: readonly string[], io: CliIo = defaultIo): number {
+export async function run(argv: readonly string[], io: CliIo = defaultIo): Promise<number> {
   let parsed;
   try {
     parsed = parseArgs({
@@ -116,6 +123,7 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
         k: { type: "string", short: "k" },
         size: { type: "string" },
         limit: { type: "string" },
+        n: { type: "string", short: "n" },
         format: { type: "string" },
         mode: { type: "string" },
         json: { type: "boolean" },
@@ -155,7 +163,7 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
     if (values.json && values.format !== undefined) {
       throw new UsageError("--json and --format both choose the printed output; use one");
     }
-    view = buildView(command as Command, args, values);
+    view = await buildView(command as Command, args, values);
   } catch (error) {
     if (error instanceof UsageError) return usage(io, error.message);
     if (error instanceof InputError) {
@@ -187,26 +195,45 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
   return 0;
 }
 
-function buildView(
+async function buildView(
   command: Command,
   args: string[],
-  values: { k?: string; size?: string; limit?: string; format?: string; mode?: string },
-): View {
-  const only = (flag: "k" | "size" | "limit" | "format" | "mode", allowed: Command) => {
+  values: {
+    k?: string;
+    size?: string;
+    limit?: string;
+    n?: string;
+    product?: string;
+    format?: string;
+    mode?: string;
+  },
+): Promise<View> {
+  const only = (flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode", allowed: Command) => {
     if (values[flag] !== undefined && command !== allowed) {
-      const name = flag === "k" ? "-k" : `--${flag}`;
+      const name = flag.length === 1 ? `-${flag}` : `--${flag}`;
       throw new UsageError(`${name} applies only to ${allowed}`);
     }
   };
   only("k", "nearest");
   only("size", "combos");
   only("limit", "combos");
+  only("n", "recommend");
+  only("product", "recommend");
   only("format", "theme");
   only("mode", "theme");
 
   if (command === "show") {
     if (args.length === 0) throw new UsageError("show needs at least one combination ID");
     return showView(args.map((a) => positiveInt(a, "combination ID")));
+  }
+
+  if (command === "recommend") {
+    if (args.length !== 1) throw new UsageError("recommend takes one design file");
+    return recommendView({
+      file: args[0]!,
+      n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
+      ...(values.product !== undefined && { product: values.product }),
+    });
   }
 
   if (args.length !== 1) {

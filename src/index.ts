@@ -15,4 +15,5 @@ export * from "./color/index.js";
 export * from "./nearest.js";
 export * from "./combinations.js";
 export * from "./equivalents.js";
+export * from "./recommend.js";
 export * from "./theme.js";

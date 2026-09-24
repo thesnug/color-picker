@@ -164,6 +164,36 @@ digits when it has none). Pass
 toward white and black, and runs lightness evenly from 0.97 to 0.25 in OKLCH.
 `ramp` from the color math is the unnamed version with constant chroma.
 
+### Recommend garment colors
+
+`recommendProductColors` ranks a product's colors for a design printed as is.
+It takes a fingerprint, or any `{ palette, inkLuminance }`, and returns the best
+`n` picks (default 5), each with a `score`, plain-language `reasons`, and
+`warnings`:
+
+```ts
+import { recommendProductColors } from "@thesnug/color-picker";
+import { fingerprint } from "@thesnug/color-picker/fingerprint";
+
+const picks = recommendProductColors(await fingerprint("art/light-ink.png"), { n: 3 });
+picks[0].color.name;  // "Graphite"
+picks[0].reasons[0];  // "Both design colors clear 4.5:1 on Graphite; #e8836b (near Apricot Orange) is the closest at 4.74:1."
+```
+
+The score adds four components, each from 0 to 1 and exposed on `components`:
+
+| Component | Measures | Default weight |
+| --- | --- | --- |
+| `contrast` | Each design color's WCAG contrast against the garment, as progress toward 4.5:1, weighted by coverage | 0.6 |
+| `vanish` | Coverage of design colors closer to the garment than the print minimum distance (subtracted) | 0.6 |
+| `inkFit` | Dark ink on a light garment, or light ink on a dark one, by the dark-ink luminance cutoff | 0.3 |
+| `bookPairing` | The garment's and the design's dominant Wada colors share a book combination | 0.1 |
+
+The weights are `RECOMMEND_WEIGHTS`. Pass `weights` to change them, or call
+`scoreComponents(pick.components, weights)` to re-rank existing picks without
+analyzing the design again. Options: `product` (an ID or a loaded product;
+default Comfort Colors 1717) and `availableOnly` (default true).
+
 ### CLI
 
 `color-picker` answers the same questions from the command line and shows
@@ -175,6 +205,7 @@ color-picker nearest "dusty rose" -k 5        # names work too; quote spaces
 color-picker combos "hermosa pink" --size 3   # ranked three-color palettes
 color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
 color-picker show 176 227                     # book combinations by ID
+color-picker recommend art/light-ink.png -n 3 # garment colors for a design
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
 color-picker theme "#1a1a40" --mode dark --format tailwind
@@ -199,12 +230,13 @@ output is piped or `NO_COLOR` is set.
 | `-k <n>` | `nearest` | Number of matches (default 3) |
 | `--size <n>` | `combos` | Only palettes with `n` colors |
 | `--limit <n>` | `combos` | Maximum palettes (default 8) |
+| `-n <n>` | `recommend` | Number of picks (default 5) |
+| `--product <id>` | `recommend` | Garment product (default `comfort-colors-1717`) |
 | `--format <css\|tailwind\|tokens>` | `theme` | Print CSS custom properties, a Tailwind v4 `@theme` block, or design tokens |
 | `--mode <light\|dark>` | `theme` | Light (default) or dark |
 | `--json` | any | Print the library result as JSON instead of text |
 | `--svg <path>` | any | Write the swatches as one SVG file |
 | `--html <path>` | any | Write a self-contained HTML review page |
-| `--product <id>` | reserved | Coming in the products milestone |
 | `--check` | reserved | Coming in the products milestone |
 
 `--svg` and `--html` still print the text result, and report the file written
@@ -216,6 +248,10 @@ color-picker combos "hermosa pink" --limit 4 --html review.html
 ```
 
 ![HTML review page for Hermosa Pink combinations](docs/images/cli-html.png)
+
+For `recommend`, the HTML page shows each pick as a product card, with the
+garment photo when the product has one and the design's colors as chips beside
+it. Warnings name the design colors that would vanish into the shirt.
 
 `theme` takes a hex code, a color name, or a book combination ID; a bare number
 is an ID, so write a numeric hex with `#`. For a color it uses the
@@ -230,8 +266,9 @@ color-picker theme "hermosa pink" --html theme.html
 ![Sample UI for a Hermosa Pink theme in light and dark mode](docs/images/cli-theme.png)
 
 Exit codes: `0` on success; `1` for an unknown name, a malformed hex, an
-unknown combination ID, or a `theme` with no legible text and background; `2` for a usage error such as a missing argument or a
-reserved flag.
+unknown combination ID or product, a design file that cannot be read, or a
+`theme` with no legible text and background; `2` for a usage error such as a
+missing argument or a reserved flag.
 
 ### MCP server
 

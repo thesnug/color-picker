@@ -178,10 +178,15 @@ over the five-color palette, so the two tools agree on photographic art too.
 One vision pass per design writes a two-line subject-and-mood description, cached by
 hash. Everything downstream is keyed on the fingerprint so a design is analyzed once.
 
-**Recommend shirts, unchanged.** For each garment color: the minimum contrast between
-garment and each design color weighted by coverage, with a penalty when a design
-color nearly matches the garment (its edges would vanish). Top ten go to Jev for
-mood fit. Each pick carries a plain-language reason.
+**Recommend shirts, unchanged.** For each garment color, four components from 0 to
+1: contrast between the garment and each design color, as progress toward WCAG
+4.5:1 and weighted by coverage; a vanish penalty for the coverage of design colors
+closer to the garment than the print minimum distance (their edges would vanish);
+ink fit by the dark-ink luminance cutoff; and a small bonus when the garment's and
+the design's dominant Wada colors share a book combination. One exported weights
+constant combines them, and the components are returned so the score can be
+recomputed without re-analysis. Top ten go to Jev for mood fit. Each pick carries
+plain-language reasons, and a warning per vanishing color.
 
 **Recommend shirts, with recoloring.** For each garment: find a combination containing
 a near match of the garment with enough other members; map the design's colors onto
