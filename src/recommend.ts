@@ -314,8 +314,8 @@ export function recommendProductColors(design: DesignSummary, options: Recommend
       if (sharedCombination !== undefined) {
         reasons.push(
           wada.index === dominant.index
-            ? `${garment} is nearest to ${wada.name}, the same Wada color as the design's dominant color.`
-            : `${garment} is nearest to ${wada.name}, which the book pairs with ${dominant.name}, the design's dominant color, in combination ${sharedCombination}.`,
+            ? `${garment} is nearest to Wada's ${wada.name}, the same Wada color as the design's dominant color.`
+            : `${garment} is nearest to Wada's ${wada.name}, which the book pairs with ${dominant.name}, the design's dominant color, in combination ${sharedCombination}.`,
         );
       }
       const warnings = designColors

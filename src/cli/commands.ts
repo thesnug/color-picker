@@ -5,9 +5,17 @@
 
 import { combinations, type Palette } from "../combinations.js";
 import { isHex } from "../color/convert.js";
-import { loadColors, loadCombinations } from "../data/index.js";
+import { loadColors, loadCombinations, loadProduct, loadProductIndex, type Product } from "../data/index.js";
+import { fingerprint } from "../fingerprint/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
-import { renderAnsi, renderCombination, renderSwatchGrid, type Swatch } from "../render/index.js";
+import { recommendProductColors } from "../recommend.js";
+import {
+  renderAnsi,
+  renderCombination,
+  renderProductCard,
+  renderSwatchGrid,
+  type Swatch,
+} from "../render/index.js";
 import { fmt } from "../render/shared.js";
 
 /** A command's output in every format the CLI can write. */
@@ -122,6 +130,65 @@ export function showView(ids: readonly number[]): View {
     sections: found.map((f) => ({
       svg: renderCombination({ id: f.combination.id, colors: f.colors }, { contrast: true }),
       caption: f.combination.harmony,
+    })),
+  };
+}
+
+/** Default `-n` for `recommend`. */
+export const DEFAULT_RECOMMEND_N = 5;
+
+export interface RecommendArgs {
+  file: string;
+  n: number;
+  product?: string;
+}
+
+export async function recommendView({ file, n, product: productId }: RecommendArgs): Promise<View> {
+  let product: Product;
+  try {
+    product = loadProduct(productId ?? loadProductIndex().default);
+  } catch (error) {
+    throw new InputError((error as Error).message);
+  }
+
+  let design;
+  try {
+    design = await fingerprint(file);
+  } catch (error) {
+    const { code, message } = error as NodeJS.ErrnoException;
+    throw new InputError(
+      code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`,
+    );
+  }
+
+  const picks = recommendProductColors(design, { product, n });
+  const title = `${product.brand} ${product.model} colors for ${file}`;
+  const chips: Swatch[] = design.palette.map((entry, i) => ({
+    hex: entry.hex,
+    name: `${Math.round(entry.share * 100)}% · near ${picks[0]?.designColors[i]?.wada.name ?? entry.hex}`,
+  }));
+  const heading = (i: number) => `${i + 1}. ${picks[i]!.color.name} · score ${fmt(picks[i]!.score, 3)}`;
+
+  const designLine = `Design: ${chips.map((c) => `${c.hex} ${c.name}`).join(", ")}; ink luminance ${fmt(design.inkLuminance)}`;
+  return {
+    title,
+    json: { product: { id: product.id, name: product.name }, design, picks },
+    text: (color) =>
+      [
+        `${title}\n${designLine}\n`,
+        ...picks.map((pick, i) =>
+          [
+            heading(i),
+            renderAnsi([pick.color], { color }).trimEnd(),
+            ...pick.reasons.map((r) => `  ${r}`),
+            ...pick.warnings.map((w) => `  Warning: ${w}`),
+          ].join("\n") + "\n",
+        ),
+      ].join("\n"),
+    sections: picks.map((pick, i) => ({
+      title: heading(i),
+      svg: renderProductCard(pick.color, { designColors: chips }),
+      caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
     })),
   };
 }
