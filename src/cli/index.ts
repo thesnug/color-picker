@@ -5,7 +5,8 @@
  * dependencies to the package. See docs/DESIGN.md, "Architecture".
  *
  * Exit codes: 0 on success, 1 for input that cannot be resolved (an unknown
- * name, a malformed hex, an unknown combination ID), 2 for usage errors.
+ * name, a malformed hex, an unknown combination ID, a theme with no legible
+ * text and background), 2 for usage errors.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -20,6 +21,8 @@ import {
   nearestView,
   recommendView,
   showView,
+  type ThemeFormat,
+  themeView,
   type View,
 } from "./commands.js";
 
@@ -61,6 +64,10 @@ Commands:
   show <combination-id...>    Specific book combinations, 1 to 348
   recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
                               printed as is
+  theme <hex|name|id>         A web theme: background, surface, text, muted
+                              text, accent, and text on the accent, each pair
+                              checked against WCAG AA. A bare number is a
+                              combination ID; write hex with # (#123).
 
 Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
@@ -68,11 +75,16 @@ Command options:
   --limit <n>                 combos: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
   -n <n>                      recommend: number of picks (default ${DEFAULT_RECOMMEND_N})
   --product <id>              recommend: garment product (default Comfort Colors 1717)
+  --format <css|tailwind|tokens>
+                              theme: print CSS custom properties, a Tailwind v4
+                              @theme block, or W3C design tokens (JSON)
+  --mode <light|dark>         theme: light (default) or dark
 
 Output options (any command):
   --json                      Print the result as JSON instead of text
   --svg <path>                Write the swatches as an SVG file
-  --html <path>               Write a self-contained HTML review page
+  --html <path>               Write a self-contained HTML review page; for
+                              theme, a sample UI in light and dark mode
 
 Coming in the products milestone (reserved, not yet available):
   --check                     Run accessibility checks on each palette
@@ -85,10 +97,11 @@ Names are Wada names, CSS color names, or xkcd survey names. Quote names with
 spaces: color-picker combos "hermosa pink"
 
 Exit codes: 0 success, 1 unknown name, malformed hex, unknown ID or product,
-or an unreadable design file, 2 usage error. See https://github.com/thesnug/color-picker
+an unreadable design file, or a theme with no legible text and background,
+2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show", "recommend"] as const;
+const COMMANDS = ["nearest", "combos", "show", "recommend", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const RESERVED = ["check"] as const;
@@ -111,6 +124,8 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         size: { type: "string" },
         limit: { type: "string" },
         n: { type: "string", short: "n" },
+        format: { type: "string" },
+        mode: { type: "string" },
         json: { type: "boolean" },
         svg: { type: "string" },
         html: { type: "string" },
@@ -145,6 +160,9 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         throw new UsageError(`--${flag} is coming in the products milestone and is not yet available`);
       }
     }
+    if (values.json && values.format !== undefined) {
+      throw new UsageError("--json and --format both choose the printed output; use one");
+    }
     view = await buildView(command as Command, args, values);
   } catch (error) {
     if (error instanceof UsageError) return usage(io, error.message);
@@ -158,7 +176,8 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
   const write = io.writeFile ?? defaultIo.writeFile!;
   try {
     if (values.svg !== undefined) {
-      write(values.svg, stackSvg(view.sections.map((s) => s.svg), view.title));
+      const svgs = view.sections.flatMap((s) => (s.svg ? [s.svg] : []));
+      write(values.svg, stackSvg(svgs, view.title));
       io.stderr(`Wrote ${values.svg}\n`);
     }
     if (values.html !== undefined) {
@@ -179,9 +198,17 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
 async function buildView(
   command: Command,
   args: string[],
-  values: { k?: string; size?: string; limit?: string; n?: string; product?: string },
+  values: {
+    k?: string;
+    size?: string;
+    limit?: string;
+    n?: string;
+    product?: string;
+    format?: string;
+    mode?: string;
+  },
 ): Promise<View> {
-  const only = (flag: "k" | "size" | "limit" | "n" | "product", allowed: Command) => {
+  const only = (flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode", allowed: Command) => {
     if (values[flag] !== undefined && command !== allowed) {
       const name = flag.length === 1 ? `-${flag}` : `--${flag}`;
       throw new UsageError(`${name} applies only to ${allowed}`);
@@ -192,6 +219,8 @@ async function buildView(
   only("limit", "combos");
   only("n", "recommend");
   only("product", "recommend");
+  only("format", "theme");
+  only("mode", "theme");
 
   if (command === "show") {
     if (args.length === 0) throw new UsageError("show needs at least one combination ID");
@@ -210,11 +239,20 @@ async function buildView(
   if (args.length !== 1) {
     throw new UsageError(
       args.length === 0
-        ? `${command} needs a hex code or color name`
+        ? `${command} needs a hex code or color name${command === "theme" ? ", or a combination ID" : ""}`
         : `${command} takes one color; quote names with spaces`,
     );
   }
   const query = args[0]!;
+  if (command === "theme") {
+    return themeView({
+      query,
+      mode: oneOf(values.mode, "--mode", ["light", "dark"] as const) ?? "light",
+      ...(values.format !== undefined && {
+        format: oneOf(values.format, "--format", ["css", "tailwind", "tokens"] as const) as ThemeFormat,
+      }),
+    });
+  }
   if (command === "nearest") {
     return nearestView({ query, k: optionalInt(values.k, "-k") ?? DEFAULT_NEAREST_K });
   }
@@ -224,6 +262,14 @@ async function buildView(
     limit: optionalInt(values.limit, "--limit") ?? DEFAULT_COMBOS_LIMIT,
     ...(size !== undefined && { size }),
   });
+}
+
+function oneOf<T extends string>(value: string | undefined, flag: string, allowed: readonly T[]): T | undefined {
+  if (value === undefined) return undefined;
+  if (!allowed.includes(value as T)) {
+    throw new UsageError(`${flag} must be one of ${allowed.join(", ")}, got ${JSON.stringify(value)}`);
+  }
+  return value as T;
 }
 
 function optionalInt(value: string | undefined, flag: string): number | undefined {

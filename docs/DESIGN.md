@@ -195,9 +195,20 @@ plausibility. Output per shirt: a from-to mapping table and a prompt. Flat-color
 is recolored deterministically from the table; the prompt is for painterly art only.
 
 **Web outputs.** From any chosen combination, assign roles by contrast rules
-(background, surface, text, accent) and emit CSS custom properties, a Tailwind
-theme, and W3C design tokens. Tint and shade ramps per color in OKLCH turn a single
-Wada color into a UI scale.
+(background, text, accent, through the accessibility checker's `roles`) and derive
+the two a UI needs that a two-to-four-color combination does not supply: a
+surface (the background shifted in OKLCH lightness to a small contrast against it,
+1.08:1 light and 1.2:1 dark, stopping early where text or accent would fall below
+their minimum) and muted text (the text mixed toward the background in OKLab as
+far as it still meets 4.5:1 on background and surface). When no member works as
+an accent, the text color stands in. Every emitted pairing meets WCAG 2.2 AA for
+its use; APCA is reported, not enforced. Contrast is symmetric, so a combination
+legible in light mode is legible in dark mode too; about 57% of the book's
+combinations have no pair at 4.5:1 and yield an error object. Emit CSS custom
+properties, a Tailwind v4 `@theme` block, and W3C design tokens (format 2025.10).
+Named tint and shade ramps per color (`namedRamp`, 50 to 950) turn a single Wada
+color into a UI scale: even OKLCH lightness, constant hue, chroma tapering toward
+the ends, and the input color held exactly at its own step.
 
 ## Jev (TypeSafe System One)
 

@@ -131,6 +131,65 @@ describe("cli", () => {
     });
   });
 
+  describe("theme", () => {
+    it("builds a theme from a book combination ID", async () => {
+      const c = capture();
+      expect(await run(["theme", "348"], c.io)).toBe(0);
+      expect(c.out()).toContain("Theme from combination 348 · light mode");
+      expect(c.out()).toMatch(/#bcd382 {2}background {2}Olive Buff/);
+      expect(c.out()).toMatch(/text on background: [\d.]+:1 WCAG AA/);
+    });
+
+    it("picks the best-ranked legible palette for a color", async () => {
+      const c = capture();
+      expect(await run(["theme", "hermosa pink"], c.io)).toBe(0);
+      expect(c.out()).toContain("Theme for Hermosa Pink (Wada #ffb3f0) · light mode");
+      expect(c.out()).toContain("Combination 273 · Hermosa Pink, Pansy Purple");
+    });
+
+    it.each([
+      ["css", ":root {\n  color-scheme: dark;"],
+      ["tailwind", "@theme {"],
+      ["tokens", '"colorSpace": "srgb"'],
+    ])("prints --format %s", async (format, expected) => {
+      const c = capture();
+      expect(await run(["theme", "#1a1a40", "--mode", "dark", "--format", format], c.io)).toBe(0);
+      expect(c.out()).toContain(expected);
+      expect(c.out()).not.toContain("Pairings:");
+    });
+
+    it("prints the chosen combination and theme as JSON", async () => {
+      const c = capture();
+      expect(await run(["theme", "red", "--json"], c.io)).toBe(0);
+      const json = JSON.parse(c.out());
+      expect(json.combination.id).toBe(261);
+      expect(json.theme).toMatchObject({ ok: true, mode: "light" });
+    });
+
+    it("writes a sample UI in both modes to --html and roles and ramps to --svg", async () => {
+      const c = capture();
+      expect(await run(["theme", "348", "--html", "t.html", "--svg", "t.svg"], c.io)).toBe(0);
+      const html = c.files.get("t.html")!;
+      expect(html).toContain("Light mode");
+      expect(html).toContain("Dark mode");
+      expect(html.match(/class="tp"/g)).toHaveLength(2);
+      // Roles grid plus one ramp per member of the four-color combination.
+      expect(c.files.get("t.svg")!.match(/<svg /g)).toHaveLength(6);
+    });
+
+    it("exits 1 when a combination has no legible pair", async () => {
+      const c = capture();
+      expect(await run(["theme", "227"], c.io)).toBe(1);
+      expect(c.err()).toContain("Theme from combination 227: No pair of colors for light mode");
+    });
+
+    it("exits 1 when no palette for a color is legible", async () => {
+      const c = capture();
+      expect(await run(["theme", "white"], c.io)).toBe(1);
+      expect(c.err()).toContain("palettes has a pair of colors with WCAG AA contrast");
+    });
+  });
+
   describe("file output", () => {
     it("writes one stacked SVG and an HTML page", async () => {
       const c = capture();
@@ -206,6 +265,7 @@ describe("cli", () => {
       [["combos", "blorp"], 'Unknown color name "blorp"'],
       [["show", "999"], "unknown combination 999"],
       [["show", "abc"], 'combination ID must be a positive integer, got "abc"'],
+      [["theme", "999"], "unknown combination 999"],
       [["recommend", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
@@ -229,6 +289,11 @@ describe("cli", () => {
       [["recommend", FLAT_MARK, "-n", "0"], '-n must be a positive integer, got "0"'],
       [["combos", "red", "--check"], "--check is coming in the products milestone"],
       [["nearest", "red", "--bogus"], "Unknown option '--bogus'"],
+      [["theme"], "theme needs a hex code or color name, or a combination ID"],
+      [["theme", "red", "--mode", "sepia"], '--mode must be one of light, dark, got "sepia"'],
+      [["theme", "red", "--format", "scss"], '--format must be one of css, tailwind, tokens, got "scss"'],
+      [["theme", "red", "--json", "--format", "css"], "--json and --format both choose the printed output"],
+      [["combos", "red", "--format", "css"], "--format applies only to theme"],
     ])("exits 2 for %j", async (argv, message) => {
       const c = capture();
       expect(await run(argv, c.io)).toBe(2);

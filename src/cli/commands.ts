@@ -10,13 +10,26 @@ import { fingerprint } from "../fingerprint/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
 import { recommendProductColors } from "../recommend.js";
 import {
+  type HtmlSection,
   renderAnsi,
   renderCombination,
   renderProductCard,
   renderSwatchGrid,
+  renderThemePreview,
   type Swatch,
 } from "../render/index.js";
 import { fmt } from "../render/shared.js";
+import {
+  describeRole,
+  namedRamp,
+  theme,
+  THEME_ROLES,
+  type ThemeMode,
+  type ThemeResult,
+  toCssVariables,
+  toDesignTokens,
+  toTailwindTheme,
+} from "../theme.js";
 
 /** A command's output in every format the CLI can write. */
 export interface View {
@@ -26,8 +39,8 @@ export interface View {
   json: unknown;
   /** Terminal output. `color` is false when escape codes should be left out. */
   text: (color: boolean) => string;
-  /** SVG sections for `--svg` and `--html`. */
-  sections: { title?: string; svg: string; caption?: string }[];
+  /** Sections for `--html`; those with SVG also go in `--svg`. */
+  sections: HtmlSection[];
 }
 
 /** Input the user can fix: an unknown name, a malformed hex, an unknown ID. */
@@ -190,6 +203,135 @@ export async function recommendView({ file, n, product: productId }: RecommendAr
       svg: renderProductCard(pick.color, { designColors: chips }),
       caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
     })),
+  };
+}
+
+export type ThemeFormat = "css" | "tailwind" | "tokens";
+
+export interface ThemeArgs {
+  /** A hex code, a color name, or a book combination ID. */
+  query: string;
+  mode: ThemeMode;
+  format?: ThemeFormat;
+}
+
+/** How many ranked palettes `theme` tries for a color before giving up. */
+export const THEME_PALETTE_SEARCH = 24;
+
+/**
+ * A web theme from a book combination by ID, or from the highest-ranked
+ * palette for a color that yields a legible theme in the mode.
+ */
+export function themeView({ query, mode, format }: ThemeArgs): View {
+  const { title, colors, chosen, result } = /^\d+$/.test(query.trim())
+    ? themeForCombination(Number(query.trim()), mode)
+    : themeForColor(query, mode);
+  if (!result.ok) throw new InputError(`${title}: ${result.reasons.join(" ")}`);
+  // Contrast is symmetric, so a combination legible in one mode is legible in both.
+  const other = theme(colors, { mode: mode === "light" ? "dark" : "light" });
+  const [light, dark] = mode === "light" ? [result, other] : [other, result];
+  const roleSwatches = THEME_ROLES.map((role): Swatch => ({
+    hex: result.colors[role].hex,
+    name: role,
+    note: result.colors[role].name ?? result.colors[role].derived ?? "",
+  }));
+  const ramps = result.source.map((c) => namedRamp(c));
+
+  return {
+    title,
+    json: { combination: chosen, theme: result },
+    text: (color) => {
+      if (format === "css") return toCssVariables(result);
+      if (format === "tailwind") return toTailwindTheme(result);
+      if (format === "tokens") return `${JSON.stringify(toDesignTokens(result), null, 2)}\n`;
+      const pairings = result.pairings.map(
+        (p) =>
+          `  ${p.foreground} on ${p.background}: ${p.wcag.ratio}:1 WCAG ${p.wcag.level}, APCA Lc ${p.apca.lc} (${p.apca.level})`,
+      );
+      return [
+        `${title} · ${result.mode} mode`,
+        chosen.detail,
+        "",
+        renderAnsi(roleSwatches, { color }).trimEnd(),
+        "",
+        ...THEME_ROLES.filter((r) => result.colors[r].derived).map((r) => `  ${describeRole(r, result.colors[r])}`),
+        "",
+        "Pairings:",
+        ...pairings,
+        "",
+        ...result.reasons.map((r) => `  ${r}`),
+        "",
+      ].join("\n");
+    },
+    sections: [
+      { title: "Sample UI", html: renderThemePreview([light, dark]), caption: chosen.detail },
+      { svg: renderSwatchGrid(roleSwatches, { title: `Roles, ${result.mode} mode` }) },
+      ...ramps.map((r) => ({
+        svg: renderSwatchGrid(
+          r.steps.map((s): Swatch => ({ hex: s.hex, name: s.name, ...(s.name === r.anchor && { note: "input" }) })),
+          { title: `${r.color.name ?? r.color.hex} ramp`, columns: 11, tileWidth: 72, tileHeight: 72 },
+        ),
+      })),
+    ],
+  };
+}
+
+interface ThemeSource {
+  title: string;
+  colors: Swatch[];
+  chosen: { id?: number; detail: string };
+  result: ThemeResult;
+}
+
+function themeForCombination(id: number, mode: ThemeMode): ThemeSource {
+  const combination = loadCombinations().find((c) => c.id === id);
+  if (!combination) {
+    throw new InputError(`unknown combination ${id}; the book's IDs run from 1 to ${loadCombinations().length}`);
+  }
+  const byIndex = new Map(loadColors().map((c) => [c.index, c]));
+  const colors = combination.colors.map((i): Swatch => {
+    const c = byIndex.get(i)!;
+    return { hex: c.hex, name: c.name };
+  });
+  return {
+    title: `Theme from combination ${id}`,
+    colors,
+    chosen: { id, detail: `Combination ${id} · ${colors.map((c) => c.name).join(", ")}` },
+    result: theme({ colors: combination.colors }, { mode }),
+  };
+}
+
+function themeForColor(query: string, mode: ThemeMode): ThemeSource {
+  const found = combinations(query, { limit: THEME_PALETTE_SEARCH });
+  const resolved = requireResolved(query, found.resolved, found.reason);
+  const title = `Theme for ${describeQuery(query, resolved)}`;
+  for (const palette of found.palettes) {
+    const colors = paletteSwatches(palette).map((c): Swatch => ({ hex: c.hex, ...(c.name && { name: c.name }) }));
+    const result = theme(colors, { mode });
+    if (result.ok) {
+      const id = palette.source === "book" ? palette.combination.id : undefined;
+      return {
+        title,
+        colors,
+        chosen: {
+          ...(id !== undefined && { id }),
+          detail: `${paletteTitle(palette)} · ${colors.map((c) => c.name ?? c.hex).join(", ")}`,
+        },
+        result,
+      };
+    }
+  }
+  return {
+    title,
+    colors: [],
+    chosen: { detail: "" },
+    result: {
+      ok: false,
+      mode,
+      reasons: [
+        `None of the top ${found.palettes.length} palettes has a pair of colors with WCAG AA contrast for body text.`,
+      ],
+    },
   };
 }
 

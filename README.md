@@ -35,7 +35,7 @@ https://github.com/thesnug/color-picker/tags.
 
 | Entry point | Contents |
 | --- | --- |
-| `@thesnug/color-picker` | Color math, nearest match, combinations, recommendations, recolor plans |
+| `@thesnug/color-picker` | Color math, nearest match, combinations, web themes and ramps, recommendations, recolor plans |
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
 | `@thesnug/color-picker/fingerprint` | Design fingerprints from image files |
@@ -124,6 +124,45 @@ package, or pass `decoder` with your own:
 ```bash
 npm install sharp
 ```
+### Web themes
+
+`theme` turns a combination into a UI theme. Background, text, and accent come
+from the combination through `roles`; the surface and muted text are derived
+from them. Every pairing is checked against WCAG 2.2 AA for its use, with APCA
+reported alongside. When no pair of colors reaches 4.5:1, `theme` returns
+`{ ok: false, reasons }` instead of throwing.
+
+```ts
+import { namedRamp, theme, toCssVariables, toDesignTokens, toTailwindTheme } from "@thesnug/color-picker";
+
+const t = theme(["#1a1a40", "#f2e8cf", "#c74300"], { mode: "dark" });
+if (t.ok) {
+  t.colors.surface;   // { hex: "#22234a", derived: "Background shifted lighter" }
+  t.pairings;         // text on background 13.6:1 AAA, accent on surface 3.01:1 AA, ...
+  toCssVariables(t);  // :root { --color-background: #1a1a40; ...; --color-c74300-600: #c74300; ... }
+  toTailwindTheme(t); // @theme { ... } for Tailwind v4
+  toDesignTokens(t);  // W3C Design Tokens, format 2025.10
+}
+
+namedRamp("#c74300"); // 50 to 950; the input holds its own step (600 here)
+```
+
+| Role | Source | Must meet |
+| --- | --- | --- |
+| `background` | combination | |
+| `surface` | background shifted in lightness to about 1.08:1 (light) or 1.2:1 (dark) | |
+| `text` | combination | 4.5:1 on background and surface |
+| `mutedText` | text mixed toward the background | 4.5:1 on background and surface |
+| `accent` | the most chromatic combination member at 3:1, else the text color | 3:1 on background and surface |
+| `onAccent` | background or text, else black or white | 4.5:1 on the accent |
+
+Emitted CSS names are `--color-background`, `--color-surface`, `--color-text`,
+`--color-text-muted`, `--color-accent`, and `--color-on-accent`, plus an
+eleven-step ramp for each combination color named by its Wada name (or its hex
+digits when it has none). Pass
+`{ ramps: false }` to leave the ramps out. `namedRamp` holds hue, tapers chroma
+toward white and black, and runs lightness evenly from 0.97 to 0.25 in OKLCH.
+`ramp` from the color math is the unnamed version with constant chroma.
 
 ### Recommend garment colors
 
@@ -167,6 +206,9 @@ color-picker combos "hermosa pink" --size 3   # ranked three-color palettes
 color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
 color-picker show 176 227                     # book combinations by ID
 color-picker recommend art/light-ink.png -n 3 # garment colors for a design
+color-picker theme 348                        # a web theme from a combination
+color-picker theme "hermosa pink" --format css
+color-picker theme "#1a1a40" --mode dark --format tailwind
 ```
 
 ```text
@@ -190,6 +232,8 @@ output is piped or `NO_COLOR` is set.
 | `--limit <n>` | `combos` | Maximum palettes (default 8) |
 | `-n <n>` | `recommend` | Number of picks (default 5) |
 | `--product <id>` | `recommend` | Garment product (default `comfort-colors-1717`) |
+| `--format <css\|tailwind\|tokens>` | `theme` | Print CSS custom properties, a Tailwind v4 `@theme` block, or design tokens |
+| `--mode <light\|dark>` | `theme` | Light (default) or dark |
 | `--json` | any | Print the library result as JSON instead of text |
 | `--svg <path>` | any | Write the swatches as one SVG file |
 | `--html <path>` | any | Write a self-contained HTML review page |
@@ -209,9 +253,22 @@ For `recommend`, the HTML page shows each pick as a product card, with the
 garment photo when the product has one and the design's colors as chips beside
 it. Warnings name the design colors that would vanish into the shirt.
 
+`theme` takes a hex code, a color name, or a book combination ID; a bare number
+is an ID, so write a numeric hex with `#`. For a color it uses the
+highest-ranked palette that yields a legible theme. Its HTML page shows a
+sample UI (heading, body text, muted text, a card, and a button) in light and
+dark mode, then the role swatches and each color's ramp:
+
+```bash
+color-picker theme "hermosa pink" --html theme.html
+```
+
+![Sample UI for a Hermosa Pink theme in light and dark mode](docs/images/cli-theme.png)
+
 Exit codes: `0` on success; `1` for an unknown name, a malformed hex, an
-unknown combination ID or product, or a design file that cannot be read; `2`
-for a usage error such as a missing argument or a reserved flag.
+unknown combination ID or product, a design file that cannot be read, or a
+`theme` with no legible text and background; `2` for a usage error such as a
+missing argument or a reserved flag.
 
 ### MCP server
 
