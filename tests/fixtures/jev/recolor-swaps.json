@@ -1,0 +1,31 @@
+{
+  "$comment": "Labeled recolor swaps for the plausibility evaluation (INT-2273). Each swap recolors one palette entry of a design in designs.json (matched by `element`) to a Wada color by name. `plausible` is true when the design still reads as the same subject, with a natural or deliberately stylized color. Draft labels: to be reviewed by Jill. tests/jev-fixtures.test.ts checks every design, element, and Wada name exists.",
+  "swaps": [
+    { "design": "strawberry", "element": "strawberry body", "to": "Carmine", "plausible": true },
+    { "design": "strawberry", "element": "strawberry body", "to": "Hermosa Pink", "plausible": true },
+    { "design": "strawberry", "element": "strawberry body", "to": "Deep Indigo", "plausible": false },
+    { "design": "strawberry", "element": "strawberry body", "to": "Olive Green", "plausible": false },
+    { "design": "strawberry", "element": "leaves", "to": "Olive Green", "plausible": true },
+    { "design": "strawberry", "element": "leaves", "to": "Scarlet", "plausible": false },
+    { "design": "strawberry", "element": "seeds", "to": "Naples Yellow", "plausible": true },
+    { "design": "jack-o-lantern", "element": "pumpkin", "to": "Yellow Orange", "plausible": true },
+    { "design": "jack-o-lantern", "element": "pumpkin", "to": "White", "plausible": true },
+    { "design": "jack-o-lantern", "element": "pumpkin", "to": "Blue", "plausible": false },
+    { "design": "jack-o-lantern", "element": "stem", "to": "Sepia", "plausible": true },
+    { "design": "coffee-logo", "element": "coffee cup and lettering", "to": "Vandyke Brown", "plausible": true },
+    { "design": "coffee-logo", "element": "coffee cup and lettering", "to": "Lemon Yellow", "plausible": false },
+    { "design": "coffee-logo", "element": "cup highlight", "to": "Ivory Buff", "plausible": true },
+    { "design": "lemons", "element": "lemons", "to": "Pale Lemon Yellow", "plausible": true },
+    { "design": "lemons", "element": "lemons", "to": "Scarlet", "plausible": false },
+    { "design": "lemons", "element": "leaves", "to": "Deep Slate Olive", "plausible": true },
+    { "design": "lemons", "element": "leaves", "to": "Eosine Pink", "plausible": false },
+    { "design": "great-wave", "element": "wave body", "to": "Vandar Poel's Blue", "plausible": true },
+    { "design": "great-wave", "element": "wave body", "to": "Brown", "plausible": false },
+    { "design": "great-wave", "element": "foam", "to": "White", "plausible": true },
+    { "design": "camp-badge", "element": "pine trees and badge ring", "to": "Blackish Olive", "plausible": true },
+    { "design": "camp-badge", "element": "pine trees and badge ring", "to": "Hermosa Pink", "plausible": false },
+    { "design": "neon-skull", "element": "skull", "to": "Lilac", "plausible": true },
+    { "design": "valentine-heart", "element": "heart", "to": "Pomegranate Purple", "plausible": true },
+    { "design": "valentine-heart", "element": "heart", "to": "Deep Slate Green", "plausible": false }
+  ]
+}

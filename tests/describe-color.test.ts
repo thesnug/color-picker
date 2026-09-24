@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { scoreDescribeColor } from "../scripts/score-describe-color.js";
 import { defaultProduct, loadColors } from "../src/data/index.js";
 import {
+  acceptedColor,
+  DESCRIBE_COLOR_ACCEPT,
   DESCRIBE_COLOR_TOP,
   describeQuestion,
   describeToColor,
@@ -172,6 +174,34 @@ describe("lightnessWord", () => {
     expect(lightnessWord("#ffffff")).toBe("light");
     expect(lightnessWord("#808080")).toBe("mid");
     expect(lightnessWord("#000000")).toBe("dark");
+  });
+});
+
+describe("acceptedColor", () => {
+  it("accepts the nearest color from a name lookup", async () => {
+    const result = await describeToColor("Brick Red", { cache, client: fakeClient({}) });
+    expect(acceptedColor(result)?.name).toBe("Brick Red");
+  });
+
+  it("accepts Jev's top match at or above the threshold", async () => {
+    const client = fakeClient({ "Burnt Sienna": DESCRIBE_COLOR_ACCEPT, "Etruscan Red": 0.2, [NONE_LABEL]: 0.1 });
+    const result = await describeToColor("old terracotta flowerpot", { cache, client });
+    expect(acceptedColor(result)?.name).toBe("Burnt Sienna");
+  });
+
+  it("accepts nothing below the threshold, or when none is Jev's top option", async () => {
+    const low = await describeToColor("old terracotta flowerpot", {
+      cache,
+      client: fakeClient({ "Burnt Sienna": 0.3, "Etruscan Red": 0.25, [NONE_LABEL]: 0.1 }),
+    });
+    expect(acceptedColor(low)).toBeUndefined();
+    expect(acceptedColor(low, 0.3)?.name).toBe("Burnt Sienna");
+
+    const none = await describeToColor("quarterly revenue forecast", {
+      cache,
+      client: fakeClient({ [NONE_LABEL]: 0.8, White: 0.1 }),
+    });
+    expect(acceptedColor(none, 0)).toBeUndefined();
   });
 });
 
