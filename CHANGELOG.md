@@ -9,6 +9,11 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ### Library
 
+- `describeToColor` in `@thesnug/color-picker/jev` resolves a free-text color
+  description ("the brick shirt", "something autumnal for a coffee brand") to a
+  Wada color or a product color. The name lookup runs first; Jev is asked only
+  when it misses. Name matches return nearest colors with distances; Jev matches
+  return up to three colors with probabilities.
 - `rerankByMood` in `@thesnug/color-picker/jev` re-ranks the top ten garment
   recommendations or palettes by how well each suits the design's subject and
   mood, with one cached Jev request of Score questions. Each candidate gains
