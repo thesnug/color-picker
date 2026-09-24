@@ -127,9 +127,55 @@ npm install sharp
 
 ### CLI
 
+`color-picker` answers the same questions from the command line and shows
+swatches, not just hex. It uses only Node built-ins, so it adds no dependencies.
+
 ```bash
-npx color-picker --help
+color-picker nearest "#c0737a"                # the 3 closest Wada colors
+color-picker nearest "dusty rose" -k 5        # names work too; quote spaces
+color-picker combos "hermosa pink" --size 3   # ranked three-color palettes
+color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
+color-picker show 176 227                     # book combinations by ID
 ```
+
+```text
+$ color-picker combos "hermosa pink" --size 3 --limit 1
+Combinations for Hermosa Pink (Wada #ffb3f0)
+Anchor: Hermosa Pink #ffb3f0 (distance 0)
+
+Combination 176 · via Hermosa Pink · score 0.3 · contrast 1.24
+██████  #ffb3f0  Hermosa Pink
+██████  #ffcfc4  Seashell Pink
+██████  #80ffcc  Calamine Blue
+```
+
+In a terminal each line starts with a truecolor block. Color is off when
+output is piped or `NO_COLOR` is set.
+
+| Flag | Applies to | Effect |
+| --- | --- | --- |
+| `-k <n>` | `nearest` | Number of matches (default 3) |
+| `--size <n>` | `combos` | Only palettes with `n` colors |
+| `--limit <n>` | `combos` | Maximum palettes (default 8) |
+| `--json` | any | Print the library result as JSON instead of text |
+| `--svg <path>` | any | Write the swatches as one SVG file |
+| `--html <path>` | any | Write a self-contained HTML review page |
+| `--product <id>` | reserved | Coming in the products milestone |
+| `--check` | reserved | Coming in the products milestone |
+
+`--svg` and `--html` still print the text result, and report the file written
+on stderr, so `--json` output stays clean for piping. The HTML page has a
+light and dark background toggle:
+
+```bash
+color-picker combos "hermosa pink" --limit 4 --html review.html
+```
+
+![HTML review page for Hermosa Pink combinations](docs/images/cli-html.png)
+
+Exit codes: `0` on success; `1` for an unknown name, a malformed hex, or an
+unknown combination ID; `2` for a usage error such as a missing argument or a
+reserved flag.
 
 ### MCP server
 
