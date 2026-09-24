@@ -197,8 +197,9 @@ between two larger ones (antialiased edges) fold into them. Ink luminance is the
 over the five-color palette, so the two tools agree on photographic art too.
 One vision pass per design writes a two-line subject-and-mood description and a list
 of named elements, each tied to the palette color that paints it (the prompt lists
-the palette and the schema limits each element's hex to it), cached by hash and
-palette next to the fingerprints. The pass runs through the Codex CLI on the
+the palette and the schema limits each element's hex to it), cached by file hash
+and exact prompt (including rounded palette shares) next to the fingerprints.
+The file hash is checked even on a cache hit. The pass runs through the Codex CLI on the
 machine's ChatGPT login first, then OpenRouter when `OPENROUTER_API_KEY` is set;
 both use the same model by default and the same strict JSON schema, and the
 description records which provider and model answered. With neither available the

@@ -303,24 +303,25 @@ export async function describeDesign(
   file: string | URL | Uint8Array,
   options: DescribeOptions = {},
 ): Promise<Fingerprint> {
+  const bytes = file instanceof Uint8Array ? file : await readFile(file);
+  if (createHash("sha256").update(bytes).digest("hex") !== print.hash) {
+    throw new Error("The file does not match the fingerprint's hash; fingerprint this file first.");
+  }
+  const prompt = describePrompt(print.palette);
   const dir = options.cache === undefined ? defaultCacheDir() : options.cache;
-  const path = dir === false ? undefined : descriptionCachePath(dir, print.hash, print.palette);
-  let description = path ? await readDescriptionCache(path) : undefined;
+  const path = dir === false ? undefined : descriptionCachePath(dir, print.hash, prompt);
+  let description = path ? await readDescriptionCache(path, prompt) : undefined;
 
   if (!description) {
-    const bytes = file instanceof Uint8Array ? file : await readFile(file);
-    if (createHash("sha256").update(bytes).digest("hex") !== print.hash) {
-      throw new Error("The file does not match the fingerprint's hash; fingerprint this file first.");
-    }
     const image = { bytes, mediaType: sniffMediaType(bytes) };
     const request = {
       image,
-      prompt: describePrompt(print.palette),
+      prompt,
       schema: descriptionSchema(print.palette),
       ...(options.signal ? { signal: options.signal } : {}),
     };
     description = await askVision(options.providers ?? defaultVisionProviders(), request, print.palette);
-    if (dir !== false && path) await writeDescriptionCache(dir, path, print.palette, description);
+    if (dir !== false && path) await writeDescriptionCache(dir, path, prompt, description);
   }
 
   return { ...print, palette: labelPalette(print.palette, description), description };

@@ -418,24 +418,23 @@ export async function askVision(
 
 interface DescriptionCacheEntry {
   version: number;
-  palette: string[];
+  prompt: string;
   description: DesignDescription;
 }
 
-/** Keyed on the file hash and the palette, since the prompt lists the palette. */
-export function descriptionCachePath(dir: string, hash: string, palette: readonly { hex: string }[]): string {
-  const hexes = palette.map((c) => c.hex.toLowerCase());
+/** Keyed on the file hash and exact prompt, including rounded palette shares. */
+export function descriptionCachePath(dir: string, hash: string, prompt: string): string {
   const key = createHash("sha256")
-    .update(JSON.stringify({ version: DESCRIPTION_VERSION, palette: hexes }))
+    .update(JSON.stringify({ version: DESCRIPTION_VERSION, prompt }))
     .digest("hex")
     .slice(0, 12);
   return join(dir, `${hash}.description.${key}.json`);
 }
 
-export async function readDescriptionCache(path: string): Promise<DesignDescription | undefined> {
+export async function readDescriptionCache(path: string, prompt: string): Promise<DesignDescription | undefined> {
   try {
     const entry = JSON.parse(await readFile(path, "utf8")) as DescriptionCacheEntry;
-    return entry.version === DESCRIPTION_VERSION ? entry.description : undefined;
+    return entry.version === DESCRIPTION_VERSION && entry.prompt === prompt ? entry.description : undefined;
   } catch {
     return undefined;
   }
@@ -444,13 +443,13 @@ export async function readDescriptionCache(path: string): Promise<DesignDescript
 export async function writeDescriptionCache(
   dir: string,
   path: string,
-  palette: readonly { hex: string }[],
+  prompt: string,
   description: DesignDescription,
 ): Promise<void> {
   await mkdir(dir, { recursive: true });
   const entry: DescriptionCacheEntry = {
     version: DESCRIPTION_VERSION,
-    palette: palette.map((c) => c.hex.toLowerCase()),
+    prompt,
     description,
   };
   const temp = `${path}.${process.pid}.${Date.now()}.tmp`;

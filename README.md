@@ -183,7 +183,9 @@ const design = await describeDesign(await fingerprint("art/flat-mark.png"), "art
   Both default to the same model (`gpt-6-sol`); set `OPENROUTER_MODEL` to change
   OpenRouter's. Pass `providers` to choose your own.
 - One call per design: descriptions are cached next to the fingerprints, keyed by
-  file hash and palette. A cached description needs no provider.
+  file hash and the exact prompt (including rounded palette coverage). The supplied
+  file is checked against the fingerprint even on a cache hit; a valid cached
+  description needs no provider.
 - With no Codex login and no `OPENROUTER_API_KEY`, it throws
   `VisionUnavailableError`, naming each provider's failure and how to enable one.
 ### Jev client

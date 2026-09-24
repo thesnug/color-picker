@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { recolorPlans } from "../src/index.js";
+import { describePrompt, descriptionCachePath } from "../src/fingerprint/describe.js";
 import {
   codexProvider,
   describeDesign,
@@ -115,6 +116,45 @@ describe("describeDesign", () => {
     const again = await describeDesign(print, FLAT_MARK, { cache, providers: [second] });
     expect(second.calls).toBe(0);
     expect(again.palette.map((c) => c.element)).toEqual(["sun ring", "sun disc"]);
+  });
+
+  it("checks the supplied file before using a cached description", async () => {
+    const provider = stub("codex", answer());
+    await describeDesign(print, FLAT_MARK, { cache, providers: [provider] });
+    const other = join(dir, "other.png");
+    writeFileSync(other, Buffer.from("different image"));
+
+    await expect(describeDesign(print, other, { cache, providers: [provider] })).rejects.toThrow(/does not match the fingerprint/);
+    await expect(describeDesign(print, join(dir, "missing.png"), { cache, providers: [provider] })).rejects.toThrow();
+    expect(provider.calls).toBe(1);
+  });
+
+  it("uses rounded palette shares in the cache key and requests a new description when they change", async () => {
+    const changed = {
+      ...print,
+      palette: print.palette.map((color, i) => ({ ...color, share: i === 0 ? color.share - 0.1 : color.share + 0.1 })),
+    };
+    const firstPrompt = describePrompt(print.palette);
+    const secondPrompt = describePrompt(changed.palette);
+    expect(secondPrompt).not.toBe(firstPrompt);
+    expect(descriptionCachePath(cache, print.hash, firstPrompt)).not.toBe(descriptionCachePath(cache, print.hash, secondPrompt));
+
+    const provider = stub("codex", answer());
+    await describeDesign(print, FLAT_MARK, { cache, providers: [provider] });
+    await describeDesign(changed, FLAT_MARK, { cache, providers: [provider] });
+    expect(provider.calls).toBe(2);
+    expect(readdirSync(cache)).toHaveLength(2);
+  });
+
+  it("ignores a cache entry whose stored prompt disagrees with its key", async () => {
+    const provider = stub("codex", answer());
+    await describeDesign(print, FLAT_MARK, { cache, providers: [provider] });
+    const path = join(cache, readdirSync(cache)[0]!);
+    const entry = JSON.parse(readFileSync(path, "utf8"));
+    entry.prompt = "different prompt";
+    writeFileSync(path, JSON.stringify(entry));
+    await describeDesign(print, FLAT_MARK, { cache, providers: [provider] });
+    expect(provider.calls).toBe(2);
   });
 
   it("uses the fingerprint cache directory by default", async () => {
