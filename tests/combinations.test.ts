@@ -251,7 +251,9 @@ describe("the default product", () => {
     }
     console.log(`Neutral anchor rule applied to: ${applied.join("; ") || "none"}`);
     // Pepper is near-black; Deep Violet is 0.1 farther than its plain nearest.
-    expect(applied.map((a) => a.split(":")[0])).toEqual(["Pepper"]);
+    // White is the reviewed #e7e7ea (INT-2260), a near-neutral light gray, so it
+    // anchors on Wada's White rather than Seashell Pink.
+    expect(applied.map((a) => a.split(":")[0])).toEqual(["Pepper", "White"]);
   });
 });
 

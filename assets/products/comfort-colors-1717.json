@@ -27,11 +27,11 @@
     {
       "name": "Bay",
       "slug": "bay",
-      "hex": "#c3cfc1",
+      "hex": "#aeb5ac",
       "aliases": [],
-      "family": "green",
+      "family": "neutral",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/19668c23c54d585f0f4139c9e442e7ed0a49e5666125a19f951d89ccc6da8113.png",
@@ -39,16 +39,17 @@
       },
       "pod": {
         "colorAssetVersionId": "d47d7f26-a6e0-44ff-9b2b-34b5d092bd9f"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #c3cfc1."
     },
     {
       "name": "Berry",
       "slug": "berry",
-      "hex": "#875570",
+      "hex": "#844e64",
       "aliases": [],
       "family": "red-pink",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/b9402c4fed8bbd35a9adf61db3f032f6d7169a18e4cf79452a2f2423f2ac7bf5.png",
@@ -56,16 +57,17 @@
       },
       "pod": {
         "colorAssetVersionId": "a3df43c2-9e4f-4f02-a8e4-167d13abcfbf"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #875570."
     },
     {
       "name": "Black",
       "slug": "black",
-      "hex": "#000000",
+      "hex": "#1f1d1e",
       "aliases": [],
       "family": "neutral",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/b4873d9a3deb7d5d25cc13b11f6d94f4796c930fa6d4655bb832be068687d38f.png",
@@ -73,7 +75,8 @@
       },
       "pod": {
         "colorAssetVersionId": "8d03644d-5f6b-4098-ba8a-224a2c0078ed"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #000000."
     },
     {
       "name": "Blossom",
@@ -146,11 +149,11 @@
     {
       "name": "Bright Orange",
       "slug": "bright-orange",
-      "hex": "#ffad4f",
+      "hex": "#fa8b2b",
       "aliases": [],
       "family": "orange-yellow",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/01cf1300c74fe09571c7354507578aab3ced6f4fd9d9e59fe6715bcce91fa000.png",
@@ -158,7 +161,8 @@
       },
       "pod": {
         "colorAssetVersionId": "2bc0edd1-9ee6-4ebc-b23f-a3ccbb28f3fb"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #ffad4f."
     },
     {
       "name": "Bright Salmon",
@@ -434,11 +438,11 @@
     {
       "name": "Grape",
       "slug": "grape",
-      "hex": "#645c81",
+      "hex": "#645a76",
       "aliases": [],
       "family": "purple",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/4a937701b665327e7f8e9ceceda5260a9f921e0355efb9fc5d0d3f38f421cc28.png",
@@ -446,7 +450,8 @@
       },
       "pod": {
         "colorAssetVersionId": "5a7413fe-f9d8-4f0b-bd4f-a02f5e29cc15"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #645c81."
     },
     {
       "name": "Graphite",
@@ -691,11 +696,11 @@
     {
       "name": "Moss",
       "slug": "moss",
-      "hex": "#747f66",
+      "hex": "#6d705e",
       "aliases": [],
-      "family": "green",
+      "family": "earth",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/5d95bb7d97c21dbfc36fd35db3bea611c98818e84d7e88fb349ea1726fea6f03.png",
@@ -703,7 +708,8 @@
       },
       "pod": {
         "colorAssetVersionId": "f0854d9d-4d41-40cc-9a01-d7cb67a41a3e"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #747f66."
     },
     {
       "name": "Mustard",
@@ -742,11 +748,11 @@
     {
       "name": "Navy",
       "slug": "navy",
-      "hex": "#52525e",
+      "hex": "#3b4153",
       "aliases": [],
       "family": "blue",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/3daf21468155711f1a1cb7e25e8ab090a150fb079713f377b298737bc20c1dbb.png",
@@ -754,7 +760,8 @@
       },
       "pod": {
         "colorAssetVersionId": "15e2438b-0bad-4772-b74e-f436d73197e6"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #52525e."
     },
     {
       "name": "Neon Cantaloupe",
@@ -1138,11 +1145,11 @@
     {
       "name": "White",
       "slug": "white",
-      "hex": "#ffffff",
+      "hex": "#e7e7ea",
       "aliases": [],
       "family": "neutral",
       "available": true,
-      "source": "printify",
+      "source": "reviewed",
       "sourceDate": "2026-09-24",
       "image": {
         "url": "https://pub-d11811fd2aeb4e4c8f77b5b259d703a7.r2.dev/mockup-templates/e97a508f-527f-4291-93f4-523959d5680f/versions/92129b1c-30db-424b-b0d6-ee3bcdb96a3d/colors/photographic-codex-v2-unmasked-codex-gpt-image-2/candidates/944e214886eab358344ad31446c18367623c44b7dc9b60cd321ba32a29afdef8.png",
@@ -1150,7 +1157,8 @@
       },
       "pod": {
         "colorAssetVersionId": "1d02be36-b359-41e4-9f6d-9b1a1cf5579e"
-      }
+      },
+      "sourceNote": "Reviewed by Jill against the POD garment render on 2026-09-24 (INT-2260); sampled from the render. Printify value was #ffffff."
     },
     {
       "name": "Wine",

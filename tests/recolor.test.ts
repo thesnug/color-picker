@@ -65,12 +65,13 @@ describe("recolorPlans", () => {
   });
 
   it("prefers merging to a vanishing ink", () => {
-    // Wada's White has no combination whose other members all clear the print
-    // minimum on a white shirt, and a neutral has no harmonies.
-    const white = recolorPlans(flatMark, everyColor).find((p) => p.color.slug === "white")!;
-    expect(white.flagged).toBe(false);
-    expect(white.merged).toBe(true);
-    expect(white.reasons.at(-1)).toMatch(/#e8836b and #f3e9d2 both become /);
+    // Ivory's equivalent is Wada's White, which has no combination whose other
+    // members all clear the print minimum on an ivory shirt, and a neutral has no
+    // harmonies. (The reviewed White garment, #e7e7ea, now resolves elsewhere.)
+    const ivory = recolorPlans(flatMark, everyColor).find((p) => p.color.slug === "ivory")!;
+    expect(ivory.flagged).toBe(false);
+    expect(ivory.merged).toBe(true);
+    expect(ivory.reasons.at(-1)).toMatch(/#e8836b and #f3e9d2 both become /);
   });
 
   it("maps only onto the combination's members other than the garment's equivalent", () => {

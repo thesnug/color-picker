@@ -45,7 +45,11 @@ Known issues to handle in a cleanup pass, keeping the original text as an alias:
   spellings are aliases where the equivalence is certain.
 - Variant names such as "Eugenia Red | A" and "Grayish Lavender - A".
 - The hex values are the site's sRGB conversions from the book's CMYK, not
-  authoritative. Keep the CMYK alongside.
+  authoritative in general. Keep the CMYK alongside. The exception is the
+  neutrals: on 2026-09-24 Jill checked all 19 grays, slates, drabs, and
+  flagged-neutral colors against the printed book and confirmed every web hex
+  matches (INT-2277). Their green lean is real, so the book has no true
+  mid-gray and no override table exists for them.
 
 `scripts/build-data.ts` derives two committed files, and CI fails when they are
 stale. `assets/derived/colors.json` carries each color with its canonical name,

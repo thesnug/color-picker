@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { colorFamily, FAMILIES } from "../src/color/index.js";
+import { loadProduct } from "../src/data/index.js";
 
 /**
  * Every Comfort Colors 1717 color in the maker-method-picker's color study
@@ -80,6 +81,19 @@ const PICKER_GROUPS: [name: string, hex: string, family: string][] = [
 describe("colorFamily", () => {
   it.each(PICKER_GROUPS)("puts %s (%s) in %s, as the picker does", (name, hex, family) => {
     expect(colorFamily(hex, name)).toBe(family);
+  });
+
+  it("classifies every reviewed Comfort Colors swatch from its current hex", () => {
+    const reviewed = loadProduct("comfort-colors-1717").colors.filter((color) => color.source === "reviewed");
+    expect(reviewed.map((color) => color.name)).toEqual([
+      "Bay", "Berry", "Black", "Bright Orange", "Grape", "Moss", "Navy", "White",
+    ]);
+    for (const { name, hex, family } of reviewed) {
+      expect(hex, name).not.toBeNull();
+      if (hex !== null) expect(colorFamily(hex, name), name).toBe(family);
+    }
+    expect(reviewed.find((color) => color.name === "Bay")?.family).toBe("neutral");
+    expect(reviewed.find((color) => color.name === "Moss")?.family).toBe("earth");
   });
 
   it("only returns known families", () => {
