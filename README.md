@@ -84,8 +84,10 @@ combinations("#808080").anchor;          // { color: Deep Violet, via: "nearest-
 Book palettes come first, grouped by which match they came from, then
 harmonies. Each palette carries a `score` from 0 to 1 (contrast against the
 matched color, weighted three to one over hue spread) with its `contrast` and
-`hueSpread`, so callers can re-rank. A neutral input anchors on the nearest
-neutral Wada color, so a gray does not anchor on a tinted color.
+`hueSpread`, so callers can re-rank. A true gray anchors on the nearest neutral
+Wada color when it is within 1.5 times the plain nearest distance, and
+`anchor.rejected` names the candidate that lost. Pass `anchor` (a Wada index or
+slug) to build palettes around a color you already have.
 
 ### Palettes for a garment color
 

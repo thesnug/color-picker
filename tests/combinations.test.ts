@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { combinations, NEUTRAL_CHROMA, type Palette } from "../src/index.js";
-import { loadColors, loadCombinations } from "../src/data/index.js";
+import { combinations, COMBINATION_DEFAULTS, type Palette } from "../src/index.js";
+import { loadColors, loadCombinations, loadProduct, loadProductIndex } from "../src/data/index.js";
+import { equivalentsFor } from "../src/equivalents.js";
 
 const colors = loadColors();
 const wadaHexes = new Set(colors.map((c) => c.hex));
@@ -155,26 +156,102 @@ describe("options", () => {
 });
 
 describe("neutral anchors", () => {
-  it("anchors a gray on the nearest neutral and reports the plain nearest match", () => {
+  it("anchors a gray on the nearest neutral when it is within the margin, and records the loser", () => {
+    // Deep Violet is within 1.5 times Andover Green's distance from #808080.
     const r = combinations("#808080");
     expect(r.anchor?.via).toBe("nearest-neutral");
     expect(r.anchor?.color.name).toBe("Deep Violet");
     expect(r.anchor?.color.neutral).toBe(true);
     expect(r.anchor?.nearest[0]?.color.name).toBe("Andover Green");
+    expect(r.anchor?.rejected?.name).toBe("Andover Green");
+    expect(r.anchor?.rejected?.distance).toBe(r.anchor?.nearest[0]?.distance);
     const first = r.palettes[0];
     expect(first?.source).toBe("book");
     if (first?.source === "book") expect(first.match.color.name).toBe("Deep Violet");
+  });
+
+  it("keeps the plain nearest for a gray whose nearest neutral is too far", () => {
+    // Comfort Colors Grey: Warm Gray is 9.5 away, 1.6 times Light Brown Drab's 5.9.
+    const r = combinations("#909090");
+    expect(r.anchor?.via).toBe("nearest");
+    expect(r.anchor?.color.name).toBe("Light Brown Drab");
+    expect(r.anchor?.rejected?.name).toBe("Warm Gray");
+    expect(r.anchor!.rejected!.distance).toBeGreaterThan(1.5 * r.anchor!.distance);
+  });
+
+  it("uses the plain nearest match for a muted hue, without considering the rule", () => {
+    // Comfort Colors Navy, chroma 0.0195: once anchored on Deep Violet.
+    const r = combinations("#52525e");
+    expect(r.anchor?.via).toBe("nearest");
+    expect(r.anchor?.color.name).toBe("Purple Drab");
+    expect(r.anchor?.rejected).toBeUndefined();
   });
 
   it("uses the plain nearest match for a chromatic input", () => {
     const r = combinations("#004578");
     expect(r.anchor?.via).toBe("nearest");
     expect(r.anchor?.nearest[0]?.color.index).toBe(r.anchor?.color.index);
+    expect(r.anchor?.rejected).toBeUndefined();
   });
 
-  it("exposes the chroma cutoff", () => {
-    expect(NEUTRAL_CHROMA).toBe(0.045);
+  it("omits the rejected candidate when both are the same color", () => {
+    const r = combinations("#000000");
+    expect(r.anchor?.color.name).toBe("Black");
+    expect(r.anchor?.rejected).toBeUndefined();
+  });
+
+  it("exposes the chroma cutoff and the margin", () => {
+    expect(COMBINATION_DEFAULTS.neutralChroma).toBe(0.015);
+    expect(COMBINATION_DEFAULTS.neutralMargin).toBe(1.5);
     expect(combinations("#808080", { neutralChroma: -1 }).anchor?.color.name).toBe("Andover Green");
+    expect(combinations("#808080", { neutralMargin: 1 }).anchor?.color.name).toBe("Andover Green");
+    expect(combinations("#909090", { neutralMargin: 2 }).anchor?.color.name).toBe("Warm Gray");
+  });
+});
+
+describe("a given anchor", () => {
+  it("builds palettes around the given index or slug and reports via anchor", () => {
+    const byIndex = combinations("#808080", { anchor: 2 });
+    const hermosa = colors.find((c) => c.index === 2)!;
+    expect(byIndex.anchor?.via).toBe("anchor");
+    expect(byIndex.anchor?.color.index).toBe(2);
+    expect(byIndex.anchor?.rejected).toBeUndefined();
+    expect(byIndex.anchor?.distance).toBeGreaterThan(0);
+    expect(byIndex.resolved?.via).toBe("hex");
+    const first = byIndex.palettes[0];
+    if (first?.source === "book") expect(first.match.color.index).toBe(2);
+    expect(combinations("#808080", { anchor: hermosa.slug }).anchor?.color.index).toBe(2);
+  });
+
+  it("skips the neutral rule even for a gray input", () => {
+    const r = combinations("#808080", { anchor: "andover-green" });
+    expect(r.anchor?.color.name).toBe("Andover Green");
+    expect(r.anchor?.via).toBe("anchor");
+  });
+
+  it("rejects an anchor that names no Wada color", () => {
+    expect(() => combinations("#808080", { anchor: 0 })).toThrow(RangeError);
+    expect(() => combinations("#808080", { anchor: "not-a-color" })).toThrow(RangeError);
+  });
+});
+
+describe("the default product", () => {
+  it("anchors every color on its stored equivalent unless the neutral rule applied", () => {
+    const product = loadProduct(loadProductIndex().default);
+    const applied: string[] = [];
+    for (const color of product.colors) {
+      if (!color.hex) continue;
+      const stored = equivalentsFor(product, color.slug)!.matches[0]!;
+      const { anchor } = combinations(color.hex);
+      if (anchor?.via === "nearest-neutral") {
+        applied.push(`${color.name}: ${anchor.color.name} ${anchor.distance.toFixed(1)} over ${stored.name} ${stored.distance.toFixed(1)}`);
+        continue;
+      }
+      expect(anchor?.color.index, color.name).toBe(stored.index);
+    }
+    console.log(`Neutral anchor rule applied to: ${applied.join("; ") || "none"}`);
+    // Pepper is near-black; Deep Violet is 0.1 farther than its plain nearest.
+    expect(applied.map((a) => a.split(":")[0])).toEqual(["Pepper"]);
   });
 });
 

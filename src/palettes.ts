@@ -158,6 +158,7 @@ export function palettesForProductColor(
   const harmonies: ProductHarmonyPalette[] = [];
   for (const equivalent of equivalents) {
     const { palettes } = combinations(equivalent.name, {
+      anchor: equivalent.index,
       limit: Number.MAX_SAFE_INTEGER,
       secondaryWithin: 0,
       ...(options.size !== undefined && { size: options.size }),

@@ -103,7 +103,7 @@ describe("cli", () => {
     it("notes a neutral anchor", async () => {
       const c = capture();
       await run(["combos", "#808080", "--limit", "1"], c.io);
-      expect(c.out()).toContain("(nearest neutral, distance");
+      expect(c.out()).toMatch(/\(nearest neutral, distance [\d.]+, over Andover Green at [\d.]+\)/);
     });
 
     it("reports when no palette matches the options", async () => {
