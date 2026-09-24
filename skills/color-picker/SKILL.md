@@ -89,7 +89,8 @@ Every reply is JSON with a `resultId` and, for tools that return colors, an
    (`pepper-palettes.svg`) and show it: as an artifact or a sent file where the
    host offers one, otherwise as a Markdown link to the file. For side-by-side
    review, call `render_card` with `format: "html"`, write the page, and show it
-   the same way.
+   the same way. Size the card with the call's `n` or `limit`, set to the
+   number of picks you will show, and show the card as returned.
 2. **Name the colors.** Under the card, say what it shows in Wada's names,
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name
