@@ -146,8 +146,10 @@ Decisions and their reasons:
 - **Git dependency pinned to a tag, not a published package.** The repo is public,
   so no registry or token is needed. Consumers pin
   `github:thesnug/color-picker#vX.Y.Z` and upgrade deliberately. `dist` is committed
-  at tag time by a release script so installs need no compiler. Publish to npm only
-  if a consumer outside our control appears.
+  at tag time by a release script so installs need no compiler. The release
+  commit is `main` plus `dist` and is reachable only from its tag, so `main`
+  never tracks build output. Publish to npm only if a consumer outside our
+  control appears.
 - **Public repo.** Wada data is open source, garment names and hex values are public
   facts, and the R2 image URLs are already world-readable.
 - **Not an agent.** Agents call the tools. A deterministic core is cheap, testable,

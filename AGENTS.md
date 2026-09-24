@@ -23,8 +23,14 @@ decisions; this file holds the working method.
   per PR unless issues are trivially small and related.
 - Never commit `.env*` files, API keys, or downloaded garment images. `dist/` is
   committed only by the release script at tag time.
-- Releases are tags (`vX.Y.Z`). Consumers pin the tag. A release PR bumps the
-  version, builds `dist`, and tags after merge.
+- Releases are tags (`vX.Y.Z`). Consumers pin the tag. Add a line under
+  "Unreleased" in `CHANGELOG.md` with each user-visible change.
+- To release: on an up-to-date `main`, `npm run release -- prepare X.Y.Z` opens a
+  release PR that bumps the version, dates the changelog entry, and moves the
+  README install lines to the new tag. After it merges, `npm run release -- tag
+  X.Y.Z` on `main` runs every CI check, builds, and pushes an annotated tag on a
+  "Release vX.Y.Z" commit that is `main` plus `dist/`. That commit lives only on
+  the tag, so `main` never tracks `dist/` and never takes a direct commit.
 
 ## Linear: adding and maintaining issues
 
