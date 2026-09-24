@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
+import { MOOD_TOP } from "../jev/mood.js";
 import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
 import {
@@ -86,6 +87,12 @@ Command options:
                               (default Comfort Colors 1717)
   --apply <dir>               recolor: write each recolored design as a PNG in
                               dir; flat-color art only
+  --mood                      recommend, palettes: re-rank the top ${MOOD_TOP} by how
+                              well each suits the design's subject and mood,
+                              with Jev (needs TYPESAFE_API_KEY and a vision
+                              provider; without them the order is unchanged
+                              and the output says why)
+  --design <file>             palettes: the design to judge with --mood
   --format <css|tailwind|tokens>
                               theme: print CSS custom properties, a Tailwind v4
                               @theme block, or W3C design tokens (JSON)
@@ -143,6 +150,8 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         html: { type: "string" },
         product: { type: "string" },
         apply: { type: "string" },
+        mood: { type: "boolean" },
+        design: { type: "string" },
         check: { type: "boolean" },
       },
       allowPositionals: true,
@@ -220,10 +229,12 @@ async function buildView(
     format?: string;
     mode?: string;
     apply?: string;
+    mood?: boolean;
+    design?: string;
   },
 ): Promise<View> {
   const only = (
-    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply",
+    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply" | "mood" | "design",
     ...allowed: Command[]
   ) => {
     if (values[flag] !== undefined && !allowed.includes(command)) {
@@ -238,6 +249,8 @@ async function buildView(
   only("n", "recommend", "recolor");
   only("product", "recommend", "recolor", "palettes");
   only("apply", "recolor");
+  only("mood", "recommend", "palettes");
+  only("design", "palettes");
   only("format", "theme");
   only("mode", "theme");
 
@@ -252,6 +265,7 @@ async function buildView(
       file: args[0]!,
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
       ...(values.product !== undefined && { product: values.product }),
+      ...(values.mood && { mood: true }),
     });
   }
 
@@ -271,12 +285,15 @@ async function buildView(
         args.length === 0 ? "palettes needs a product color name" : "palettes takes one color; quote names with spaces",
       );
     }
+    if (values.mood && values.design === undefined) throw new UsageError("palettes --mood needs --design <file>");
+    if (values.design !== undefined && !values.mood) throw new UsageError("--design applies only with --mood");
     const size = optionalInt(values.size, "--size");
     return palettesView({
       name: args[0]!,
       limit: optionalInt(values.limit, "--limit") ?? DEFAULT_COMBOS_LIMIT,
       ...(size !== undefined && { size }),
       ...(values.product !== undefined && { product: values.product }),
+      ...(values.mood && values.design !== undefined && { mood: true, design: { file: values.design } }),
     });
   }
 

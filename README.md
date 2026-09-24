@@ -259,6 +259,38 @@ if (shirt.via === "jev") {
   phrases in `tests/fixtures/jev/describe-color.json` against the live API. It
   needs a key and is never run in CI.
 
+### Mood re-rank
+
+`rerankByMood` takes candidates already ranked by the deterministic scoring
+(garment recommendations or palettes for a garment) and asks Jev how well each
+of the top ten suits the design's subject and mood. The design needs a vision
+description first (`describeDesign`).
+
+```ts
+import { describeDesign, fingerprint } from "@thesnug/color-picker/fingerprint";
+import { recommendProductColors } from "@thesnug/color-picker";
+import { combineMood, rerankByMood } from "@thesnug/color-picker/jev";
+
+const design = await describeDesign(await fingerprint("art/flat-mark.png"), "art/flat-mark.png");
+const { candidates, applied, note } = await rerankByMood(recommendProductColors(design, { n: 10 }), design);
+
+candidates[0].moodLevel;     // "clashes" | "neutral" | "complements" | "elevates"
+candidates[0].moodScore;     // 0 to 1, or null when Jev was not asked
+candidates[0].combinedScore; // shortlist place and mood score, weighted by MOOD_WEIGHT
+combineMood(candidates, 0.7); // reweigh and re-sort without calling Jev again
+```
+
+- One cached request per shortlist: the state is the design's description and
+  palette, with one Score question per candidate over four levels (clashes,
+  neutral, complements, elevates).
+- The deterministic side of `combinedScore` is the candidate's place in the
+  shortlist, 1 for the first and 0 for the last, so garments and palettes
+  combine the same way. `MOOD_WEIGHT` (0.4) is a starting value until the
+  threshold evaluation sets it.
+- Without a description, or when Jev is unavailable and the answer is not
+  cached, the order is the deterministic one, `moodScore` is `null`, and `note`
+  says why.
+
 ### Web themes
 
 `theme` turns a combination into a UI theme. Background, text, and accent come
@@ -377,6 +409,8 @@ color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
 color-picker show 176 227                     # book combinations by ID
 color-picker palettes "Blue Spruce"           # palettes for a garment color
 color-picker recommend art/light-ink.png -n 3 # garment colors for a design
+color-picker recommend art/light-ink.png --mood  # re-ranked by mood with Jev
+color-picker palettes "Black" --mood --design art/light-ink.png
 color-picker recolor art/flat-mark.png --apply out/  # with recoloring
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css

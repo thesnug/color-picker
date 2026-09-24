@@ -287,6 +287,21 @@ option lets Jev decline text that is not a color. It returns the top three with
 their probabilities, the confidence, and the probability of `none`, and leaves the
 cutoff to the caller until the threshold evaluation sets one.
 
+Mood re-rank (`rerankByMood`) takes the top ten candidates from the
+deterministic ranking, garment recommendations or palettes for one garment, and
+sends one request whose state is the design's vision description and palette,
+with one Score question per candidate over four levels: clashes, neutral,
+complements, elevates. Question names are the candidates' garment slugs (plus
+the combination or harmony for a palette), so the cache key covers the
+candidate set whatever its order, and the description and palette, which follow
+from the fingerprint's file hash. The mood score is Jev's expected level over
+the top level; the deterministic side is the candidate's place in the shortlist
+from 1 to 0, so garments and palettes combine alike. `MOOD_WEIGHT` blends the
+two in code, and `combineMood` reweighs without calling Jev again. The CLI and
+MCP describe the design first; when Jev cannot be called they read only a
+cached description and answer, so no vision call is spent on a re-rank that
+cannot happen, and the reply says why the order is the deterministic one.
+
 Hex-to-nearest is never sent to Jev. Thresholds are evaluated on labeled examples
 before they gate anything; cookbook numbers are starting points, not rules.
 

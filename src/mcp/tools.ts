@@ -146,22 +146,36 @@ export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDef
         "Get palettes for a garment color by its product name, such as the Comfort Colors 1717 color " +
         '"Pepper": the garment first, then ink colors that print legibly on it, each with its contrast. Use this ' +
         "when someone names a shirt color and wants design colors for it. Warns when the print provider does not " +
-        "stock the color.",
+        "stock the color. Give a design and mood to re-rank the palettes by how well each suits the design's " +
+        "subject and mood.",
       inputSchema: {
         name: z.string().describe('The product color\'s name, slug, or alias, such as "Pepper" or "blue-jean".'),
         product,
         size: z.number().int().min(2).max(4).optional().describe("Only palettes with this many colors, 2 to 4."),
         limit: count(DEFAULT_COMBOS_LIMIT, "palettes to return"),
+        designPath: designPath.describe("Path to a design file (PNG, WebP, or JPEG) to judge with mood."),
+        designBase64: designBase64.describe("A design file's bytes as base64, to judge with mood."),
+        mood: z
+          .boolean()
+          .optional()
+          .describe(
+            "Re-rank the palettes by how well each suits the design's subject and mood, with Jev. Needs a design.",
+          ),
       },
-      handler: async ({ name, product: productId, size, limit }) =>
-        reply(
-          palettesView({
+      handler: async ({ name, product: productId, size, limit, designPath: path, designBase64: base64, mood }) => {
+        const hasDesign = path !== undefined || base64 !== undefined;
+        if (mood && !hasDesign) throw new InputError("mood needs designPath or designBase64");
+        if (hasDesign && !mood) throw new InputError("a design is used only with mood: true");
+        return reply(
+          await palettesView({
             name: name as string,
             limit: (limit as number | undefined) ?? DEFAULT_COMBOS_LIMIT,
             ...(size !== undefined && { size: size as number }),
             ...(productId !== undefined && { product: productId as string }),
+            ...(mood === true && { mood: true, design: designInput(path, base64) }),
           }),
-        ),
+        );
+      },
     },
     {
       name: "recommend_product_colors",
@@ -178,7 +192,10 @@ export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDef
         mood: z
           .boolean()
           .optional()
-          .describe("Re-rank the picks by how well each garment suits the design's mood, with Jev."),
+          .describe(
+            "Re-rank the top picks by how well each garment suits the design's subject and mood, with Jev. " +
+              "Without Jev the order is unchanged and the reply's mood.reason says why.",
+          ),
       },
       handler: async ({ designPath: path, designBase64: base64, n, product: productId, mood }) => {
         const design = designInput(path, base64);
@@ -186,8 +203,9 @@ export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDef
           ...design,
           n: (n as number | undefined) ?? DEFAULT_RECOMMEND_N,
           ...(productId !== undefined && { product: productId as string }),
+          ...(mood === true && { mood: true }),
         });
-        return reply(view, mood ? { mood: jevStatus("mood") } : {});
+        return reply(view);
       },
     },
     {
@@ -450,12 +468,12 @@ function designInput(path: unknown, base64: unknown): { file: string; bytes?: Ui
 }
 
 /**
- * Jev judgments arrive in later issues (INT-2268 for mood, INT-2270 for
- * vetting). Until then a tool asked for one returns its deterministic result
- * and says why the judgment was skipped. The key is checked for presence only.
+ * Swap vetting with Jev arrives in INT-2270. Until then a tool asked for it
+ * returns its deterministic result and says why the judgment was skipped. The
+ * key is checked for presence only.
  */
-export function jevStatus(option: "mood" | "vet"): JevStatus {
-  const what = option === "mood" ? "Mood re-ranking" : "Swap vetting";
+export function jevStatus(option: "vet"): JevStatus {
+  const what = { vet: "Swap vetting" }[option];
   const reason = process.env.TYPESAFE_API_KEY
     ? `${what} with Jev is not available in this version, so the result uses the deterministic ranking only.`
     : `${what} needs Jev and TYPESAFE_API_KEY is not set, so the result uses the deterministic ranking only.`;
