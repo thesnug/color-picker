@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -9,7 +9,8 @@ import {
   dateUnreleased,
   existingTagAction,
   parseArgs,
-  pointReadme,
+  PINNED_FILES,
+  pointInstallLines,
   pushFailureMessage,
   ReleaseError,
   validateReleaseTag,
@@ -65,12 +66,18 @@ describe("dateUnreleased", () => {
   });
 });
 
-describe("pointReadme", () => {
+describe("pointInstallLines", () => {
   it("replaces pinned tags and the placeholder", () => {
     const readme = "npm install github:thesnug/color-picker#v0.1.0\n\"github:thesnug/color-picker#vX.Y.Z\"";
-    expect(pointReadme(readme, "0.2.0")).toBe(
+    expect(pointInstallLines(readme, "0.2.0")).toBe(
       "npm install github:thesnug/color-picker#v0.2.0\n\"github:thesnug/color-picker#v0.2.0\"",
     );
+  });
+
+  it("finds a pinned tag in every pinned file", () => {
+    for (const file of PINNED_FILES) {
+      expect(readFileSync(file, "utf8"), file).toMatch(/github:thesnug\/color-picker#v\d+\.\d+\.\d+/);
+    }
   });
 });
 
