@@ -339,17 +339,58 @@ missing argument or a reserved flag.
 
 ### MCP server
 
-The MCP server depends on `@modelcontextprotocol/sdk`, declared as an optional
-peer dependency so consumers that import only the core never install it. Add it
-next to this package to run the server:
+`color-picker-mcp` exposes the library as MCP tools over stdio, for Claude Code,
+Codex, and other agents. It depends on `@modelcontextprotocol/sdk` and its `zod`
+peer, both declared as optional peer dependencies so consumers that import only
+the core never install them. Add them next to this package to run the server:
 
 ```bash
-npm install @modelcontextprotocol/sdk
+npm install @modelcontextprotocol/sdk zod
 npx color-picker-mcp
 ```
 
-The server speaks MCP over stdio. Register it with a client as the command
-`color-picker-mcp`.
+Register it with Claude Code:
+
+```bash
+claude mcp add color-picker -- npx color-picker-mcp
+```
+
+Or with Codex, in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.color-picker]
+command = "npx"
+args = ["color-picker-mcp"]
+```
+
+| Tool | Use it to |
+| --- | --- |
+| `nearest_colors` | Name a hex code, or translate a CSS or xkcd name into Wada colors |
+| `combinations` | Get Wada palettes for any color |
+| `palettes_for_product_color` | Get ink palettes for a garment color by name, such as "Pepper" |
+| `recommend_product_colors` | Rank garment colors for a design, unchanged |
+| `recolor_plans` | Plan a recolor of a design for each garment, and optionally write the PNGs |
+| `theme` | Build a light or dark web theme, with CSS, Tailwind, and design tokens |
+| `check_accessibility` | Check colors for WCAG and APCA contrast, print separation, and color-vision safety |
+| `list_products` | List products, or one product's colors and stock |
+| `render_card` | Render an earlier result, or a list of colors, as SVG or HTML |
+
+Every tool replies with one JSON text block: the same result the CLI prints with
+`--json`, a `resultId`, and, for tools that return colors, an `svg` field holding
+the rendered swatch card. Pass the `resultId` to `render_card` with
+`format: "html"` for a review page, or a theme's sample UI in light and dark mode.
+The server keeps the last 50 results.
+
+Design tools take `designPath`, a file on the server's machine, or
+`designBase64`, the file's bytes. Fingerprints are cached by file hash, so repeat
+calls about the same design skip decoding. `recommend_product_colors` takes
+`mood` and `recolor_plans` takes `vet` for the Jev judgments. Until those land,
+and whenever `TYPESAFE_API_KEY` is not set, the reply carries the deterministic
+result with `mood` or `vet` set to `{ "requested": true, "applied": false,
+"reason": ... }` rather than failing.
+
+Input the tool cannot use, such as an unknown color or a missing design file,
+comes back as a tool error with a message saying what to fix.
 
 ## Accessibility
 

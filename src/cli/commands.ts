@@ -230,12 +230,15 @@ function contrastOn(p: ProductPalette, hex: string): number {
 export const DEFAULT_RECOMMEND_N = 5;
 
 export interface RecommendArgs {
+  /** The design file's path, or its label when `bytes` are given. */
   file: string;
+  /** The design file's contents, read instead of `file` when given. */
+  bytes?: Uint8Array;
   n: number;
   product?: string;
 }
 
-export async function recommendView({ file, n, product: productId }: RecommendArgs): Promise<View> {
+export async function recommendView({ file, bytes, n, product: productId }: RecommendArgs): Promise<View> {
   let product: Product;
   try {
     product = loadProduct(productId ?? loadProductIndex().default);
@@ -243,15 +246,7 @@ export async function recommendView({ file, n, product: productId }: RecommendAr
     throw new InputError((error as Error).message);
   }
 
-  let design;
-  try {
-    design = await fingerprint(file);
-  } catch (error) {
-    const { code, message } = error as NodeJS.ErrnoException;
-    throw new InputError(
-      code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`,
-    );
-  }
+  const design = await fingerprintDesign(file, bytes);
 
   const picks = recommendProductColors(design, { product, n });
   const title = `${product.brand} ${product.model} colors for ${file}`;
@@ -289,14 +284,17 @@ export async function recommendView({ file, n, product: productId }: RecommendAr
 export const DEFAULT_RECOLOR_N = 5;
 
 export interface RecolorArgs {
+  /** The design file's path, or its label when `bytes` are given. */
   file: string;
+  /** The design file's contents, read instead of `file` when given. */
+  bytes?: Uint8Array;
   n: number;
   product?: string;
   /** Directory to write each recolored PNG to. */
   apply?: string;
 }
 
-export async function recolorView({ file, n, product: productId, apply }: RecolorArgs): Promise<View> {
+export async function recolorView({ file, bytes, n, product: productId, apply }: RecolorArgs): Promise<View> {
   let product: Product;
   try {
     product = loadProduct(productId ?? loadProductIndex().default);
@@ -304,15 +302,7 @@ export async function recolorView({ file, n, product: productId, apply }: Recolo
     throw new InputError((error as Error).message);
   }
 
-  let design;
-  try {
-    design = await fingerprint(file);
-  } catch (error) {
-    const { code, message } = error as NodeJS.ErrnoException;
-    throw new InputError(
-      code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`,
-    );
-  }
+  const design = await fingerprintDesign(file, bytes);
 
   const plans = recolorPlans(design, { product, n });
   const applied: (AppliedRecolor | undefined)[] = [];
@@ -321,7 +311,7 @@ export async function recolorView({ file, n, product: productId, apply }: Recolo
     const stem = basename(file, extname(file));
     for (const plan of plans) {
       const out = join(apply, `${stem}-${plan.color.slug}.png`);
-      applied.push(await applyRecolor(file, plan.mapping, { out, fingerprint: design }));
+      applied.push(await applyRecolor(bytes ?? file, plan.mapping, { out, fingerprint: design }));
     }
   }
 
@@ -507,6 +497,18 @@ function themeForColor(query: string, mode: ThemeMode): ThemeSource {
 }
 
 // ---------------------------------------------------------------------------
+
+/** Fingerprint a design from its bytes when given, else from the file at `file`. */
+async function fingerprintDesign(file: string, bytes: Uint8Array | undefined) {
+  try {
+    return await fingerprint(bytes ?? file);
+  } catch (error) {
+    const { code, message } = error as NodeJS.ErrnoException;
+    throw new InputError(
+      code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`,
+    );
+  }
+}
 
 function requireResolved(
   query: string,

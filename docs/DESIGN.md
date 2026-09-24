@@ -151,6 +151,13 @@ Decisions and their reasons:
   like the MCP SDK: it decodes PNG, WebP, and JPEG and applies EXIF orientation,
   which no small pure-JS decoder covers (WebP in particular). Callers without it
   pass their own decoder.
+- **The MCP server wraps the CLI's commands, not the library directly.** Each tool
+  returns the same JSON the CLI's `--json` prints, plus the rendered card as `svg`
+  and a `resultId`. `render_card` re-renders a recent result (the last 50, held in
+  memory) as SVG or HTML, so an agent never re-sends a result to see it another way.
+  Design inputs are a path or base64; both key the fingerprint cache by file hash.
+  Jev options (`mood`, `vet`) never fail a call: when Jev is unavailable the result
+  is the deterministic one, with the reason in the reply.
 
 ## Pipelines
 
