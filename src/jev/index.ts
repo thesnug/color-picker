@@ -277,3 +277,5 @@ export async function ask<const Q extends Questions>(
 export function resetJevClient(): void {
   sharedClient = undefined;
 }
+
+export * from "./describe.js";
