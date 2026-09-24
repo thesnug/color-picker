@@ -9,7 +9,12 @@ export interface HtmlSection {
   /** Heading above the section. */
   title?: string;
   /** Rendered SVG markup from this module. Inserted as is, so pass trusted SVG only. */
-  svg: string;
+  svg?: string;
+  /**
+   * Rendered HTML markup from this module, such as `renderThemePreview`.
+   * Inserted as is after any SVG, so pass trusted markup only.
+   */
+  html?: string;
   /** A line of text under the SVG. */
   caption?: string;
 }
@@ -43,6 +48,21 @@ p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
 .toggle button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent;
   color: var(--fg); cursor: pointer; }
 .toggle button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tp { background: var(--tp-background); color: var(--tp-text); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 20px; min-width: 0; }
+.tp .mode { margin: 0 0 12px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--tp-muted); }
+.tp h3 { margin: 0 0 8px; font-size: 22px; line-height: 1.25; }
+.tp p { margin: 0 0 12px; font-size: 15px; color: var(--tp-text); }
+.tp .muted { font-size: 13px; color: var(--tp-muted); }
+.tp .card { background: var(--tp-surface); border-left: 4px solid var(--tp-accent); border-radius: 8px;
+  padding: 16px; margin-top: 16px; }
+.tp .card p:last-child { margin-bottom: 0; }
+.tp button { font: inherit; font-weight: 600; background: var(--tp-accent); color: var(--tp-on-accent);
+  border: 0; border-radius: 6px; padding: 8px 16px; cursor: pointer; }
+.tp-none { border: 1px dashed var(--rule); border-radius: 12px; padding: 20px; }
+.tp-none p { color: var(--fg); font-size: 14px; }
 `;
 
 const SCRIPT = `
@@ -80,7 +100,8 @@ export function renderHtml(
       const s = typeof entry === "string" ? { svg: entry } : entry;
       const heading = s.title ? `<h2>${escapeXml(s.title)}</h2>` : "";
       const caption = s.caption ? `<p>${escapeXml(s.caption)}</p>` : "";
-      return `<section>${heading}<div class="svg">${s.svg}</div>${caption}</section>`;
+      const svg = s.svg ? `<div class="svg">${s.svg}</div>` : "";
+      return `<section>${heading}${svg}${s.html ?? ""}${caption}</section>`;
     })
     .join("\n");
 

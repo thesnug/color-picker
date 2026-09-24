@@ -13,7 +13,15 @@ import { parseArgs } from "node:util";
 
 import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
-import { combosView, InputError, nearestView, showView, type View } from "./commands.js";
+import {
+  combosView,
+  InputError,
+  nearestView,
+  showView,
+  type ThemeFormat,
+  themeView,
+  type View,
+} from "./commands.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -51,16 +59,25 @@ Commands:
   combos <hex|name>           Ranked palettes: the book's combinations, then
                               harmonies snapped to Wada colors
   show <combination-id...>    Specific book combinations, 1 to 348
+  theme <hex|name|id>         A web theme: background, surface, text, muted
+                              text, accent, and text on the accent, each pair
+                              checked against WCAG AA. A bare number is a
+                              combination ID; write hex with # (#123).
 
 Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
   --size <n>                  combos: only palettes with n colors
   --limit <n>                 combos: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
+  --format <css|tailwind|tokens>
+                              theme: print CSS custom properties, a Tailwind v4
+                              @theme block, or W3C design tokens (JSON)
+  --mode <light|dark>         theme: light (default) or dark
 
 Output options (any command):
   --json                      Print the result as JSON instead of text
   --svg <path>                Write the swatches as an SVG file
-  --html <path>               Write a self-contained HTML review page
+  --html <path>               Write a self-contained HTML review page; for
+                              theme, a sample UI in light and dark mode
 
 Coming in the products milestone (reserved, not yet available):
   --product <id>              Work against a garment product's colors
@@ -77,7 +94,7 @@ Exit codes: 0 success, 1 unknown name, malformed hex, or unknown ID,
 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show"] as const;
+const COMMANDS = ["nearest", "combos", "show", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const RESERVED = ["product", "check"] as const;
@@ -99,6 +116,8 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
         k: { type: "string", short: "k" },
         size: { type: "string" },
         limit: { type: "string" },
+        format: { type: "string" },
+        mode: { type: "string" },
         json: { type: "boolean" },
         svg: { type: "string" },
         html: { type: "string" },
@@ -133,6 +152,9 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
         throw new UsageError(`--${flag} is coming in the products milestone and is not yet available`);
       }
     }
+    if (values.json && values.format !== undefined) {
+      throw new UsageError("--json and --format both choose the printed output; use one");
+    }
     view = buildView(command as Command, args, values);
   } catch (error) {
     if (error instanceof UsageError) return usage(io, error.message);
@@ -146,7 +168,8 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
   const write = io.writeFile ?? defaultIo.writeFile!;
   try {
     if (values.svg !== undefined) {
-      write(values.svg, stackSvg(view.sections.map((s) => s.svg), view.title));
+      const svgs = view.sections.flatMap((s) => (s.svg ? [s.svg] : []));
+      write(values.svg, stackSvg(svgs, view.title));
       io.stderr(`Wrote ${values.svg}\n`);
     }
     if (values.html !== undefined) {
@@ -167,9 +190,9 @@ export function run(argv: readonly string[], io: CliIo = defaultIo): number {
 function buildView(
   command: Command,
   args: string[],
-  values: { k?: string; size?: string; limit?: string },
+  values: { k?: string; size?: string; limit?: string; format?: string; mode?: string },
 ): View {
-  const only = (flag: "k" | "size" | "limit", allowed: Command) => {
+  const only = (flag: "k" | "size" | "limit" | "format" | "mode", allowed: Command) => {
     if (values[flag] !== undefined && command !== allowed) {
       const name = flag === "k" ? "-k" : `--${flag}`;
       throw new UsageError(`${name} applies only to ${allowed}`);
@@ -178,6 +201,8 @@ function buildView(
   only("k", "nearest");
   only("size", "combos");
   only("limit", "combos");
+  only("format", "theme");
+  only("mode", "theme");
 
   if (command === "show") {
     if (args.length === 0) throw new UsageError("show needs at least one combination ID");
@@ -187,11 +212,20 @@ function buildView(
   if (args.length !== 1) {
     throw new UsageError(
       args.length === 0
-        ? `${command} needs a hex code or color name`
+        ? `${command} needs a hex code or color name${command === "theme" ? ", or a combination ID" : ""}`
         : `${command} takes one color; quote names with spaces`,
     );
   }
   const query = args[0]!;
+  if (command === "theme") {
+    return themeView({
+      query,
+      mode: oneOf(values.mode, "--mode", ["light", "dark"] as const) ?? "light",
+      ...(values.format !== undefined && {
+        format: oneOf(values.format, "--format", ["css", "tailwind", "tokens"] as const) as ThemeFormat,
+      }),
+    });
+  }
   if (command === "nearest") {
     return nearestView({ query, k: optionalInt(values.k, "-k") ?? DEFAULT_NEAREST_K });
   }
@@ -201,6 +235,14 @@ function buildView(
     limit: optionalInt(values.limit, "--limit") ?? DEFAULT_COMBOS_LIMIT,
     ...(size !== undefined && { size }),
   });
+}
+
+function oneOf<T extends string>(value: string | undefined, flag: string, allowed: readonly T[]): T | undefined {
+  if (value === undefined) return undefined;
+  if (!allowed.includes(value as T)) {
+    throw new UsageError(`${flag} must be one of ${allowed.join(", ")}, got ${JSON.stringify(value)}`);
+  }
+  return value as T;
 }
 
 function optionalInt(value: string | undefined, flag: string): number | undefined {
