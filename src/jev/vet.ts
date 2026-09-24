@@ -34,11 +34,13 @@ import {
 export const VET_RECOLOR_VERSION = 1;
 
 /**
- * A plan whose least plausible swap scores below this is implausible. A
- * starting point, to be tuned against labeled swaps in the threshold
- * evaluation (INT-2273).
+ * A plan whose least plausible swap scores below this is implausible. Jev's
+ * Noul answers for swaps run high (0.49 to 0.93 on the labeled set), so the
+ * cutoff sits high too: the most accurate on the labeled swaps, from
+ * docs/evaluations/2026-09-24.md (INT-2273). A wrongly dropped plan costs a
+ * garment slot; a wrongly kept one ships a blue pumpkin.
  */
-export const PLAUSIBILITY_THRESHOLD = 0.4;
+export const PLAUSIBILITY_THRESHOLD = 0.8;
 
 /**
  * Below this `distance()` a swap is not a change (the prompt says "keep"), so

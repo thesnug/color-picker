@@ -28,6 +28,15 @@ export const DESCRIBE_COLOR_VERSION = 1;
 /** Number of candidates returned. */
 export const DESCRIBE_COLOR_TOP = 3;
 
+/**
+ * `acceptedColor` takes Jev's top match as the answer when its probability is
+ * at least this and `none` is not Jev's top option. Below it, the matches are
+ * suggestions to show, not an answer to act on. The lowest threshold with
+ * precision at least 0.9 on the labeled phrases, from
+ * docs/evaluations/2026-09-24.md (INT-2273).
+ */
+export const DESCRIBE_COLOR_ACCEPT = 0.35;
+
 /** The option Jev picks when no color in the set fits. */
 export const NONE_LABEL = "none";
 
@@ -124,6 +133,21 @@ export async function describeToColor(
   const byName = productByName(trimmed, product);
   if (byName) return { via: "name", text: trimmed, set, product: product.id, ...byName };
   return byJev(trimmed, set, product, product.colors, productOption, options);
+}
+
+/**
+ * The color a description resolved to, when it is safe to act on: the nearest
+ * match for a name lookup, or Jev's top match when it clears `threshold` and
+ * `none` is not Jev's top option. Undefined otherwise, so the caller shows
+ * `matches` as suggestions or asks again.
+ */
+export function acceptedColor<C extends DescribedColor>(
+  result: DescribeResult<C>,
+  threshold: number = DESCRIBE_COLOR_ACCEPT,
+): C | undefined {
+  if (result.via === "name") return result.matches[0]?.color;
+  const top = result.matches[0];
+  return top && !result.noneTop && top.probability >= threshold ? top.color : undefined;
 }
 
 /** The lightness word for a color, from its OKLCH lightness. */

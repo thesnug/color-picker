@@ -100,16 +100,16 @@ describe("vetRecolorPlans", () => {
     expect(background.plausibility).toBe(0.9);
     expect(vettedPlan.plausibility).toBe(0.08);
     expect(vettedPlan.implausible).toBe(true);
-    expect(vettedPlan.reasons.at(-1)).toMatch(/^Implausible: the strawberry body as .+ \(plausibility 0\.08, below 0\.4\)\.$/);
+    expect(vettedPlan.reasons.at(-1)).toMatch(/^Implausible: the strawberry body as .+ \(plausibility 0\.08, below 0\.8\)\.$/);
     // The deterministic reasons are kept ahead of the judgment.
     expect(vettedPlan.reasons.slice(0, plan!.reasons.length)).toEqual(plan!.reasons);
   });
 
   it("passes a plan whose every swap is plausible", async () => {
     const [plan] = recolorPlans(strawberry, { n: 1 });
-    const client = fakeClient(() => 0.75);
+    const client = fakeClient(() => 0.85);
     const { plans } = await vetRecolorPlans([plan!], strawberry, { cache, client });
-    expect(plans[0]!.plausibility).toBe(0.75);
+    expect(plans[0]!.plausibility).toBe(0.85);
     expect(plans[0]!.implausible).toBe(false);
     expect(plans[0]!.reasons).toEqual(plan!.reasons);
   });
@@ -159,7 +159,7 @@ describe("vetRecolorPlans", () => {
     const plans = recolorPlans(strawberry, { n: 1 });
     const result = await vetRecolorPlans(plans, strawberry, { cache, client: rejectsBody, threshold: 0.05 });
     expect(result.plans[0]!.implausible).toBe(false);
-    expect(PLAUSIBILITY_THRESHOLD).toBe(0.4);
+    expect(PLAUSIBILITY_THRESHOLD).toBe(0.8);
   });
 });
 

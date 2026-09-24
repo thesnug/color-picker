@@ -23,9 +23,17 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `vettedRecolorPlans` and `vetRecolorPlans` in `@thesnug/color-picker/jev` ask
   Jev whether each recolor swap keeps the design reading as the same subject.
   Each mapping entry gains `plausibility`; a plan below `PLAUSIBILITY_THRESHOLD`
-  (0.4) is marked `implausible`, named in `reasons`, and dropped unless
+  (0.8, from the threshold evaluation) is marked `implausible`, named in `reasons`, and dropped unless
   `includeImplausible` is set. Without Jev or a description, plans pass with
   `plausibility: null`.
+
+- `acceptedColor` in `@thesnug/color-picker/jev` returns the color a
+  `describeToColor` result can be acted on, or nothing when Jev's top match is
+  below `DESCRIBE_COLOR_ACCEPT` (0.35) or `none` won.
+- `npm run jev:evaluate` measures the Jev thresholds against labeled phrases,
+  designs, and recolor swaps and writes a report under `docs/evaluations/`.
+  The first report raised `PLAUSIBILITY_THRESHOLD` from 0.4, which flagged no
+  labeled implausible swap, to 0.8.
 
 ### CLI and MCP
 

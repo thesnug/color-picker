@@ -24,8 +24,9 @@ export const MOOD_TOP = 10;
 
 /**
  * How much the mood score counts in `combinedScore`, from 0 (shortlist order
- * only) to 1 (mood only). A starting value, to be set from the threshold
- * evaluation (INT-2273).
+ * only) to 1 (mood only). Unchanged by the first threshold evaluation
+ * (docs/evaluations/2026-09-24.md, INT-2273): the measured direction favors a
+ * higher weight, but on draft garment picks that Jill has not yet reviewed.
  */
 export const MOOD_WEIGHT = 0.4;
 

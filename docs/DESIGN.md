@@ -286,8 +286,9 @@ Words to color (`describeToColor`) runs the name lookup first (hex, Wada names a
 aliases, product names, CSS and xkcd names) and asks Jev only when it misses. Each
 option is a color's name, described by hex, family, and a lightness word; a `none`
 option lets Jev decline text that is not a color. It returns the top three with
-their probabilities, the confidence, and the probability of `none`, and leaves the
-cutoff to the caller until the threshold evaluation sets one.
+their probabilities, the confidence, and the probability of `none`. `acceptedColor`
+takes the top match as the answer when it reaches `DESCRIBE_COLOR_ACCEPT` (0.35)
+and `none` did not win; below that the matches are suggestions.
 
 Mood re-rank (`rerankByMood`) takes the top ten candidates from the
 deterministic ranking, garment recommendations or palettes for one garment, and
@@ -309,13 +310,16 @@ design's vision description (subject, mood, and each element's name and color
 in words) as the state. A swap names its element and the color it had in words,
 and the target by Wada name, family, and lightness word; a color no element
 names is asked about the design as a whole. A plan's plausibility is its lowest
-swap's; below the threshold (0.4 until the evaluation) the plan is implausible
+swap's; below the threshold (0.8, set by the evaluation) the plan is implausible
 and dropped, and the next garment takes its place. One cached request per plan,
 so a mapping judged once for a design is free after. Without Jev or a
 description, plans pass unvetted and the result says why.
 
 Hex-to-nearest is never sent to Jev. Thresholds are evaluated on labeled examples
 before they gate anything; cookbook numbers are starting points, not rules.
+`npm run jev:evaluate` runs the labeled sets in `tests/fixtures/jev/` against
+the live API and writes a dated report under `docs/evaluations/`; each
+threshold constant names the report it came from. Manual, never in CI.
 
 ## Rendering
 
