@@ -615,9 +615,13 @@ and on `main`.
 `npm run jev:evaluate` runs words to color, the mood re-rank, and recolor
 plausibility against the labeled sets in `tests/fixtures/jev/` (phrases,
 designs with ranked garment picks, and recolor swaps), sweeps each threshold or
-weight, and writes `docs/evaluations/<date>.md`. It needs `TYPESAFE_API_KEY`
+weight, and writes `docs/evaluations/<date>.md` only if it does not already exist.
+Reports can contain hand-written decisions: to rerun on the same date, use
+`npm run jev:evaluate -- --out /tmp/jev-rerun.md` (a new path) and review the
+result rather than replacing the committed report. It needs `TYPESAFE_API_KEY`
 and is never run in CI; answers are cached, so a rerun after relabeling costs
-nothing. `--only describe,mood,vet` limits the features and `--no-cache` asks
+nothing. Mood picks are draft agent labels awaiting Jill's review.
+`--only describe,mood,vet` limits the features and `--no-cache` asks
 again. Commit a new threshold with a comment naming the report it came from,
 and bump the feature's question version when a question's wording changes.
 

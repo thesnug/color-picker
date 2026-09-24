@@ -4,7 +4,7 @@
  *
  * Words to color and recolor plausibility are each read as a binary decision
  * with a score: accept the top color, or flag a swap as implausible. Mood is a
- * ranking against Jill's picks.
+ * ranking against draft agent picks awaiting Jill's review.
  */
 
 /** One labeled case: Jev's score and whether the decision should come out positive. */

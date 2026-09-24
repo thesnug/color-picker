@@ -4,7 +4,7 @@
  * to docs/evaluations/<date>.md. See docs/DESIGN.md, "Jev (TypeSafe System One)".
  *
  * - Words to color: accepting the top match, at each acceptance threshold.
- * - Mood re-rank: garment order against Jill's picks, at each mood weight.
+ * - Mood re-rank: garment order against draft picks, at each mood weight.
  * - Recolor plausibility: flagging a swap as implausible, at each cutoff.
  *
  * Manual, never in CI: it needs `TYPESAFE_API_KEY` and spends requests on a
@@ -15,7 +15,7 @@
  *   npm run jev:evaluate -- --only describe,vet --no-cache --out /tmp/report.md
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -66,6 +66,9 @@ const features = new Set((flag("--only") ?? "describe,mood,vet").split(","));
 const cache = argv.includes("--no-cache") ? { cache: false as const } : {};
 const date = flag("--date") ?? new Date().toISOString().slice(0, 10);
 const out = flag("--out") ?? join(root, "docs", "evaluations", `${date}.md`);
+// Reports may contain hand-written decisions that the generator cannot reproduce.
+// Reject before any Jev calls, even on a cached rerun.
+if (existsSync(out)) throw new Error(`Report already exists: ${out}. Choose a new --out path; existing reports are not overwritten.`);
 
 /** Precision the acceptance threshold must reach: a wrong answer acted on is worse than a suggestion. */
 const MIN_ACCEPT_PRECISION = 0.9;
@@ -219,7 +222,7 @@ async function evaluateMood() {
     "## Mood re-rank",
     "",
     `\`rerankByMood\` over \`recommendProductColors\`, question version ${MOOD_VERSION}, ${runs.length} designs, ` +
-      `top ${MOOD_TOP} re-ranked. Each order is scored against Jill's picks: top-1 is whether the first garment is ` +
+      `top ${MOOD_TOP} re-ranked. Each order is scored against draft agent picks (not yet reviewed by Jill): top-1 is whether the first garment is ` +
       "a pick, P@3 the share of picks in the first three, MRR the mean of one over the first pick's position. " +
       "Weight 0 is the deterministic order.",
     "",
@@ -236,7 +239,7 @@ async function evaluateMood() {
     "",
     chosen ? `Best mean reciprocal rank at weight **${chosen.weight.toFixed(1)}**.` : "",
     "",
-    "| Design | Picks in shortlist | Deterministic top 3 | Top 3 at chosen weight | Jev on picks |",
+    "| Design | Draft picks in shortlist | Deterministic top 3 | Top 3 at chosen weight | Jev on draft picks |",
     "| --- | --- | --- | --- | --- |",
   );
   for (const r of runs) {
@@ -252,9 +255,9 @@ async function evaluateMood() {
   }
   say("");
 
-  // Garments Jev rated highly and confidently that Jill did not pick.
+  // Garments Jev rated highly and confidently that are not in the draft picks.
   say("### Confident wrong answers", "", "Shortlisted garments Jev rated _elevates_ with confidence at least " +
-    `${CONFIDENT} that are not among Jill's picks, and picks Jev rated _clashes_.`, "");
+    `${CONFIDENT} that are not among the draft picks, and draft picks Jev rated _clashes_.`, "");
   let any = false;
   for (const r of runs) {
     for (const c of r.ranked.candidates) {
@@ -358,6 +361,7 @@ const header = [
 ];
 
 mkdirSync(dirname(out), { recursive: true });
-writeFileSync(out, `${[...header, ...lines].join("\n").trimEnd()}\n`);
+// Exclusive creation closes the race between the preflight and writing the report.
+writeFileSync(out, `${[...header, ...lines].join("\n").trimEnd()}\n`, { flag: "wx" });
 console.log(`Wrote ${relative(process.cwd(), out)}`);
 for (const [name, v] of Object.entries(results)) console.log(`${name}: current ${current[name]}, measured ${v ?? "–"}`);
