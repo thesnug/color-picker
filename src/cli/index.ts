@@ -93,6 +93,13 @@ Command options:
                               provider; without them the order is unchanged
                               and the output says why)
   --design <file>             palettes: the design to judge with --mood
+  --vet                       recolor: describe the design and check with Jev
+                              that each swap keeps the subject recognizable;
+                              implausible plans are dropped and replaced by
+                              the next garments. Needs the Codex CLI or
+                              OPENROUTER_API_KEY, and TYPESAFE_API_KEY
+  --include-implausible       recolor, with --vet: keep implausible plans,
+                              marked, instead of dropping them
   --format <css|tailwind|tokens>
                               theme: print CSS custom properties, a Tailwind v4
                               @theme block, or W3C design tokens (JSON)
@@ -152,6 +159,8 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         apply: { type: "string" },
         mood: { type: "boolean" },
         design: { type: "string" },
+        vet: { type: "boolean" },
+        "include-implausible": { type: "boolean" },
         check: { type: "boolean" },
       },
       allowPositionals: true,
@@ -231,10 +240,12 @@ async function buildView(
     apply?: string;
     mood?: boolean;
     design?: string;
+    vet?: boolean;
+    "include-implausible"?: boolean;
   },
 ): Promise<View> {
   const only = (
-    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply" | "mood" | "design",
+    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply" | "mood" | "design" | "vet" | "include-implausible",
     ...allowed: Command[]
   ) => {
     if (values[flag] !== undefined && !allowed.includes(command)) {
@@ -251,6 +262,11 @@ async function buildView(
   only("apply", "recolor");
   only("mood", "recommend", "palettes");
   only("design", "palettes");
+  only("vet", "recolor");
+  only("include-implausible", "recolor");
+  if (values["include-implausible"] && !values.vet) {
+    throw new UsageError("--include-implausible applies only with --vet");
+  }
   only("format", "theme");
   only("mode", "theme");
 
@@ -276,6 +292,8 @@ async function buildView(
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOLOR_N,
       ...(values.product !== undefined && { product: values.product }),
       ...(values.apply !== undefined && { apply: values.apply }),
+      ...(values.vet && { vet: true }),
+      ...(values["include-implausible"] && { includeImplausible: true }),
     });
   }
 

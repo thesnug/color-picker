@@ -280,3 +280,4 @@ export function resetJevClient(): void {
 
 export * from "./describe.js";
 export * from "./mood.js";
+export * from "./vet.js";

@@ -396,6 +396,37 @@ palette covers less than 90% of the design, or more than 5% of the pixels are
 farther than 10 from every mapped color, the art counts as photographic and it
 returns `{ applicable: false, reason }`; use the prompt instead.
 
+#### Vetting swaps with Jev
+
+A recolor plan can map a strawberry's red body onto a blue ink. `vettedRecolorPlans`
+in `@thesnug/color-picker/jev` asks Jev, one yes-or-no question per swap, whether
+the design still reads as the same subject, and drops plans that fail:
+
+```ts
+import { describeDesign, fingerprint } from "@thesnug/color-picker/fingerprint";
+import { vettedRecolorPlans } from "@thesnug/color-picker/jev";
+
+const design = await describeDesign(await fingerprint("art/strawberry.png"), "art/strawberry.png");
+const { plans, dropped } = await vettedRecolorPlans(design, { n: 5 });
+plans[0].mapping[0].plausibility; // 0.91: the probability that the swap keeps the subject
+plans[0].plausibility;            // the lowest across the plan's swaps
+dropped[0].reasons.at(-1);        // "Implausible: the strawberry body as … (plausibility 0.08, below 0.4)."
+```
+
+- The state is the design's vision description, so describe the design first.
+  Each question names the element ("If the strawberry body changes from deep
+  red to …"); a color no element names is asked about the design as a whole.
+  A swap that is not a change is not asked about and counts as 1.
+- A plan is `implausible` when its lowest swap is below `PLAUSIBILITY_THRESHOLD`
+  (0.4, a starting point until the threshold evaluation). Implausible plans are
+  dropped and the next garments fill their places; pass `includeImplausible` to
+  keep them, marked. `vetRecolorPlans` vets plans you already have and drops
+  nothing.
+- One request per plan, cached through `ask`, so a mapping already judged for
+  the same design costs nothing.
+- Without the SDK, `TYPESAFE_API_KEY`, or a description, every plan passes with
+  `plausibility: null`, and `skipped` says why.
+
 ### CLI
 
 `color-picker` answers the same questions from the command line and shows
@@ -412,6 +443,7 @@ color-picker recommend art/light-ink.png -n 3 # garment colors for a design
 color-picker recommend art/light-ink.png --mood  # re-ranked by mood with Jev
 color-picker palettes "Black" --mood --design art/light-ink.png
 color-picker recolor art/flat-mark.png --apply out/  # with recoloring
+color-picker recolor art/strawberry.png --vet  # drop recolors Jev finds implausible
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
 color-picker theme "#1a1a40" --mode dark --format tailwind
@@ -522,11 +554,17 @@ The server keeps the last 50 results.
 
 Design tools take `designPath`, a file on the server's machine, or
 `designBase64`, the file's bytes. Fingerprints are cached by file hash, so repeat
-calls about the same design skip decoding. `recommend_product_colors` takes
-`mood` and `recolor_plans` takes `vet` for the Jev judgments. Until those land,
-and whenever `TYPESAFE_API_KEY` is not set, the reply carries the deterministic
-result with `mood` or `vet` set to `{ "requested": true, "applied": false,
-"reason": ... }` rather than failing.
+calls about the same design skip decoding.
+
+The Jev judgments are opt-in. `recommend_product_colors` and
+`palettes_for_product_color` take `mood` to re-rank by the design's subject and
+mood; the reply's `mood` field says whether Jev's scores were applied, the
+weight, and otherwise why the order is the deterministic one. `recolor_plans`
+takes `vet` to drop swaps that would make the subject unrecognizable, and
+`includeImplausible` to keep them marked instead; the reply's `vet` field says
+how many plans Jev judged, which were dropped and why, and otherwise why the
+plans are the deterministic ones. Neither fails for want of `TYPESAFE_API_KEY`
+or a vision provider, and without a key no vision call is made.
 
 Input the tool cannot use, such as an unknown color or a missing design file,
 comes back as a tool error with a message saying what to fix.

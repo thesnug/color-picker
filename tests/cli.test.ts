@@ -377,6 +377,8 @@ describe("cli", () => {
       [["recommend"], "recommend takes one design file"],
       [["recolor"], "recolor takes one design file"],
       [["recommend", FLAT_MARK, "--apply", "out"], "--apply applies only to recolor"],
+      [["recommend", FLAT_MARK, "--vet"], "--vet applies only to recolor"],
+      [["recolor", FLAT_MARK, "--include-implausible"], "--include-implausible applies only with --vet"],
       [["palettes"], "palettes needs a product color name"],
       [["palettes", "blue", "spruce"], "quote names with spaces"],
       [["palettes", "Blue Spruce", "-k", "3"], "-k applies only to nearest"],
