@@ -40,6 +40,12 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
 
+### Packaging
+
+- The `sharp` peer range accepts 0.34 as well as 0.35. The fingerprint code
+  needs nothing newer than `autoOrient`, which arrived in 0.34, and
+  print-on-demand pins 0.34.
+
 ### Release tooling
 
 - The release script reports a failed tag push with the commands to recover or
