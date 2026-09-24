@@ -7,6 +7,21 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+### Library
+
+- `rerankByMood` in `@thesnug/color-picker/jev` re-ranks the top ten garment
+  recommendations or palettes by how well each suits the design's subject and
+  mood, with one cached Jev request of Score questions. Each candidate gains
+  `moodScore`, `confidence`, `moodLevel`, and a `combinedScore` weighted by
+  `MOOD_WEIGHT`; `combineMood` reweighs without calling Jev. Without Jev the
+  order is unchanged and a note says why.
+
+### CLI and MCP
+
+- `--mood` on `recommend` and `palettes` (with `--design <file>`), and `mood` on
+  the `recommend_product_colors` and `palettes_for_product_color` tools. HTML
+  cards show the mood level as a badge.
+
 ## [0.1.0] - 2026-09-24
 
 The first release.

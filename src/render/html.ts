@@ -17,6 +17,8 @@ export interface HtmlSection {
   html?: string;
   /** A line of text under the SVG. */
   caption?: string;
+  /** A short label shown as a badge beside the heading, such as a mood level. */
+  badge?: string;
 }
 
 export interface HtmlOptions {
@@ -39,6 +41,8 @@ header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify
   max-width: 1100px; margin: 0 auto 24px; }
 h1 { font-size: 20px; margin: 0; }
 h2 { font-size: 15px; margin: 0 0 8px; }
+.badge { display: inline-block; margin-left: 8px; padding: 1px 8px; border: 1px solid var(--rule);
+  border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--muted); vertical-align: 1px; }
 main { max-width: 1100px; margin: 0 auto; display: grid; gap: 32px; }
 section { border-top: 1px solid var(--rule); padding-top: 16px; }
 .svg { overflow-x: auto; }
@@ -98,7 +102,8 @@ export function renderHtml(
   const body = sections
     .map((entry) => {
       const s = typeof entry === "string" ? { svg: entry } : entry;
-      const heading = s.title ? `<h2>${escapeXml(s.title)}</h2>` : "";
+      const badge = s.badge ? `<span class="badge">${escapeXml(s.badge)}</span>` : "";
+      const heading = s.title || badge ? `<h2>${escapeXml(s.title ?? "")}${badge}</h2>` : "";
       const caption = s.caption ? `<p>${escapeXml(s.caption)}</p>` : "";
       const svg = s.svg ? `<div class="svg">${s.svg}</div>` : "";
       return `<section>${heading}${svg}${s.html ?? ""}${caption}</section>`;

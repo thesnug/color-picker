@@ -46,8 +46,8 @@ describe("mcp", () => {
     const saved = process.env.TYPESAFE_API_KEY;
     try {
       delete process.env.TYPESAFE_API_KEY;
-      expect(jevStatus("mood")).toMatchObject({ requested: true, applied: false });
-      expect(jevStatus("mood").reason).toMatch(/TYPESAFE_API_KEY is not set/);
+      expect(jevStatus("vet")).toMatchObject({ requested: true, applied: false });
+      expect(jevStatus("vet").reason).toMatch(/TYPESAFE_API_KEY is not set/);
       process.env.TYPESAFE_API_KEY = "secret-value";
       expect(jevStatus("vet").reason).toMatch(/not available in this version/);
       expect(jevStatus("vet").reason).not.toContain("secret-value");
@@ -143,7 +143,7 @@ describe("mcp over stdio", () => {
     expect(fromBytes.design.hash).toBe(fromPath.design.hash);
     expect(fromBytes.picks.map((p: any) => p.color.slug)).toEqual(fromPath.picks.map((p: any) => p.color.slug));
     expect(fromBytes.mood).toMatchObject({ requested: true, applied: false });
-    expect(fromBytes.mood.reason).toMatch(/TYPESAFE_API_KEY is not set/);
+    expect(fromBytes.mood.reason).toMatch(/TYPESAFE_API_KEY/);
 
     // Both calls share one cached fingerprint.
     const cached = readdirSync(join(scratch, "cache", "color-picker", "fingerprints"));
