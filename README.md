@@ -230,6 +230,34 @@ npm install @typesafe-ai/sdk
 export TYPESAFE_API_KEY=...
 ```
 
+### Words to color
+
+`describeToColor` resolves a free-text description to a Wada color or a product
+color. The name lookup runs first, and Jev is asked only when it misses.
+
+```ts
+import { describeToColor } from "@thesnug/color-picker/jev";
+
+const wada = await describeToColor("something autumnal for a coffee brand");
+const shirt = await describeToColor("the brick shirt", { set: "product" }); // Comfort Colors 1717 by default
+
+if (shirt.via === "jev") {
+  shirt.matches; // top three: [{ color, probability }, ...]
+  shirt.confidence; // Jev's confidence in its top option
+  shirt.none; // probability that the text is not a color at all
+}
+```
+
+- A hex code, a Wada name or alias, a product color name, or a CSS or xkcd name
+  resolves by name (`via: "name"`) with the closest colors by distance, and
+  never reaches Jev.
+- Anything else is one cached Choice request over every color in the set plus a
+  `none` option. The result carries the probabilities and the confidence as Jev
+  reported them; deciding when a spread is too flat to act on is the caller's job.
+- `npm run jev:describe:evaluate` reports top-1 and top-3 accuracy on the labeled
+  phrases in `tests/fixtures/jev/describe-color.json` against the live API. It
+  needs a key and is never run in CI.
+
 ### Web themes
 
 `theme` turns a combination into a UI theme. Background, text, and accent come

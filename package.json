@@ -49,6 +49,7 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "data:build": "tsx scripts/build-data.ts",
     "data:check": "tsx scripts/build-data.ts --check",
+    "jev:describe:evaluate": "tsx scripts/evaluate-describe-color.ts",
     "products:check": "tsx scripts/validate-products.ts",
     "products:equivalents": "tsx scripts/build-equivalents.ts",
     "products:equivalents:check": "tsx scripts/build-equivalents.ts --check",

@@ -278,6 +278,13 @@ key, so committed answers work in every install. `@typesafe-ai/sdk` is an
 optional peer, like `sharp` and the MCP SDK, and the API key comes only from
 `TYPESAFE_API_KEY`.
 
+Words to color (`describeToColor`) runs the name lookup first (hex, Wada names and
+aliases, product names, CSS and xkcd names) and asks Jev only when it misses. Each
+option is a color's name, described by hex, family, and a lightness word; a `none`
+option lets Jev decline text that is not a color. It returns the top three with
+their probabilities, the confidence, and the probability of `none`, and leaves the
+cutoff to the caller until the threshold evaluation sets one.
+
 Hex-to-nearest is never sent to Jev. Thresholds are evaluated on labeled examples
 before they gate anything; cookbook numbers are starting points, not rules.
 
