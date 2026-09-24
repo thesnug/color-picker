@@ -95,6 +95,42 @@ npm run data:build  # regenerate assets/derived/
 npm run data:check  # fail if assets/derived/ is out of date
 ```
 
+### Products
+
+Each garment product is one file in `assets/products/`, named for its ID. The
+index, `assets/products/index.json`, lists every product and names the default:
+Comfort Colors 1717. Files are checked against
+`assets/schemas/product.schema.json`.
+
+```ts
+import { defaultProduct, loadProduct } from "@thesnug/color-picker/data";
+
+defaultProduct();                  // Comfort Colors 1717
+loadProduct("comfort-colors-1717");
+```
+
+To add a product:
+
+1. Create `assets/products/<id>.json`, where `<id>` is a lowercase slug such as
+   `gildan-5000`. Start with `"$schema": "../schemas/product.schema.json"` so
+   editors validate as you type. Fill in `id` (matching the file name), `brand`,
+   `model`, `name`, `printMethod`, and `printAreas` (position, width and height in
+   inches).
+2. Add `{ "id": "<id>", "name": "<display name>" }` to `products` in
+   `assets/products/index.json`.
+3. Add colors. Each carries `source` (`printify`, `retail-chart:<name>`, or
+   `reviewed`) and a `sourceDate`. Colors the provider does not stock get
+   `"available": false`. Garment images are referenced by `image.url` and
+   `image.sha256`, never stored in the repo. Never overwrite a `reviewed` color
+   from an import.
+4. Run `npm run products:check`. It fails on schema errors, duplicate slugs, a
+   `reviewed` color without a date, or a file missing from the index. CI runs it
+   too.
+
+```bash
+npm run products:check  # validate assets/products/
+```
+
 ## License
 
 MIT.

@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/product.schema.json",
+  "id": "comfort-colors-1717",
+  "brand": "Comfort Colors",
+  "model": "1717",
+  "name": "Comfort Colors 1717 Garment-Dyed Heavyweight T-Shirt",
+  "printMethod": "dtg",
+  "printAreas": [],
+  "colors": []
+}

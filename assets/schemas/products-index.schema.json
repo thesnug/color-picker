@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thesnug/color-picker/assets/schemas/products-index.schema.json",
+  "title": "Product index",
+  "description": "Lists every product file in assets/products/ and names the default product.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["default", "products"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "default": {
+      "description": "Product used when no product is named.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "products": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "name": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

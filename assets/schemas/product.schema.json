@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thesnug/color-picker/assets/schemas/product.schema.json",
+  "title": "Product",
+  "description": "One garment product and its colors. This repo owns these facts; see docs/DESIGN.md, \"Products\".",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "brand", "model", "name", "printMethod", "printAreas", "colors"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": {
+      "description": "Stable product ID. Matches the file name without .json.",
+      "$ref": "#/$defs/slug"
+    },
+    "brand": { "type": "string", "minLength": 1 },
+    "model": { "type": "string", "minLength": 1 },
+    "name": { "description": "Display name.", "type": "string", "minLength": 1 },
+    "printMethod": {
+      "description": "How designs are printed on this product.",
+      "enum": ["dtg", "dtf", "screen", "embroidery", "sublimation"]
+    },
+    "printAreas": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/printArea" }
+    },
+    "colors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/color" }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "date": {
+      "description": "Calendar date, YYYY-MM-DD.",
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "printArea": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "width", "height"],
+      "properties": {
+        "position": { "description": "For example front, back, left-sleeve.", "$ref": "#/$defs/slug" },
+        "width": { "description": "Inches.", "type": "number", "exclusiveMinimum": 0 },
+        "height": { "description": "Inches.", "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "color": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "slug", "hex", "aliases", "family", "available", "source", "sourceDate"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "slug": { "$ref": "#/$defs/slug" },
+        "hex": {
+          "description": "Lowercase #rrggbb.",
+          "type": "string",
+          "pattern": "^#[0-9a-f]{6}$"
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "family": {
+          "description": "Broad color family used for grouping, lowercase.",
+          "$ref": "#/$defs/slug"
+        },
+        "available": {
+          "description": "False for colors the print provider does not stock.",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the hex came from. reviewed values are never overwritten by an import script.",
+          "type": "string",
+          "pattern": "^(printify|reviewed|retail-chart:[a-z0-9]+(-[a-z0-9]+)*)$"
+        },
+        "sourceDate": {
+          "description": "When the hex was fetched or reviewed.",
+          "$ref": "#/$defs/date"
+        },
+        "image": {
+          "description": "Public garment image. A pointer, never the bytes.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "sha256"],
+          "properties": {
+            "url": { "type": "string", "pattern": "^https://" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          }
+        },
+        "pod": {
+          "description": "A pointer for the picker. Never authority over which render version is current.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["colorAssetVersionId"],
+          "properties": {
+            "colorAssetVersionId": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

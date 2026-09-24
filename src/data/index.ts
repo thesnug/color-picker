@@ -5,6 +5,8 @@
  * `assets/colors.json` is the Wada source and is never edited by hand.
  * `scripts/build-data.ts` derives `assets/derived/colors.json` and
  * `assets/derived/combinations.json` from it; CI fails when they are stale.
+ * Products live one file each in `assets/products/`, validated against
+ * `assets/schemas/product.schema.json` by `scripts/validate-products.ts`.
  * See docs/DESIGN.md, "Data".
  */
 
@@ -121,6 +123,68 @@ export interface CombinationsFile {
 }
 
 // ---------------------------------------------------------------------------
+// Products. Shapes match assets/schemas/product.schema.json and
+// assets/schemas/products-index.schema.json.
+
+export type PrintMethod = "dtg" | "dtf" | "screen" | "embroidery" | "sublimation";
+
+/** A printable region of a product. */
+export interface PrintArea {
+  /** For example `front`, `back`, `left-sleeve`. */
+  position: string;
+  /** Inches. */
+  width: number;
+  /** Inches. */
+  height: number;
+}
+
+/**
+ * Where a product hex came from: the Printify catalog, a named retail chart
+ * (`retail-chart:<name>`), or a manual review against the garment image.
+ * `reviewed` values are never overwritten by an import script.
+ */
+export type ProductColorSource = "printify" | "reviewed" | `retail-chart:${string}`;
+
+/** One color of a product. */
+export interface ProductColor {
+  name: string;
+  slug: string;
+  /** Lowercase `#rrggbb`. */
+  hex: string;
+  aliases: string[];
+  /** Broad color family used for grouping, lowercase. */
+  family: string;
+  /** False for colors the print provider does not stock. */
+  available: boolean;
+  source: ProductColorSource;
+  /** When the hex was fetched or reviewed, `YYYY-MM-DD`. */
+  sourceDate: string;
+  /** Public garment image. A pointer, never the bytes. */
+  image?: { url: string; sha256: string };
+  /** A pointer for the picker. Never authority over which render version is current. */
+  pod?: { colorAssetVersionId: string };
+}
+
+/** One garment product. This repo owns these facts; see docs/DESIGN.md, "Products". */
+export interface Product {
+  /** Stable product ID. Matches the file name without `.json`. */
+  id: string;
+  brand: string;
+  model: string;
+  /** Display name. */
+  name: string;
+  printMethod: PrintMethod;
+  printAreas: PrintArea[];
+  colors: ProductColor[];
+}
+
+export interface ProductIndex {
+  /** Product used when no product is named. */
+  default: string;
+  products: { id: string; name: string }[];
+}
+
+// ---------------------------------------------------------------------------
 // Loaders
 
 /** URL of the assets directory. Resolves correctly from both `src/` and `dist/`. */
@@ -129,6 +193,12 @@ export const ASSETS_URL = new URL("../../assets/", import.meta.url);
 function readJson<T>(name: string): T {
   const url = new URL(name, ASSETS_URL);
   return JSON.parse(readFileSync(url, "utf8")) as T;
+}
+
+/** Drop the editor-only `$schema` pointer that product files carry. */
+function withoutSchema<T extends object>(value: T & { $schema?: string }): T {
+  const { $schema: _schema, ...rest } = value;
+  return rest as T;
 }
 
 /** Load the vendored Wada dataset, untouched. */
@@ -149,4 +219,27 @@ export function loadColors(): DerivedColor[] {
 /** Load the book's combinations as first-class objects. */
 export function loadCombinations(): Combination[] {
   return readJson<CombinationsFile>("derived/combinations.json").combinations;
+}
+
+/** Load `assets/products/index.json`. */
+export function loadProductIndex(): ProductIndex {
+  return withoutSchema(readJson<ProductIndex>("products/index.json"));
+}
+
+/**
+ * Load one product by ID. Only IDs listed in the index are accepted, so the ID
+ * never reaches the file system unchecked.
+ */
+export function loadProduct(id: string): Product {
+  const index = loadProductIndex();
+  if (!index.products.some((p) => p.id === id)) {
+    const known = index.products.map((p) => p.id).join(", ");
+    throw new Error(`Unknown product "${id}". Known products: ${known}.`);
+  }
+  return withoutSchema(readJson<Product>(`products/${id}.json`));
+}
+
+/** Load the default product, Comfort Colors 1717 unless the index says otherwise. */
+export function defaultProduct(): Product {
+  return loadProduct(loadProductIndex().default);
 }
