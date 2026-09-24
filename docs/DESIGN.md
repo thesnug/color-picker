@@ -43,10 +43,13 @@ Known issues to handle in a cleanup pass, keeping the original text as an alias:
 - The hex values are the site's sRGB conversions from the book's CMYK, not
   authoritative. Keep the CMYK alongside.
 
-A derived `assets/combinations.json` makes each combination a first-class object:
-ID, member colors, size, harmony label, average lightness, hue spread, and whether
-it contains a neutral. Everything derivable is precomputed and committed so runtime
-queries are file reads.
+`scripts/build-data.ts` derives two committed files, and CI fails when they are
+stale. `assets/derived/colors.json` carries each color with its canonical name,
+aliases (the source name always among them when it differs), slug, hex, RGB, CMYK,
+OKLab, OKLCH, and a neutral flag. `assets/derived/combinations.json` makes each
+combination a first-class object: ID, member colors, size, harmony label, average
+lightness, hue spread, and whether it contains a neutral. Everything derivable is
+precomputed and committed so runtime queries are file reads.
 
 ### Products (`assets/products/`)
 

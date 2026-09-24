@@ -1,0 +1,6238 @@
+{
+  "colors": [
+    {
+      "index": 1,
+      "name": "Hermosa Pink",
+      "slug": "hermosa-pink",
+      "aliases": [],
+      "sourceName": "Hermosa Pink",
+      "sourceSlug": "hermosa-pink",
+      "hex": "#ffb3f0",
+      "rgb": [
+        255,
+        179,
+        240
+      ],
+      "cmyk": [
+        0,
+        30,
+        6,
+        0
+      ],
+      "oklab": {
+        "l": 0.85695,
+        "a": 0.10496,
+        "b": -0.05166
+      },
+      "oklch": {
+        "l": 0.85695,
+        "c": 0.11698,
+        "h": 333.79
+      },
+      "neutral": false,
+      "combinations": [
+        176,
+        227,
+        273
+      ]
+    },
+    {
+      "index": 2,
+      "name": "Corinthian Pink",
+      "slug": "corinthian-pink",
+      "aliases": [],
+      "sourceName": "Corinthian Pink",
+      "sourceSlug": "corinthian-pink",
+      "hex": "#ffa6d9",
+      "rgb": [
+        255,
+        166,
+        217
+      ],
+      "cmyk": [
+        0,
+        35,
+        15,
+        0
+      ],
+      "oklab": {
+        "l": 0.82768,
+        "a": 0.11746,
+        "b": -0.03205
+      },
+      "oklch": {
+        "l": 0.82768,
+        "c": 0.12175,
+        "h": 344.74
+      },
+      "neutral": false,
+      "combinations": [
+        27,
+        43,
+        87,
+        97,
+        128,
+        169,
+        174,
+        206,
+        246,
+        254,
+        264,
+        342
+      ]
+    },
+    {
+      "index": 3,
+      "name": "Cameo Pink",
+      "slug": "cameo-pink",
+      "aliases": [],
+      "sourceName": "Cameo Pink",
+      "sourceSlug": "cameo-pink",
+      "hex": "#e6adcf",
+      "rgb": [
+        230,
+        173,
+        207
+      ],
+      "cmyk": [
+        10,
+        32,
+        19,
+        0
+      ],
+      "oklab": {
+        "l": 0.81019,
+        "a": 0.0759,
+        "b": -0.02391
+      },
+      "oklch": {
+        "l": 0.81019,
+        "c": 0.07958,
+        "h": 342.51
+      },
+      "neutral": false,
+      "combinations": [
+        18,
+        125,
+        308
+      ]
+    },
+    {
+      "index": 4,
+      "name": "Fawn",
+      "slug": "fawn",
+      "aliases": [],
+      "sourceName": "Fawn",
+      "sourceSlug": "fawn",
+      "hex": "#d1b0b3",
+      "rgb": [
+        209,
+        176,
+        179
+      ],
+      "cmyk": [
+        18,
+        31,
+        30,
+        0
+      ],
+      "oklab": {
+        "l": 0.78694,
+        "a": 0.03767,
+        "b": 0.00788
+      },
+      "oklch": {
+        "l": 0.78694,
+        "c": 0.03849,
+        "h": 11.82
+      },
+      "neutral": true,
+      "combinations": [
+        18,
+        125,
+        308
+      ]
+    },
+    {
+      "index": 5,
+      "name": "Light Brown Drab",
+      "slug": "light-brown-drab",
+      "aliases": [],
+      "sourceName": "Light Brown Drab",
+      "sourceSlug": "light-brown-drab",
+      "hex": "#b08699",
+      "rgb": [
+        176,
+        134,
+        153
+      ],
+      "cmyk": [
+        8,
+        30,
+        20,
+        25
+      ],
+      "oklab": {
+        "l": 0.66607,
+        "a": 0.05644,
+        "b": -0.01004
+      },
+      "oklch": {
+        "l": 0.66607,
+        "c": 0.05733,
+        "h": 349.91
+      },
+      "neutral": false,
+      "combinations": [
+        35,
+        68,
+        185,
+        191,
+        223,
+        239,
+        244,
+        268,
+        285,
+        321
+      ]
+    },
+    {
+      "index": 6,
+      "name": "Coral Red",
+      "slug": "coral-red",
+      "aliases": [],
+      "sourceName": "Coral Red",
+      "sourceSlug": "coral-red",
+      "hex": "#ff7399",
+      "rgb": [
+        255,
+        115,
+        153
+      ],
+      "cmyk": [
+        0,
+        55,
+        40,
+        0
+      ],
+      "oklab": {
+        "l": 0.73249,
+        "a": 0.17268,
+        "b": 0.01622
+      },
+      "oklch": {
+        "l": 0.73249,
+        "c": 0.17344,
+        "h": 5.37
+      },
+      "neutral": false,
+      "combinations": [
+        92,
+        123,
+        320,
+        332
+      ]
+    },
+    {
+      "index": 7,
+      "name": "Fresh Color",
+      "slug": "fresh-color",
+      "aliases": [],
+      "sourceName": "Fresh Color",
+      "sourceSlug": "fresh-color",
+      "hex": "#ff788c",
+      "rgb": [
+        255,
+        120,
+        140
+      ],
+      "cmyk": [
+        0,
+        53,
+        45,
+        0
+      ],
+      "oklab": {
+        "l": 0.73586,
+        "a": 0.1607,
+        "b": 0.03662
+      },
+      "oklch": {
+        "l": 0.73586,
+        "c": 0.16482,
+        "h": 12.84
+      },
+      "neutral": false,
+      "combinations": [
+        240
+      ]
+    },
+    {
+      "index": 8,
+      "name": "Grenadine Pink",
+      "slug": "grenadine-pink",
+      "aliases": [],
+      "sourceName": "Grenadine Pink",
+      "sourceSlug": "grenadine-pink",
+      "hex": "#ff616b",
+      "rgb": [
+        255,
+        97,
+        107
+      ],
+      "cmyk": [
+        0,
+        62,
+        58,
+        0
+      ],
+      "oklab": {
+        "l": 0.69936,
+        "a": 0.18068,
+        "b": 0.06542
+      },
+      "oklch": {
+        "l": 0.69936,
+        "c": 0.19216,
+        "h": 19.9
+      },
+      "neutral": false,
+      "combinations": [
+        6,
+        21,
+        112,
+        166,
+        193,
+        201,
+        230,
+        300,
+        315,
+        341
+      ]
+    },
+    {
+      "index": 9,
+      "name": "Eosine Pink",
+      "slug": "eosine-pink",
+      "aliases": [],
+      "sourceName": "Eosine Pink",
+      "sourceSlug": "eosine-pink",
+      "hex": "#ff5ec4",
+      "rgb": [
+        255,
+        94,
+        196
+      ],
+      "cmyk": [
+        0,
+        63,
+        23,
+        0
+      ],
+      "oklab": {
+        "l": 0.72184,
+        "a": 0.21314,
+        "b": -0.05684
+      },
+      "oklch": {
+        "l": 0.72184,
+        "c": 0.22059,
+        "h": 345.07
+      },
+      "neutral": false,
+      "combinations": [
+        34,
+        59,
+        90,
+        108,
+        134,
+        153,
+        197,
+        242,
+        248,
+        276,
+        287,
+        314,
+        327,
+        336
+      ]
+    },
+    {
+      "index": 10,
+      "name": "Spinel Red",
+      "slug": "spinel-red",
+      "aliases": [],
+      "sourceName": "Spinel Red",
+      "sourceSlug": "spinel-red",
+      "hex": "#ff4dc9",
+      "rgb": [
+        255,
+        77,
+        201
+      ],
+      "cmyk": [
+        0,
+        70,
+        21,
+        0
+      ],
+      "oklab": {
+        "l": 0.70756,
+        "a": 0.23306,
+        "b": -0.07335
+      },
+      "oklch": {
+        "l": 0.70756,
+        "c": 0.24433,
+        "h": 342.53
+      },
+      "neutral": false,
+      "combinations": [
+        14,
+        147,
+        165,
+        184,
+        195,
+        224,
+        277
+      ]
+    },
+    {
+      "index": 11,
+      "name": "Old Rose",
+      "slug": "old-rose",
+      "aliases": [],
+      "sourceName": "Old Rose",
+      "sourceSlug": "old-rose",
+      "hex": "#d94d99",
+      "rgb": [
+        217,
+        77,
+        153
+      ],
+      "cmyk": [
+        15,
+        70,
+        40,
+        0
+      ],
+      "oklab": {
+        "l": 0.63202,
+        "a": 0.18756,
+        "b": -0.0319
+      },
+      "oklch": {
+        "l": 0.63202,
+        "c": 0.19025,
+        "h": 350.35
+      },
+      "neutral": false,
+      "combinations": [
+        55,
+        162,
+        260,
+        265
+      ]
+    },
+    {
+      "index": 12,
+      "name": "Eugenia Red A",
+      "slug": "eugenia-red-a",
+      "aliases": [
+        "Eugenia Red",
+        "Eugenia Red | A"
+      ],
+      "sourceName": "Eugenia Red | A",
+      "sourceSlug": "eugenia-red-|-a",
+      "hex": "#ed3d66",
+      "rgb": [
+        237,
+        61,
+        102
+      ],
+      "cmyk": [
+        7,
+        76,
+        60,
+        0
+      ],
+      "oklab": {
+        "l": 0.63335,
+        "a": 0.20612,
+        "b": 0.04581
+      },
+      "oklch": {
+        "l": 0.63335,
+        "c": 0.21115,
+        "h": 12.53
+      },
+      "neutral": false,
+      "combinations": [
+        284
+      ],
+      "variant": "A"
+    },
+    {
+      "index": 13,
+      "name": "Eugenia Red B",
+      "slug": "eugenia-red-b",
+      "aliases": [
+        "Eugenia Red",
+        "Eugenia Red | B"
+      ],
+      "sourceName": "Eugenia Red | B",
+      "sourceSlug": "eugenia-red-|-b",
+      "hex": "#e62e73",
+      "rgb": [
+        230,
+        46,
+        115
+      ],
+      "cmyk": [
+        0,
+        80,
+        50,
+        10
+      ],
+      "oklab": {
+        "l": 0.61365,
+        "a": 0.21926,
+        "b": 0.01831
+      },
+      "oklch": {
+        "l": 0.61365,
+        "c": 0.22002,
+        "h": 4.77
+      },
+      "neutral": false,
+      "combinations": [
+        17,
+        77,
+        252,
+        262,
+        270,
+        280,
+        282,
+        325
+      ],
+      "variant": "B"
+    },
+    {
+      "index": 14,
+      "name": "Raw Sienna",
+      "slug": "raw-sienna",
+      "aliases": [],
+      "sourceName": "Raw Sienna",
+      "sourceSlug": "raw-sienna",
+      "hex": "#b85e00",
+      "rgb": [
+        184,
+        94,
+        0
+      ],
+      "cmyk": [
+        18,
+        58,
+        100,
+        12
+      ],
+      "oklab": {
+        "l": 0.57843,
+        "a": 0.08212,
+        "b": 0.11732
+      },
+      "oklch": {
+        "l": 0.57843,
+        "c": 0.14321,
+        "h": 55.01
+      },
+      "neutral": false,
+      "combinations": [
+        3,
+        13,
+        33,
+        70,
+        86,
+        130,
+        131,
+        182,
+        243,
+        247,
+        252,
+        255,
+        268,
+        269,
+        279,
+        293,
+        298,
+        319,
+        327
+      ]
+    },
+    {
+      "index": 15,
+      "name": "Vinaceous Tawny",
+      "slug": "vinaceous-tawny",
+      "aliases": [],
+      "sourceName": "Vinaceous Tawny",
+      "sourceSlug": "vinaceous-tawny",
+      "hex": "#c74300",
+      "rgb": [
+        199,
+        67,
+        0
+      ],
+      "cmyk": [
+        17,
+        72,
+        100,
+        6
+      ],
+      "oklab": {
+        "l": 0.56377,
+        "a": 0.13735,
+        "b": 0.11371
+      },
+      "oklch": {
+        "l": 0.56377,
+        "c": 0.17831,
+        "h": 39.62
+      },
+      "neutral": false,
+      "combinations": [
+        40,
+        85,
+        244
+      ]
+    },
+    {
+      "index": 16,
+      "name": "Jasper Red",
+      "slug": "jasper-red",
+      "aliases": [],
+      "sourceName": "Jasper Red",
+      "sourceSlug": "jasper-red",
+      "hex": "#fa2b00",
+      "rgb": [
+        250,
+        43,
+        0
+      ],
+      "cmyk": [
+        2,
+        83,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.63251,
+        "a": 0.20482,
+        "b": 0.12701
+      },
+      "oklch": {
+        "l": 0.63251,
+        "c": 0.241,
+        "h": 31.8
+      },
+      "neutral": false,
+      "combinations": [
+        155,
+        194,
+        216,
+        219
+      ]
+    },
+    {
+      "index": 17,
+      "name": "Spectrum Red",
+      "slug": "spectrum-red",
+      "aliases": [],
+      "sourceName": "Spectrum Red",
+      "sourceSlug": "spectrum-red",
+      "hex": "#f20000",
+      "rgb": [
+        242,
+        0,
+        0
+      ],
+      "cmyk": [
+        5,
+        100,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.60356,
+        "a": 0.21613,
+        "b": 0.12096
+      },
+      "oklch": {
+        "l": 0.60356,
+        "c": 0.24768,
+        "h": 29.23
+      },
+      "neutral": false,
+      "combinations": [
+        257,
+        266,
+        301,
+        322
+      ]
+    },
+    {
+      "index": 18,
+      "name": "Red Orange",
+      "slug": "red-orange",
+      "aliases": [],
+      "sourceName": "Red Orange",
+      "sourceSlug": "red-orange",
+      "hex": "#e81900",
+      "rgb": [
+        232,
+        25,
+        0
+      ],
+      "cmyk": [
+        9,
+        90,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.59097,
+        "a": 0.20167,
+        "b": 0.11855
+      },
+      "oklch": {
+        "l": 0.59097,
+        "c": 0.23393,
+        "h": 30.45
+      },
+      "neutral": false,
+      "combinations": [
+        31,
+        164,
+        179,
+        241,
+        264
+      ]
+    },
+    {
+      "index": 19,
+      "name": "Etruscan Red",
+      "slug": "etruscan-red",
+      "aliases": [],
+      "sourceName": "Etruscan Red",
+      "sourceSlug": "etruscan-red",
+      "hex": "#c9303e",
+      "rgb": [
+        201,
+        48,
+        62
+      ],
+      "cmyk": [
+        16,
+        80,
+        74,
+        6
+      ],
+      "oklab": {
+        "l": 0.55313,
+        "a": 0.17543,
+        "b": 0.06882
+      },
+      "oklch": {
+        "l": 0.55313,
+        "c": 0.18845,
+        "h": 21.42
+      },
+      "neutral": false,
+      "combinations": [
+        25,
+        47,
+        97,
+        137,
+        152,
+        185,
+        275
+      ]
+    },
+    {
+      "index": 20,
+      "name": "Burnt Sienna",
+      "slug": "burnt-sienna",
+      "aliases": [],
+      "sourceName": "Burnt Sienna",
+      "sourceSlug": "burnt-sienna",
+      "hex": "#a93400",
+      "rgb": [
+        169,
+        52,
+        0
+      ],
+      "cmyk": [
+        22,
+        76,
+        100,
+        15
+      ],
+      "oklab": {
+        "l": 0.49511,
+        "a": 0.12623,
+        "b": 0.0998
+      },
+      "oklch": {
+        "l": 0.49511,
+        "c": 0.16092,
+        "h": 38.33
+      },
+      "neutral": false,
+      "combinations": [
+        198,
+        242,
+        263,
+        285,
+        286,
+        297,
+        312,
+        333,
+        343
+      ]
+    },
+    {
+      "index": 21,
+      "name": "Ochre Red",
+      "slug": "ochre-red",
+      "aliases": [
+        "Ocher Red"
+      ],
+      "sourceName": "Ochre Red",
+      "sourceSlug": "ochre-red",
+      "hex": "#a7374b",
+      "rgb": [
+        167,
+        55,
+        75
+      ],
+      "cmyk": [
+        18,
+        73,
+        63,
+        20
+      ],
+      "oklab": {
+        "l": 0.50418,
+        "a": 0.14261,
+        "b": 0.03453
+      },
+      "oklch": {
+        "l": 0.50418,
+        "c": 0.14673,
+        "h": 13.61
+      },
+      "neutral": false,
+      "combinations": [
+        199,
+        283
+      ]
+    },
+    {
+      "index": 22,
+      "name": "Scarlet",
+      "slug": "scarlet",
+      "aliases": [],
+      "sourceName": "Scarlet",
+      "sourceSlug": "scarlet",
+      "hex": "#d50c42",
+      "rgb": [
+        213,
+        12,
+        66
+      ],
+      "cmyk": [
+        10,
+        95,
+        72,
+        7
+      ],
+      "oklab": {
+        "l": 0.55674,
+        "a": 0.20902,
+        "b": 0.0644
+      },
+      "oklch": {
+        "l": 0.55674,
+        "c": 0.21872,
+        "h": 17.12
+      },
+      "neutral": false,
+      "combinations": [
+        136,
+        308,
+        332
+      ]
+    },
+    {
+      "index": 23,
+      "name": "Carmine",
+      "slug": "carmine",
+      "aliases": [],
+      "sourceName": "Carmine",
+      "sourceSlug": "carmine",
+      "hex": "#d60036",
+      "rgb": [
+        214,
+        0,
+        54
+      ],
+      "cmyk": [
+        0,
+        100,
+        75,
+        16
+      ],
+      "oklab": {
+        "l": 0.55408,
+        "a": 0.20875,
+        "b": 0.07733
+      },
+      "oklch": {
+        "l": 0.55408,
+        "c": 0.22261,
+        "h": 20.33
+      },
+      "neutral": false,
+      "combinations": [
+        39,
+        117,
+        122,
+        154,
+        225,
+        232,
+        307,
+        313
+      ]
+    },
+    {
+      "index": 24,
+      "name": "Indian Lake",
+      "slug": "indian-lake",
+      "aliases": [],
+      "sourceName": "Indian Lake",
+      "sourceSlug": "indian-lake",
+      "hex": "#cc1a97",
+      "rgb": [
+        204,
+        26,
+        151
+      ],
+      "cmyk": [
+        12,
+        89,
+        35,
+        9
+      ],
+      "oklab": {
+        "l": 0.57161,
+        "a": 0.22269,
+        "b": -0.06138
+      },
+      "oklch": {
+        "l": 0.57161,
+        "c": 0.23099,
+        "h": 344.59
+      },
+      "neutral": false,
+      "combinations": [
+        299,
+        331
+      ]
+    },
+    {
+      "index": 25,
+      "name": "Rosolane Purple",
+      "slug": "rosolane-purple",
+      "aliases": [
+        "Rosolanc Purple"
+      ],
+      "sourceName": "Rosolanc Purple",
+      "sourceSlug": "rosolanc-purple",
+      "hex": "#b319ab",
+      "rgb": [
+        179,
+        25,
+        171
+      ],
+      "cmyk": [
+        30,
+        90,
+        33,
+        0
+      ],
+      "oklab": {
+        "l": 0.54054,
+        "a": 0.2023,
+        "b": -0.1133
+      },
+      "oklch": {
+        "l": 0.54054,
+        "c": 0.23187,
+        "h": 330.75
+      },
+      "neutral": false,
+      "combinations": [
+        48,
+        144,
+        170,
+        204,
+        277
+      ]
+    },
+    {
+      "index": 26,
+      "name": "Pomegranate Purple",
+      "slug": "pomegranate-purple",
+      "aliases": [
+        "Pomegranite Purple"
+      ],
+      "sourceName": "Pomegranite Purple",
+      "sourceSlug": "pomegranite-purple",
+      "hex": "#b90078",
+      "rgb": [
+        185,
+        0,
+        120
+      ],
+      "cmyk": [
+        23,
+        100,
+        50,
+        6
+      ],
+      "oklab": {
+        "l": 0.51746,
+        "a": 0.21256,
+        "b": -0.03543
+      },
+      "oklch": {
+        "l": 0.51746,
+        "c": 0.21549,
+        "h": 350.54
+      },
+      "neutral": false,
+      "combinations": [
+        220,
+        271
+      ]
+    },
+    {
+      "index": 27,
+      "name": "Hydrangea Red",
+      "slug": "hydrangea-red",
+      "aliases": [],
+      "sourceName": "Hydrangea Red",
+      "sourceSlug": "hydrangea-red",
+      "hex": "#9e194d",
+      "rgb": [
+        158,
+        25,
+        77
+      ],
+      "cmyk": [
+        38,
+        90,
+        70,
+        0
+      ],
+      "oklab": {
+        "l": 0.46177,
+        "a": 0.16852,
+        "b": 0.01268
+      },
+      "oklch": {
+        "l": 0.46177,
+        "c": 0.169,
+        "h": 4.3
+      },
+      "neutral": false,
+      "combinations": [
+        142
+      ]
+    },
+    {
+      "index": 28,
+      "name": "Brick Red",
+      "slug": "brick-red",
+      "aliases": [],
+      "sourceName": "Brick Red",
+      "sourceSlug": "brick-red",
+      "hex": "#a32100",
+      "rgb": [
+        163,
+        33,
+        0
+      ],
+      "cmyk": [
+        22,
+        84,
+        100,
+        18
+      ],
+      "oklab": {
+        "l": 0.46564,
+        "a": 0.14145,
+        "b": 0.09361
+      },
+      "oklch": {
+        "l": 0.46564,
+        "c": 0.16962,
+        "h": 33.5
+      },
+      "neutral": false,
+      "combinations": [
+        37,
+        108,
+        246,
+        322,
+        328
+      ]
+    },
+    {
+      "index": 29,
+      "name": "Carmine Red",
+      "slug": "carmine-red",
+      "aliases": [],
+      "sourceName": "Carmine Red",
+      "sourceSlug": "carmine-red",
+      "hex": "#a10b2b",
+      "rgb": [
+        161,
+        11,
+        43
+      ],
+      "cmyk": [
+        25,
+        95,
+        80,
+        16
+      ],
+      "oklab": {
+        "l": 0.45285,
+        "a": 0.16603,
+        "b": 0.05846
+      },
+      "oklch": {
+        "l": 0.45285,
+        "c": 0.17602,
+        "h": 19.4
+      },
+      "neutral": false,
+      "combinations": [
+        35,
+        51,
+        104,
+        130,
+        181,
+        200,
+        221,
+        228,
+        233,
+        237,
+        245
+      ]
+    },
+    {
+      "index": 30,
+      "name": "Pompeian Red",
+      "slug": "pompeian-red",
+      "aliases": [],
+      "sourceName": "Pompeian Red",
+      "sourceSlug": "pompeian-red",
+      "hex": "#a90636",
+      "rgb": [
+        169,
+        6,
+        54
+      ],
+      "cmyk": [
+        18,
+        97,
+        74,
+        19
+      ],
+      "oklab": {
+        "l": 0.46887,
+        "a": 0.17779,
+        "b": 0.04966
+      },
+      "oklch": {
+        "l": 0.46887,
+        "c": 0.1846,
+        "h": 15.61
+      },
+      "neutral": false,
+      "combinations": [
+        30,
+        71,
+        120,
+        212,
+        311,
+        324
+      ]
+    },
+    {
+      "index": 31,
+      "name": "Red",
+      "slug": "red",
+      "aliases": [],
+      "sourceName": "Red",
+      "sourceSlug": "red",
+      "hex": "#a10045",
+      "rgb": [
+        161,
+        0,
+        69
+      ],
+      "cmyk": [
+        30,
+        100,
+        70,
+        10
+      ],
+      "oklab": {
+        "l": 0.45481,
+        "a": 0.18097,
+        "b": 0.02209
+      },
+      "oklch": {
+        "l": 0.45481,
+        "c": 0.18231,
+        "h": 6.96
+      },
+      "neutral": false,
+      "combinations": [
+        251,
+        261
+      ]
+    },
+    {
+      "index": 32,
+      "name": "Brown",
+      "slug": "brown",
+      "aliases": [],
+      "sourceName": "Brown",
+      "sourceSlug": "brown",
+      "hex": "#6c2b11",
+      "rgb": [
+        108,
+        43,
+        17
+      ],
+      "cmyk": [
+        35,
+        74,
+        90,
+        35
+      ],
+      "oklab": {
+        "l": 0.37767,
+        "a": 0.07597,
+        "b": 0.06513
+      },
+      "oklch": {
+        "l": 0.37767,
+        "c": 0.10007,
+        "h": 40.61
+      },
+      "neutral": false,
+      "combinations": [
+        110,
+        121,
+        145,
+        161
+      ]
+    },
+    {
+      "index": 33,
+      "name": "Hay's Russet",
+      "slug": "hays-russet",
+      "aliases": [],
+      "sourceName": "Hay's Russet",
+      "sourceSlug": "hay's-russet",
+      "hex": "#681916",
+      "rgb": [
+        104,
+        25,
+        22
+      ],
+      "cmyk": [
+        37,
+        85,
+        87,
+        35
+      ],
+      "oklab": {
+        "l": 0.3465,
+        "a": 0.10022,
+        "b": 0.05112
+      },
+      "oklch": {
+        "l": 0.3465,
+        "c": 0.1125,
+        "h": 27.03
+      },
+      "neutral": false,
+      "combinations": [
+        58,
+        82,
+        95,
+        152,
+        186,
+        231,
+        249,
+        304,
+        314,
+        336,
+        345
+      ]
+    },
+    {
+      "index": 34,
+      "name": "Vandyke Red",
+      "slug": "vandyke-red",
+      "aliases": [],
+      "sourceName": "Vandyke Red",
+      "sourceSlug": "vandyke-red",
+      "hex": "#740909",
+      "rgb": [
+        116,
+        9,
+        9
+      ],
+      "cmyk": [
+        32,
+        95,
+        95,
+        33
+      ],
+      "oklab": {
+        "l": 0.35663,
+        "a": 0.1221,
+        "b": 0.06509
+      },
+      "oklch": {
+        "l": 0.35663,
+        "c": 0.13837,
+        "h": 28.06
+      },
+      "neutral": false,
+      "combinations": [
+        16,
+        133,
+        147,
+        316,
+        335
+      ]
+    },
+    {
+      "index": 35,
+      "name": "Pansy Purple",
+      "slug": "pansy-purple",
+      "aliases": [],
+      "sourceName": "Pansy Purple",
+      "sourceSlug": "pansy-purple",
+      "hex": "#6f0043",
+      "rgb": [
+        111,
+        0,
+        67
+      ],
+      "cmyk": [
+        34,
+        100,
+        60,
+        34
+      ],
+      "oklab": {
+        "l": 0.35534,
+        "a": 0.14575,
+        "b": -0.01906
+      },
+      "oklch": {
+        "l": 0.35534,
+        "c": 0.14699,
+        "h": 352.55
+      },
+      "neutral": false,
+      "combinations": [
+        157,
+        273
+      ]
+    },
+    {
+      "index": 36,
+      "name": "Pale Burnt Lake",
+      "slug": "pale-burnt-lake",
+      "aliases": [],
+      "sourceName": "Pale Burnt Lake",
+      "sourceSlug": "pale-burnt-lake",
+      "hex": "#730f1f",
+      "rgb": [
+        115,
+        15,
+        31
+      ],
+      "cmyk": [
+        25,
+        90,
+        80,
+        40
+      ],
+      "oklab": {
+        "l": 0.36091,
+        "a": 0.12437,
+        "b": 0.04408
+      },
+      "oklch": {
+        "l": 0.36091,
+        "c": 0.13195,
+        "h": 19.52
+      },
+      "neutral": false,
+      "combinations": [
+        124,
+        171,
+        177,
+        205,
+        217,
+        258,
+        269,
+        283
+      ]
+    },
+    {
+      "index": 37,
+      "name": "Violet Red",
+      "slug": "violet-red",
+      "aliases": [],
+      "sourceName": "Violet Red",
+      "sourceSlug": "violet-red",
+      "hex": "#3d0079",
+      "rgb": [
+        61,
+        0,
+        121
+      ],
+      "cmyk": [
+        75,
+        100,
+        50,
+        5
+      ],
+      "oklab": {
+        "l": 0.31043,
+        "a": 0.0751,
+        "b": -0.15155
+      },
+      "oklch": {
+        "l": 0.31043,
+        "c": 0.16914,
+        "h": 296.36
+      },
+      "neutral": false,
+      "combinations": [
+        9
+      ]
+    },
+    {
+      "index": 38,
+      "name": "Victoria Lake",
+      "slug": "victoria-lake",
+      "aliases": [
+        "Vistoris Lake"
+      ],
+      "sourceName": "Vistoris Lake",
+      "sourceSlug": "vistoris-lake",
+      "hex": "#5c2c45",
+      "rgb": [
+        92,
+        44,
+        69
+      ],
+      "cmyk": [
+        40,
+        71,
+        55,
+        40
+      ],
+      "oklab": {
+        "l": 0.36596,
+        "a": 0.07613,
+        "b": -0.01464
+      },
+      "oklch": {
+        "l": 0.36596,
+        "c": 0.07752,
+        "h": 349.11
+      },
+      "neutral": false,
+      "combinations": [
+        63,
+        91,
+        165,
+        226,
+        290,
+        337
+      ]
+    },
+    {
+      "index": 39,
+      "name": "Sulphur Yellow",
+      "slug": "sulphur-yellow",
+      "aliases": [
+        "Sulfur Yellow",
+        "Sulpher Yellow"
+      ],
+      "sourceName": "Sulpher Yellow",
+      "sourceSlug": "sulpher-yellow",
+      "hex": "#f5f5b8",
+      "rgb": [
+        245,
+        245,
+        184
+      ],
+      "cmyk": [
+        4,
+        4,
+        28,
+        0
+      ],
+      "oklab": {
+        "l": 0.95559,
+        "a": -0.02386,
+        "b": 0.07436
+      },
+      "oklch": {
+        "l": 0.95559,
+        "c": 0.07809,
+        "h": 107.79
+      },
+      "neutral": false,
+      "combinations": [
+        52,
+        72,
+        80,
+        104,
+        132,
+        135,
+        151,
+        208,
+        246,
+        254,
+        270,
+        294,
+        296,
+        310,
+        315,
+        320,
+        321,
+        326
+      ]
+    },
+    {
+      "index": 40,
+      "name": "Pale Lemon Yellow",
+      "slug": "pale-lemon-yellow",
+      "aliases": [],
+      "sourceName": "Pale Lemon Yellow",
+      "sourceSlug": "pale-lemon-yellow",
+      "hex": "#fff59e",
+      "rgb": [
+        255,
+        245,
+        158
+      ],
+      "cmyk": [
+        0,
+        4,
+        38,
+        0
+      ],
+      "oklab": {
+        "l": 0.95896,
+        "a": -0.02351,
+        "b": 0.10558
+      },
+      "oklch": {
+        "l": 0.95896,
+        "c": 0.10817,
+        "h": 102.55
+      },
+      "neutral": false,
+      "combinations": [
+        3,
+        31,
+        60,
+        76,
+        99,
+        109,
+        111,
+        169,
+        185,
+        195,
+        203,
+        228,
+        241,
+        261,
+        272,
+        281,
+        290,
+        292,
+        336
+      ]
+    },
+    {
+      "index": 41,
+      "name": "Naples Yellow",
+      "slug": "naples-yellow",
+      "aliases": [],
+      "sourceName": "Naples Yellow",
+      "sourceSlug": "naples-yellow",
+      "hex": "#faed8f",
+      "rgb": [
+        250,
+        237,
+        143
+      ],
+      "cmyk": [
+        2,
+        7,
+        44,
+        0
+      ],
+      "oklab": {
+        "l": 0.93644,
+        "a": -0.02304,
+        "b": 0.11375
+      },
+      "oklch": {
+        "l": 0.93644,
+        "c": 0.11606,
+        "h": 101.45
+      },
+      "neutral": false,
+      "combinations": [
+        14,
+        115,
+        166,
+        193,
+        303,
+        325
+      ]
+    },
+    {
+      "index": 42,
+      "name": "Ivory Buff",
+      "slug": "ivory-buff",
+      "aliases": [],
+      "sourceName": "Ivory Buff",
+      "sourceSlug": "ivory-buff",
+      "hex": "#ebd999",
+      "rgb": [
+        235,
+        217,
+        153
+      ],
+      "cmyk": [
+        8,
+        15,
+        40,
+        0
+      ],
+      "oklab": {
+        "l": 0.88518,
+        "a": -0.00627,
+        "b": 0.08402
+      },
+      "oklch": {
+        "l": 0.88518,
+        "c": 0.08425,
+        "h": 94.27
+      },
+      "neutral": false,
+      "combinations": [
+        11,
+        50,
+        94,
+        102,
+        126,
+        178,
+        184,
+        190,
+        209,
+        214,
+        235,
+        243,
+        262,
+        266,
+        301,
+        343
+      ]
+    },
+    {
+      "index": 43,
+      "name": "Seashell Pink",
+      "slug": "seashell-pink",
+      "aliases": [],
+      "sourceName": "Seashell Pink",
+      "sourceSlug": "seashell-pink",
+      "hex": "#ffcfc4",
+      "rgb": [
+        255,
+        207,
+        196
+      ],
+      "cmyk": [
+        0,
+        19,
+        23,
+        0
+      ],
+      "oklab": {
+        "l": 0.89316,
+        "a": 0.04747,
+        "b": 0.03095
+      },
+      "oklch": {
+        "l": 0.89316,
+        "c": 0.05667,
+        "h": 33.1
+      },
+      "neutral": false,
+      "combinations": [
+        45,
+        84,
+        88,
+        113,
+        150,
+        176,
+        194,
+        276,
+        334
+      ]
+    },
+    {
+      "index": 44,
+      "name": "Light Pinkish Cinnamon",
+      "slug": "light-pinkish-cinnamon",
+      "aliases": [],
+      "sourceName": "Light Pinkish Cinnamon",
+      "sourceSlug": "light-pinkish-cinnamon",
+      "hex": "#ffbf99",
+      "rgb": [
+        255,
+        191,
+        153
+      ],
+      "cmyk": [
+        0,
+        25,
+        40,
+        0
+      ],
+      "oklab": {
+        "l": 0.85413,
+        "a": 0.05537,
+        "b": 0.07049
+      },
+      "oklch": {
+        "l": 0.85413,
+        "c": 0.08964,
+        "h": 51.85
+      },
+      "neutral": false,
+      "combinations": [
+        317
+      ]
+    },
+    {
+      "index": 45,
+      "name": "Pinkish Cinnamon",
+      "slug": "pinkish-cinnamon",
+      "aliases": [],
+      "sourceName": "Pinkish Cinnamon",
+      "sourceSlug": "pinkish-cinnamon",
+      "hex": "#f2ad78",
+      "rgb": [
+        242,
+        173,
+        120
+      ],
+      "cmyk": [
+        5,
+        32,
+        53,
+        0
+      ],
+      "oklab": {
+        "l": 0.80156,
+        "a": 0.05629,
+        "b": 0.09021
+      },
+      "oklch": {
+        "l": 0.80156,
+        "c": 0.10633,
+        "h": 58.04
+      },
+      "neutral": false,
+      "combinations": [
+        78,
+        175,
+        232,
+        258,
+        263,
+        292,
+        305,
+        310
+      ]
+    },
+    {
+      "index": 46,
+      "name": "Cinnamon Buff",
+      "slug": "cinnamon-buff",
+      "aliases": [],
+      "sourceName": "Cinnamon Buff",
+      "sourceSlug": "cinnamon-buff",
+      "hex": "#ffbf6e",
+      "rgb": [
+        255,
+        191,
+        110
+      ],
+      "cmyk": [
+        0,
+        25,
+        57,
+        0
+      ],
+      "oklab": {
+        "l": 0.8471,
+        "a": 0.03925,
+        "b": 0.11634
+      },
+      "oklch": {
+        "l": 0.8471,
+        "c": 0.12278,
+        "h": 71.36
+      },
+      "neutral": false,
+      "combinations": [
+        23,
+        127,
+        137,
+        180,
+        210,
+        234,
+        246,
+        323,
+        344
+      ]
+    },
+    {
+      "index": 47,
+      "name": "Cream Yellow",
+      "slug": "cream-yellow",
+      "aliases": [],
+      "sourceName": "Cream Yellow",
+      "sourceSlug": "cream-yellow",
+      "hex": "#ffb852",
+      "rgb": [
+        255,
+        184,
+        82
+      ],
+      "cmyk": [
+        0,
+        28,
+        68,
+        0
+      ],
+      "oklab": {
+        "l": 0.83097,
+        "a": 0.04103,
+        "b": 0.13615
+      },
+      "oklch": {
+        "l": 0.83097,
+        "c": 0.1422,
+        "h": 73.23
+      },
+      "neutral": false,
+      "combinations": [
+        122,
+        192,
+        215,
+        226,
+        267,
+        278,
+        294,
+        295,
+        300,
+        302,
+        304,
+        311,
+        329,
+        342
+      ]
+    },
+    {
+      "index": 48,
+      "name": "Golden Yellow",
+      "slug": "golden-yellow",
+      "aliases": [],
+      "sourceName": "Golden Yellow",
+      "sourceSlug": "golden-yellow",
+      "hex": "#fa9442",
+      "rgb": [
+        250,
+        148,
+        66
+      ],
+      "cmyk": [
+        2,
+        42,
+        74,
+        0
+      ],
+      "oklab": {
+        "l": 0.76021,
+        "a": 0.08645,
+        "b": 0.1282
+      },
+      "oklch": {
+        "l": 0.76021,
+        "c": 0.15462,
+        "h": 56.01
+      },
+      "neutral": false,
+      "combinations": [
+        26,
+        81,
+        132,
+        138,
+        140,
+        179
+      ]
+    },
+    {
+      "index": 49,
+      "name": "Vinaceous Cinnamon",
+      "slug": "vinaceous-cinnamon",
+      "aliases": [],
+      "sourceName": "Vinaceous Cinnamon",
+      "sourceSlug": "vinaceous-cinnamon",
+      "hex": "#f59994",
+      "rgb": [
+        245,
+        153,
+        148
+      ],
+      "cmyk": [
+        4,
+        40,
+        42,
+        0
+      ],
+      "oklab": {
+        "l": 0.77543,
+        "a": 0.10228,
+        "b": 0.04408
+      },
+      "oklch": {
+        "l": 0.77543,
+        "c": 0.11137,
+        "h": 23.31
+      },
+      "neutral": false,
+      "combinations": [
+        203,
+        205,
+        213,
+        256,
+        260,
+        279,
+        299
+      ]
+    },
+    {
+      "index": 50,
+      "name": "Ochraceous Salmon",
+      "slug": "ochraceous-salmon",
+      "aliases": [],
+      "sourceName": "Ochraceous Salmon",
+      "sourceSlug": "ochraceous-salmon",
+      "hex": "#d99e73",
+      "rgb": [
+        217,
+        158,
+        115
+      ],
+      "cmyk": [
+        15,
+        38,
+        55,
+        0
+      ],
+      "oklab": {
+        "l": 0.74582,
+        "a": 0.04976,
+        "b": 0.07632
+      },
+      "oklch": {
+        "l": 0.74582,
+        "c": 0.09111,
+        "h": 56.9
+      },
+      "neutral": false,
+      "combinations": [
+        32,
+        71,
+        121,
+        186,
+        217,
+        220,
+        223,
+        238,
+        296,
+        339
+      ]
+    },
+    {
+      "index": 51,
+      "name": "Isabella Color",
+      "slug": "isabella-color",
+      "aliases": [],
+      "sourceName": "Isabella Color",
+      "sourceSlug": "isabella-color",
+      "hex": "#c3a55c",
+      "rgb": [
+        195,
+        165,
+        92
+      ],
+      "cmyk": [
+        15,
+        28,
+        60,
+        10
+      ],
+      "oklab": {
+        "l": 0.73313,
+        "a": 0.00418,
+        "b": 0.0988
+      },
+      "oklch": {
+        "l": 0.73313,
+        "c": 0.09889,
+        "h": 87.58
+      },
+      "neutral": false,
+      "combinations": [
+        4,
+        12,
+        241,
+        292
+      ]
+    },
+    {
+      "index": 52,
+      "name": "Maple",
+      "slug": "maple",
+      "aliases": [],
+      "sourceName": "Maple",
+      "sourceSlug": "maple",
+      "hex": "#c2975a",
+      "rgb": [
+        194,
+        151,
+        90
+      ],
+      "cmyk": [
+        5,
+        26,
+        56,
+        20
+      ],
+      "oklab": {
+        "l": 0.70356,
+        "a": 0.02449,
+        "b": 0.09084
+      },
+      "oklch": {
+        "l": 0.70356,
+        "c": 0.09408,
+        "h": 74.91
+      },
+      "neutral": false,
+      "combinations": [
+        282
+      ]
+    },
+    {
+      "index": 53,
+      "name": "Olive Buff",
+      "slug": "olive-buff",
+      "aliases": [],
+      "sourceName": "Olive Buff",
+      "sourceSlug": "olive-buff",
+      "hex": "#bcd382",
+      "rgb": [
+        188,
+        211,
+        130
+      ],
+      "cmyk": [
+        16,
+        6,
+        42,
+        12
+      ],
+      "oklab": {
+        "l": 0.83092,
+        "a": -0.05695,
+        "b": 0.09218
+      },
+      "oklch": {
+        "l": 0.83092,
+        "c": 0.10835,
+        "h": 121.71
+      },
+      "neutral": false,
+      "combinations": [
+        83,
+        175,
+        200,
+        330,
+        348
+      ]
+    },
+    {
+      "index": 54,
+      "name": "Ecru",
+      "slug": "ecru",
+      "aliases": [],
+      "sourceName": "Ecru",
+      "sourceSlug": "ecru",
+      "hex": "#c0b490",
+      "rgb": [
+        192,
+        180,
+        144
+      ],
+      "cmyk": [
+        20,
+        25,
+        40,
+        6
+      ],
+      "oklab": {
+        "l": 0.7707,
+        "a": -0.0016,
+        "b": 0.05077
+      },
+      "oklch": {
+        "l": 0.7707,
+        "c": 0.0508,
+        "h": 91.81
+      },
+      "neutral": false,
+      "combinations": [
+        167,
+        249,
+        275,
+        279,
+        292,
+        302,
+        317,
+        327
+      ]
+    },
+    {
+      "index": 55,
+      "name": "Yellow",
+      "slug": "yellow",
+      "aliases": [],
+      "sourceName": "Yellow",
+      "sourceSlug": "yellow",
+      "hex": "#ffff00",
+      "rgb": [
+        255,
+        255,
+        0
+      ],
+      "cmyk": [
+        0,
+        0,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.96798,
+        "a": -0.07137,
+        "b": 0.19857
+      },
+      "oklch": {
+        "l": 0.96798,
+        "c": 0.21101,
+        "h": 109.77
+      },
+      "neutral": false,
+      "combinations": [
+        22,
+        62,
+        68,
+        154,
+        240,
+        251,
+        295,
+        313
+      ]
+    },
+    {
+      "index": 56,
+      "name": "Lemon Yellow",
+      "slug": "lemon-yellow",
+      "aliases": [],
+      "sourceName": "Lemon Yellow",
+      "sourceSlug": "lemon-yellow",
+      "hex": "#f2ff26",
+      "rgb": [
+        242,
+        255,
+        38
+      ],
+      "cmyk": [
+        5,
+        0,
+        85,
+        0
+      ],
+      "oklab": {
+        "l": 0.9584,
+        "a": -0.083,
+        "b": 0.1908
+      },
+      "oklch": {
+        "l": 0.9584,
+        "c": 0.20807,
+        "h": 113.51
+      },
+      "neutral": false,
+      "combinations": [
+        45,
+        123,
+        138,
+        158,
+        168,
+        173,
+        189,
+        210,
+        253,
+        259,
+        289,
+        298,
+        306,
+        317,
+        333
+      ]
+    },
+    {
+      "index": 57,
+      "name": "Apricot Yellow",
+      "slug": "apricot-yellow",
+      "aliases": [],
+      "sourceName": "Apricot Yellow",
+      "sourceSlug": "apricot-yellow",
+      "hex": "#ffe600",
+      "rgb": [
+        255,
+        230,
+        0
+      ],
+      "cmyk": [
+        0,
+        10,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.91677,
+        "a": -0.03788,
+        "b": 0.18775
+      },
+      "oklch": {
+        "l": 0.91677,
+        "c": 0.19153,
+        "h": 101.41
+      },
+      "neutral": false,
+      "combinations": [
+        107,
+        129,
+        163,
+        198,
+        213,
+        247,
+        265,
+        284,
+        305,
+        319
+      ]
+    },
+    {
+      "index": 58,
+      "name": "Pyrite Yellow",
+      "slug": "pyrite-yellow",
+      "aliases": [],
+      "sourceName": "Pyrite Yellow",
+      "sourceSlug": "pyrite-yellow",
+      "hex": "#c4bf33",
+      "rgb": [
+        196,
+        191,
+        51
+      ],
+      "cmyk": [
+        23,
+        25,
+        80,
+        0
+      ],
+      "oklab": {
+        "l": 0.78484,
+        "a": -0.04564,
+        "b": 0.14602
+      },
+      "oklch": {
+        "l": 0.78484,
+        "c": 0.15299,
+        "h": 107.36
+      },
+      "neutral": false,
+      "combinations": [
+        239,
+        250,
+        255,
+        287
+      ]
+    },
+    {
+      "index": 59,
+      "name": "Olive Ocher",
+      "slug": "olive-ocher",
+      "aliases": [
+        "Olive Ochre"
+      ],
+      "sourceName": "Olive Ocher",
+      "sourceSlug": "olive-ocher",
+      "hex": "#d1bd19",
+      "rgb": [
+        209,
+        189,
+        25
+      ],
+      "cmyk": [
+        18,
+        26,
+        90,
+        0
+      ],
+      "oklab": {
+        "l": 0.79106,
+        "a": -0.03185,
+        "b": 0.15758
+      },
+      "oklch": {
+        "l": 0.79106,
+        "c": 0.16077,
+        "h": 101.43
+      },
+      "neutral": false,
+      "combinations": [
+        66,
+        148,
+        149,
+        156,
+        157,
+        249,
+        278
+      ]
+    },
+    {
+      "index": 60,
+      "name": "Yellow Ocher",
+      "slug": "yellow-ocher",
+      "aliases": [
+        "Yellow Ochre"
+      ],
+      "sourceName": "Yellow Ocher",
+      "sourceSlug": "yellow-ocher",
+      "hex": "#e0b81f",
+      "rgb": [
+        224,
+        184,
+        31
+      ],
+      "cmyk": [
+        12,
+        28,
+        88,
+        0
+      ],
+      "oklab": {
+        "l": 0.7954,
+        "a": -0.00614,
+        "b": 0.15644
+      },
+      "oklch": {
+        "l": 0.7954,
+        "c": 0.15656,
+        "h": 92.25
+      },
+      "neutral": false,
+      "combinations": [
+        42,
+        96,
+        118,
+        124,
+        126,
+        191,
+        222,
+        325
+      ]
+    },
+    {
+      "index": 61,
+      "name": "Orange Yellow",
+      "slug": "orange-yellow",
+      "aliases": [],
+      "sourceName": "Orange Yellow",
+      "sourceSlug": "orange-yellow",
+      "hex": "#ffab00",
+      "rgb": [
+        255,
+        171,
+        0
+      ],
+      "cmyk": [
+        0,
+        33,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.80337,
+        "a": 0.04759,
+        "b": 0.16366
+      },
+      "oklch": {
+        "l": 0.80337,
+        "c": 0.17044,
+        "h": 73.79
+      },
+      "neutral": false,
+      "combinations": [
+        114,
+        148,
+        153,
+        164,
+        170,
+        257,
+        286,
+        338
+      ]
+    },
+    {
+      "index": 62,
+      "name": "Yellow Orange",
+      "slug": "yellow-orange",
+      "aliases": [],
+      "sourceName": "Yellow Orange",
+      "sourceSlug": "yellow-orange",
+      "hex": "#ff8c00",
+      "rgb": [
+        255,
+        140,
+        0
+      ],
+      "cmyk": [
+        0,
+        45,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.75054,
+        "a": 0.09417,
+        "b": 0.15236
+      },
+      "oklch": {
+        "l": 0.75054,
+        "c": 0.17911,
+        "h": 58.28
+      },
+      "neutral": false,
+      "combinations": [
+        22,
+        53,
+        89,
+        151,
+        171,
+        209,
+        222,
+        235,
+        267,
+        288,
+        297,
+        312,
+        319,
+        335
+      ]
+    },
+    {
+      "index": 63,
+      "name": "Apricot Orange",
+      "slug": "apricot-orange",
+      "aliases": [],
+      "sourceName": "Apricot Orange",
+      "sourceSlug": "apricot-orange",
+      "hex": "#ff7340",
+      "rgb": [
+        255,
+        115,
+        64
+      ],
+      "cmyk": [
+        0,
+        55,
+        75,
+        0
+      ],
+      "oklab": {
+        "l": 0.71623,
+        "a": 0.14091,
+        "b": 0.11681
+      },
+      "oklch": {
+        "l": 0.71623,
+        "c": 0.18303,
+        "h": 39.66
+      },
+      "neutral": false,
+      "combinations": [
+        211,
+        253,
+        309,
+        328
+      ]
+    },
+    {
+      "index": 64,
+      "name": "Orange",
+      "slug": "orange",
+      "aliases": [],
+      "sourceName": "Orange",
+      "sourceSlug": "orange",
+      "hex": "#ff5200",
+      "rgb": [
+        255,
+        82,
+        0
+      ],
+      "cmyk": [
+        0,
+        68,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.67272,
+        "a": 0.17296,
+        "b": 0.13559
+      },
+      "oklch": {
+        "l": 0.67272,
+        "c": 0.21977,
+        "h": 38.09
+      },
+      "neutral": false,
+      "combinations": [
+        7,
+        46,
+        141,
+        144,
+        149,
+        256,
+        272
+      ]
+    },
+    {
+      "index": 65,
+      "name": "Peach Red",
+      "slug": "peach-red",
+      "aliases": [],
+      "sourceName": "Peach Red",
+      "sourceSlug": "peach-red",
+      "hex": "#ff3319",
+      "rgb": [
+        255,
+        51,
+        25
+      ],
+      "cmyk": [
+        0,
+        80,
+        90,
+        0
+      ],
+      "oklab": {
+        "l": 0.64707,
+        "a": 0.20554,
+        "b": 0.12295
+      },
+      "oklch": {
+        "l": 0.64707,
+        "c": 0.23951,
+        "h": 30.89
+      },
+      "neutral": false,
+      "combinations": [
+        115,
+        250,
+        274,
+        285,
+        298,
+        303,
+        326,
+        340
+      ]
+    },
+    {
+      "index": 66,
+      "name": "English Red",
+      "slug": "english-red",
+      "aliases": [],
+      "sourceName": "English Red",
+      "sourceSlug": "english-red",
+      "hex": "#de4500",
+      "rgb": [
+        222,
+        69,
+        0
+      ],
+      "cmyk": [
+        13,
+        73,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.60456,
+        "a": 0.1572,
+        "b": 0.12183
+      },
+      "oklch": {
+        "l": 0.60456,
+        "c": 0.19888,
+        "h": 37.78
+      },
+      "neutral": false,
+      "combinations": [
+        1,
+        131,
+        190,
+        308,
+        339
+      ]
+    },
+    {
+      "index": 67,
+      "name": "Cinnamon Rufous",
+      "slug": "cinnamon-rufous",
+      "aliases": [],
+      "sourceName": "Cinnamon Rufous",
+      "sourceSlug": "cinnamon-rufous",
+      "hex": "#c2612c",
+      "rgb": [
+        194,
+        97,
+        44
+      ],
+      "cmyk": [
+        20,
+        60,
+        82,
+        5
+      ],
+      "oklab": {
+        "l": 0.59994,
+        "a": 0.09666,
+        "b": 0.10185
+      },
+      "oklch": {
+        "l": 0.59994,
+        "c": 0.14042,
+        "h": 46.5
+      },
+      "neutral": false,
+      "combinations": [
+        8,
+        10,
+        103,
+        158,
+        172,
+        204,
+        206
+      ]
+    },
+    {
+      "index": 68,
+      "name": "Orange Rufous",
+      "slug": "orange-rufous",
+      "aliases": [],
+      "sourceName": "Orange Rufous",
+      "sourceSlug": "orange-rufous",
+      "hex": "#c05200",
+      "rgb": [
+        192,
+        82,
+        0
+      ],
+      "cmyk": [
+        18,
+        65,
+        100,
+        8
+      ],
+      "oklab": {
+        "l": 0.57197,
+        "a": 0.10948,
+        "b": 0.1157
+      },
+      "oklch": {
+        "l": 0.57197,
+        "c": 0.15929,
+        "h": 46.58
+      },
+      "neutral": false,
+      "combinations": [
+        91,
+        102,
+        222
+      ]
+    },
+    {
+      "index": 69,
+      "name": "Sulphine Yellow",
+      "slug": "sulphine-yellow",
+      "aliases": [],
+      "sourceName": "Sulphine Yellow",
+      "sourceSlug": "sulphine-yellow",
+      "hex": "#baa600",
+      "rgb": [
+        186,
+        166,
+        0
+      ],
+      "cmyk": [
+        24,
+        32,
+        100,
+        4
+      ],
+      "oklab": {
+        "l": 0.72023,
+        "a": -0.02782,
+        "b": 0.14748
+      },
+      "oklch": {
+        "l": 0.72023,
+        "c": 0.15008,
+        "h": 100.68
+      },
+      "neutral": false,
+      "combinations": [
+        36,
+        65,
+        142,
+        160,
+        252
+      ]
+    },
+    {
+      "index": 70,
+      "name": "Khaki",
+      "slug": "khaki",
+      "aliases": [],
+      "sourceName": "Khaki",
+      "sourceSlug": "khaki",
+      "hex": "#b68400",
+      "rgb": [
+        182,
+        132,
+        0
+      ],
+      "cmyk": [
+        24,
+        45,
+        100,
+        6
+      ],
+      "oklab": {
+        "l": 0.64555,
+        "a": 0.01912,
+        "b": 0.13172
+      },
+      "oklch": {
+        "l": 0.64555,
+        "c": 0.1331,
+        "h": 81.74
+      },
+      "neutral": false,
+      "combinations": [
+        129,
+        146,
+        159,
+        236,
+        248
+      ]
+    },
+    {
+      "index": 71,
+      "name": "Citron Yellow",
+      "slug": "citron-yellow",
+      "aliases": [],
+      "sourceName": "Citron Yellow",
+      "sourceSlug": "citron-yellow",
+      "hex": "#a6d40d",
+      "rgb": [
+        166,
+        212,
+        13
+      ],
+      "cmyk": [
+        35,
+        17,
+        95,
+        0
+      ],
+      "oklab": {
+        "l": 0.80774,
+        "a": -0.11106,
+        "b": 0.16451
+      },
+      "oklch": {
+        "l": 0.80774,
+        "c": 0.19849,
+        "h": 124.02
+      },
+      "neutral": false,
+      "combinations": [
+        59,
+        93,
+        132,
+        133,
+        262
+      ]
+    },
+    {
+      "index": 72,
+      "name": "Buffy Citrine",
+      "slug": "buffy-citrine",
+      "aliases": [],
+      "sourceName": "Buffy Citrine",
+      "sourceSlug": "buffy-citrine",
+      "hex": "#888d2a",
+      "rgb": [
+        136,
+        141,
+        42
+      ],
+      "cmyk": [
+        42,
+        40,
+        82,
+        8
+      ],
+      "oklab": {
+        "l": 0.62024,
+        "a": -0.04535,
+        "b": 0.11087
+      },
+      "oklch": {
+        "l": 0.62024,
+        "c": 0.11979,
+        "h": 112.25
+      },
+      "neutral": false,
+      "combinations": [
+        100,
+        177,
+        233
+      ]
+    },
+    {
+      "index": 73,
+      "name": "Dark Citrine",
+      "slug": "dark-citrine",
+      "aliases": [],
+      "sourceName": "Dark Citrine",
+      "sourceSlug": "dark-citrine",
+      "hex": "#7e8743",
+      "rgb": [
+        126,
+        135,
+        67
+      ],
+      "cmyk": [
+        38,
+        34,
+        67,
+        20
+      ],
+      "oklab": {
+        "l": 0.60036,
+        "a": -0.03979,
+        "b": 0.08354
+      },
+      "oklch": {
+        "l": 0.60036,
+        "c": 0.09253,
+        "h": 115.47
+      },
+      "neutral": false,
+      "combinations": [
+        10,
+        41,
+        274,
+        304
+      ]
+    },
+    {
+      "index": 74,
+      "name": "Light Grayish Olive",
+      "slug": "light-grayish-olive",
+      "aliases": [],
+      "sourceName": "Light Grayish Olive",
+      "sourceSlug": "light-grayish-olive",
+      "hex": "#76844e",
+      "rgb": [
+        118,
+        132,
+        78
+      ],
+      "cmyk": [
+        43,
+        36,
+        62,
+        19
+      ],
+      "oklab": {
+        "l": 0.5884,
+        "a": -0.03987,
+        "b": 0.06713
+      },
+      "oklch": {
+        "l": 0.5884,
+        "c": 0.07808,
+        "h": 120.71
+      },
+      "neutral": false,
+      "combinations": [
+        107,
+        184
+      ]
+    },
+    {
+      "index": 75,
+      "name": "Kronberg's Green",
+      "slug": "kronbergs-green",
+      "aliases": [
+        "Krongbergs Green"
+      ],
+      "sourceName": "Krongbergs Green",
+      "sourceSlug": "krongbergs-green",
+      "hex": "#759243",
+      "rgb": [
+        117,
+        146,
+        67
+      ],
+      "cmyk": [
+        48,
+        35,
+        70,
+        12
+      ],
+      "oklab": {
+        "l": 0.61971,
+        "a": -0.06592,
+        "b": 0.09012
+      },
+      "oklch": {
+        "l": 0.61971,
+        "c": 0.11166,
+        "h": 126.18
+      },
+      "neutral": false,
+      "combinations": [
+        29
+      ]
+    },
+    {
+      "index": 76,
+      "name": "Olive",
+      "slug": "olive",
+      "aliases": [],
+      "sourceName": "Olive",
+      "sourceSlug": "olive",
+      "hex": "#718600",
+      "rgb": [
+        113,
+        134,
+        0
+      ],
+      "cmyk": [
+        48,
+        38,
+        100,
+        15
+      ],
+      "oklab": {
+        "l": 0.58246,
+        "a": -0.06936,
+        "b": 0.11976
+      },
+      "oklch": {
+        "l": 0.58246,
+        "c": 0.1384,
+        "h": 120.08
+      },
+      "neutral": false,
+      "combinations": [
+        96,
+        201,
+        254,
+        258,
+        277,
+        310,
+        334
+      ]
+    },
+    {
+      "index": 77,
+      "name": "Orange Citrine",
+      "slug": "orange-citrine",
+      "aliases": [],
+      "sourceName": "Orange Citrine",
+      "sourceSlug": "orange-citrine",
+      "hex": "#8c6510",
+      "rgb": [
+        140,
+        101,
+        16
+      ],
+      "cmyk": [
+        28,
+        48,
+        92,
+        24
+      ],
+      "oklab": {
+        "l": 0.53346,
+        "a": 0.01736,
+        "b": 0.10362
+      },
+      "oklch": {
+        "l": 0.53346,
+        "c": 0.10506,
+        "h": 80.49
+      },
+      "neutral": false,
+      "combinations": [
+        212,
+        342
+      ]
+    },
+    {
+      "index": 78,
+      "name": "Sudan Brown",
+      "slug": "sudan-brown",
+      "aliases": [],
+      "sourceName": "Sudan Brown",
+      "sourceSlug": "sudan-brown",
+      "hex": "#9b5348",
+      "rgb": [
+        155,
+        83,
+        72
+      ],
+      "cmyk": [
+        25,
+        60,
+        65,
+        19
+      ],
+      "oklab": {
+        "l": 0.52545,
+        "a": 0.08496,
+        "b": 0.04874
+      },
+      "oklch": {
+        "l": 0.52545,
+        "c": 0.09795,
+        "h": 29.84
+      },
+      "neutral": false,
+      "combinations": [
+        207,
+        214,
+        273
+      ]
+    },
+    {
+      "index": 79,
+      "name": "Olive Green",
+      "slug": "olive-green",
+      "aliases": [],
+      "sourceName": "Olive Green",
+      "sourceSlug": "olive-green",
+      "hex": "#58771e",
+      "rgb": [
+        88,
+        119,
+        30
+      ],
+      "cmyk": [
+        56,
+        40,
+        85,
+        22
+      ],
+      "oklab": {
+        "l": 0.52702,
+        "a": -0.07232,
+        "b": 0.09586
+      },
+      "oklch": {
+        "l": 0.52702,
+        "c": 0.12008,
+        "h": 127.03
+      },
+      "neutral": false,
+      "combinations": [
+        66,
+        243,
+        270,
+        297
+      ]
+    },
+    {
+      "index": 80,
+      "name": "Light Brownish Olive",
+      "slug": "light-brownish-olive",
+      "aliases": [],
+      "sourceName": "Light Brownish Olive",
+      "sourceSlug": "light-brownish-olive",
+      "hex": "#706934",
+      "rgb": [
+        112,
+        105,
+        52
+      ],
+      "cmyk": [
+        42,
+        46,
+        73,
+        24
+      ],
+      "oklab": {
+        "l": 0.51496,
+        "a": -0.01514,
+        "b": 0.07218
+      },
+      "oklch": {
+        "l": 0.51496,
+        "c": 0.07375,
+        "h": 101.85
+      },
+      "neutral": false,
+      "combinations": [
+        199,
+        318
+      ]
+    },
+    {
+      "index": 81,
+      "name": "Deep Grayish Olive",
+      "slug": "deep-grayish-olive",
+      "aliases": [],
+      "sourceName": "Deep Grayish Olive",
+      "sourceSlug": "deep-grayish-olive",
+      "hex": "#505423",
+      "rgb": [
+        80,
+        84,
+        35
+      ],
+      "cmyk": [
+        50,
+        48,
+        78,
+        37
+      ],
+      "oklab": {
+        "l": 0.43056,
+        "a": -0.02778,
+        "b": 0.06478
+      },
+      "oklch": {
+        "l": 0.43056,
+        "c": 0.07049,
+        "h": 113.21
+      },
+      "neutral": false,
+      "combinations": [
+        146,
+        343
+      ]
+    },
+    {
+      "index": 82,
+      "name": "Pale Raw Umber",
+      "slug": "pale-raw-umber",
+      "aliases": [],
+      "sourceName": "Pale Raw Umber",
+      "sourceSlug": "pale-raw-umber",
+      "hex": "#5e4017",
+      "rgb": [
+        94,
+        64,
+        23
+      ],
+      "cmyk": [
+        46,
+        63,
+        87,
+        32
+      ],
+      "oklab": {
+        "l": 0.39702,
+        "a": 0.02199,
+        "b": 0.06603
+      },
+      "oklch": {
+        "l": 0.39702,
+        "c": 0.0696,
+        "h": 71.58
+      },
+      "neutral": false,
+      "combinations": [
+        26,
+        73,
+        160,
+        234,
+        296
+      ]
+    },
+    {
+      "index": 83,
+      "name": "Sepia",
+      "slug": "sepia",
+      "aliases": [],
+      "sourceName": "Sepia",
+      "sourceSlug": "sepia",
+      "hex": "#503d00",
+      "rgb": [
+        80,
+        61,
+        0
+      ],
+      "cmyk": [
+        48,
+        60,
+        100,
+        40
+      ],
+      "oklab": {
+        "l": 0.37034,
+        "a": 0.00159,
+        "b": 0.07566
+      },
+      "oklch": {
+        "l": 0.37034,
+        "c": 0.07568,
+        "h": 88.8
+      },
+      "neutral": false,
+      "combinations": [
+        24,
+        288
+      ]
+    },
+    {
+      "index": 84,
+      "name": "Madder Brown",
+      "slug": "madder-brown",
+      "aliases": [],
+      "sourceName": "Madder Brown",
+      "sourceSlug": "madder-brown",
+      "hex": "#651300",
+      "rgb": [
+        101,
+        19,
+        0
+      ],
+      "cmyk": [
+        36,
+        88,
+        100,
+        38
+      ],
+      "oklab": {
+        "l": 0.33208,
+        "a": 0.09757,
+        "b": 0.06679
+      },
+      "oklch": {
+        "l": 0.33208,
+        "c": 0.11824,
+        "h": 34.39
+      },
+      "neutral": false,
+      "combinations": [
+        28,
+        79,
+        98,
+        173,
+        237,
+        275,
+        323
+      ]
+    },
+    {
+      "index": 85,
+      "name": "Mars Brown",
+      "slug": "mars-brown",
+      "aliases": [
+        "Mars Brown / Tobacco",
+        "Tobacco"
+      ],
+      "sourceName": "Mars Brown / Tobacco",
+      "sourceSlug": "mars-brown-tobacco",
+      "hex": "#522000",
+      "rgb": [
+        82,
+        32,
+        0
+      ],
+      "cmyk": [
+        39,
+        76,
+        100,
+        47
+      ],
+      "oklab": {
+        "l": 0.3127,
+        "a": 0.05727,
+        "b": 0.06328
+      },
+      "oklch": {
+        "l": 0.3127,
+        "c": 0.08535,
+        "h": 47.85
+      },
+      "neutral": false,
+      "combinations": [
+        19
+      ]
+    },
+    {
+      "index": 86,
+      "name": "Vandyke Brown",
+      "slug": "vandyke-brown",
+      "aliases": [],
+      "sourceName": "Vandyke Brown",
+      "sourceSlug": "vandyke-brown",
+      "hex": "#362304",
+      "rgb": [
+        54,
+        35,
+        4
+      ],
+      "cmyk": [
+        56,
+        71,
+        97,
+        52
+      ],
+      "oklab": {
+        "l": 0.27331,
+        "a": 0.01324,
+        "b": 0.0511
+      },
+      "oklch": {
+        "l": 0.27331,
+        "c": 0.05279,
+        "h": 75.47
+      },
+      "neutral": false,
+      "combinations": [
+        110,
+        113,
+        118,
+        182,
+        192
+      ]
+    },
+    {
+      "index": 87,
+      "name": "Turquoise Green",
+      "slug": "turquoise-green",
+      "aliases": [],
+      "sourceName": "Turquoise Green",
+      "sourceSlug": "turquoise-green",
+      "hex": "#b5ffc2",
+      "rgb": [
+        181,
+        255,
+        194
+      ],
+      "cmyk": [
+        29,
+        0,
+        24,
+        0
+      ],
+      "oklab": {
+        "l": 0.93583,
+        "a": -0.09478,
+        "b": 0.05622
+      },
+      "oklch": {
+        "l": 0.93583,
+        "c": 0.1102,
+        "h": 149.33
+      },
+      "neutral": false,
+      "combinations": [
+        36,
+        74,
+        147,
+        163,
+        173,
+        202,
+        223,
+        230,
+        263,
+        272,
+        285,
+        293,
+        300,
+        305,
+        317,
+        346
+      ]
+    },
+    {
+      "index": 88,
+      "name": "Glaucous Green",
+      "slug": "glaucous-green",
+      "aliases": [],
+      "sourceName": "Glaucous Green",
+      "sourceSlug": "glaucous-green",
+      "hex": "#b3e8c2",
+      "rgb": [
+        179,
+        232,
+        194
+      ],
+      "cmyk": [
+        30,
+        9,
+        24,
+        0
+      ],
+      "oklab": {
+        "l": 0.8841,
+        "a": -0.06744,
+        "b": 0.03363
+      },
+      "oklch": {
+        "l": 0.8841,
+        "c": 0.07536,
+        "h": 153.5
+      },
+      "neutral": false,
+      "combinations": [
+        7,
+        150,
+        171,
+        207,
+        239,
+        260
+      ]
+    },
+    {
+      "index": 89,
+      "name": "Dark Greenish Glaucous",
+      "slug": "dark-greenish-glaucous",
+      "aliases": [],
+      "sourceName": "Dark Greenish Glaucous",
+      "sourceSlug": "dark-greenish-glaucous",
+      "hex": "#b3d9a3",
+      "rgb": [
+        179,
+        217,
+        163
+      ],
+      "cmyk": [
+        30,
+        15,
+        36,
+        0
+      ],
+      "oklab": {
+        "l": 0.84405,
+        "a": -0.06061,
+        "b": 0.05744
+      },
+      "oklch": {
+        "l": 0.84405,
+        "c": 0.0835,
+        "h": 136.54
+      },
+      "neutral": false,
+      "combinations": [
+        264,
+        311
+      ]
+    },
+    {
+      "index": 90,
+      "name": "Yellow Green",
+      "slug": "yellow-green",
+      "aliases": [],
+      "sourceName": "Yellow Green",
+      "sourceSlug": "yellow-green",
+      "hex": "#a6ff47",
+      "rgb": [
+        166,
+        255,
+        71
+      ],
+      "cmyk": [
+        35,
+        0,
+        72,
+        0
+      ],
+      "oklab": {
+        "l": 0.91055,
+        "a": -0.15166,
+        "b": 0.16724
+      },
+      "oklch": {
+        "l": 0.91055,
+        "c": 0.22577,
+        "h": 132.2
+      },
+      "neutral": false,
+      "combinations": [
+        111,
+        141,
+        276,
+        326,
+        334
+      ]
+    },
+    {
+      "index": 91,
+      "name": "Light Green Yellow",
+      "slug": "light-green-yellow",
+      "aliases": [],
+      "sourceName": "Light Green Yellow",
+      "sourceSlug": "light-green-yellow",
+      "hex": "#bdf226",
+      "rgb": [
+        189,
+        242,
+        38
+      ],
+      "cmyk": [
+        26,
+        5,
+        85,
+        0
+      ],
+      "oklab": {
+        "l": 0.89238,
+        "a": -0.12157,
+        "b": 0.17689
+      },
+      "oklch": {
+        "l": 0.89238,
+        "c": 0.21464,
+        "h": 124.5
+      },
+      "neutral": false,
+      "combinations": [
+        61,
+        289,
+        291,
+        311,
+        346
+      ]
+    },
+    {
+      "index": 92,
+      "name": "Night Green",
+      "slug": "night-green",
+      "aliases": [],
+      "sourceName": "Night Green",
+      "sourceSlug": "night-green",
+      "hex": "#7aff00",
+      "rgb": [
+        122,
+        255,
+        0
+      ],
+      "cmyk": [
+        52,
+        0,
+        100,
+        0
+      ],
+      "oklab": {
+        "l": 0.88834,
+        "a": -0.19386,
+        "b": 0.18357
+      },
+      "oklch": {
+        "l": 0.88834,
+        "c": 0.26698,
+        "h": 136.56
+      },
+      "neutral": false,
+      "combinations": [
+        19,
+        32,
+        158,
+        326
+      ]
+    },
+    {
+      "index": 93,
+      "name": "Olive Yellow",
+      "slug": "olive-yellow",
+      "aliases": [],
+      "sourceName": "Olive Yellow",
+      "sourceSlug": "olive-yellow",
+      "hex": "#99b333",
+      "rgb": [
+        153,
+        179,
+        51
+      ],
+      "cmyk": [
+        40,
+        30,
+        80,
+        0
+      ],
+      "oklab": {
+        "l": 0.72323,
+        "a": -0.07721,
+        "b": 0.13144
+      },
+      "oklch": {
+        "l": 0.72323,
+        "c": 0.15244,
+        "h": 120.43
+      },
+      "neutral": false,
+      "combinations": [
+        124,
+        211,
+        265,
+        347
+      ]
+    },
+    {
+      "index": 94,
+      "name": "Artemisia Green",
+      "slug": "artemisia-green",
+      "aliases": [
+        "Artemesia Green"
+      ],
+      "sourceName": "Artemesia Green",
+      "sourceSlug": "artemesia-green",
+      "hex": "#65a98f",
+      "rgb": [
+        101,
+        169,
+        143
+      ],
+      "cmyk": [
+        57,
+        28,
+        39,
+        8
+      ],
+      "oklab": {
+        "l": 0.6819,
+        "a": -0.0781,
+        "b": 0.0172
+      },
+      "oklch": {
+        "l": 0.6819,
+        "c": 0.07997,
+        "h": 167.58
+      },
+      "neutral": false,
+      "combinations": [
+        293,
+        312
+      ]
+    },
+    {
+      "index": 95,
+      "name": "Andover Green",
+      "slug": "andover-green",
+      "aliases": [],
+      "sourceName": "Andover Green",
+      "sourceSlug": "andover-green",
+      "hex": "#5c8a73",
+      "rgb": [
+        92,
+        138,
+        115
+      ],
+      "cmyk": [
+        60,
+        40,
+        50,
+        10
+      ],
+      "oklab": {
+        "l": 0.59326,
+        "a": -0.05861,
+        "b": 0.01902
+      },
+      "oklch": {
+        "l": 0.59326,
+        "c": 0.06162,
+        "h": 162.02
+      },
+      "neutral": false,
+      "combinations": [
+        244,
+        346
+      ]
+    },
+    {
+      "index": 96,
+      "name": "Rainette Green",
+      "slug": "rainette-green",
+      "aliases": [],
+      "sourceName": "Rainette Green",
+      "sourceSlug": "rainette-green",
+      "hex": "#85b857",
+      "rgb": [
+        133,
+        184,
+        87
+      ],
+      "cmyk": [
+        42,
+        20,
+        62,
+        10
+      ],
+      "oklab": {
+        "l": 0.72503,
+        "a": -0.09297,
+        "b": 0.10341
+      },
+      "oklch": {
+        "l": 0.72503,
+        "c": 0.13906,
+        "h": 131.96
+      },
+      "neutral": false,
+      "combinations": [
+        105,
+        200,
+        219,
+        283
+      ]
+    },
+    {
+      "index": 97,
+      "name": "Pistachio Green",
+      "slug": "pistachio-green",
+      "aliases": [],
+      "sourceName": "Pistachio Green",
+      "sourceSlug": "pistachio-green",
+      "hex": "#56aa69",
+      "rgb": [
+        86,
+        170,
+        105
+      ],
+      "cmyk": [
+        64,
+        29,
+        56,
+        6
+      ],
+      "oklab": {
+        "l": 0.66837,
+        "a": -0.10857,
+        "b": 0.06447
+      },
+      "oklch": {
+        "l": 0.66837,
+        "c": 0.12627,
+        "h": 149.3
+      },
+      "neutral": false,
+      "combinations": [
+        127,
+        237
+      ]
+    },
+    {
+      "index": 98,
+      "name": "Sea Green",
+      "slug": "sea-green",
+      "aliases": [],
+      "sourceName": "Sea Green",
+      "sourceSlug": "sea-green",
+      "hex": "#33ff7d",
+      "rgb": [
+        51,
+        255,
+        125
+      ],
+      "cmyk": [
+        80,
+        0,
+        51,
+        0
+      ],
+      "oklab": {
+        "l": 0.8784,
+        "a": -0.19963,
+        "b": 0.11696
+      },
+      "oklch": {
+        "l": 0.8784,
+        "c": 0.23137,
+        "h": 149.63
+      },
+      "neutral": false,
+      "combinations": [
+        17,
+        21,
+        58,
+        86,
+        133,
+        250,
+        260,
+        284,
+        291,
+        340,
+        347
+      ]
+    },
+    {
+      "index": 99,
+      "name": "Benzol Green",
+      "slug": "benzol-green",
+      "aliases": [],
+      "sourceName": "Benzol Green",
+      "sourceSlug": "benzol-green",
+      "hex": "#00d973",
+      "rgb": [
+        0,
+        217,
+        115
+      ],
+      "cmyk": [
+        100,
+        15,
+        55,
+        0
+      ],
+      "oklab": {
+        "l": 0.77581,
+        "a": -0.17888,
+        "b": 0.09276
+      },
+      "oklch": {
+        "l": 0.77581,
+        "c": 0.2015,
+        "h": 152.59
+      },
+      "neutral": false,
+      "combinations": [
+        15,
+        54,
+        92,
+        122,
+        155,
+        247,
+        266,
+        267,
+        281,
+        304,
+        306
+      ]
+    },
+    {
+      "index": 100,
+      "name": "Light Porcelain Green",
+      "slug": "light-porcelain-green",
+      "aliases": [],
+      "sourceName": "Light Porcelain Green",
+      "sourceSlug": "light-porcelain-green",
+      "hex": "#23c17c",
+      "rgb": [
+        35,
+        193,
+        124
+      ],
+      "cmyk": [
+        86,
+        22,
+        50,
+        3
+      ],
+      "oklab": {
+        "l": 0.71768,
+        "a": -0.14833,
+        "b": 0.06021
+      },
+      "oklch": {
+        "l": 0.71768,
+        "c": 0.16008,
+        "h": 157.91
+      },
+      "neutral": false,
+      "combinations": [
+        44,
+        193,
+        328
+      ]
+    },
+    {
+      "index": 101,
+      "name": "Green",
+      "slug": "green",
+      "aliases": [],
+      "sourceName": "Green",
+      "sourceSlug": "green",
+      "hex": "#40c945",
+      "rgb": [
+        64,
+        201,
+        69
+      ],
+      "cmyk": [
+        75,
+        21,
+        73,
+        0
+      ],
+      "oklab": {
+        "l": 0.736,
+        "a": -0.1678,
+        "b": 0.1238
+      },
+      "oklch": {
+        "l": 0.736,
+        "c": 0.20853,
+        "h": 143.58
+      },
+      "neutral": false,
+      "combinations": [
+        198,
+        216,
+        293
+      ]
+    },
+    {
+      "index": 102,
+      "name": "Dull Viridian Green",
+      "slug": "dull-viridian-green",
+      "aliases": [],
+      "sourceName": "Dull Viridian Green",
+      "sourceSlug": "dull-viridian-green",
+      "hex": "#19cc33",
+      "rgb": [
+        25,
+        204,
+        51
+      ],
+      "cmyk": [
+        90,
+        20,
+        80,
+        0
+      ],
+      "oklab": {
+        "l": 0.73576,
+        "a": -0.18773,
+        "b": 0.13615
+      },
+      "oklch": {
+        "l": 0.73576,
+        "c": 0.2319,
+        "h": 144.05
+      },
+      "neutral": false,
+      "combinations": [
+        136,
+        256,
+        306,
+        316
+      ]
+    },
+    {
+      "index": 103,
+      "name": "Oil Green",
+      "slug": "oil-green",
+      "aliases": [],
+      "sourceName": "Oil Green",
+      "sourceSlug": "oil-green",
+      "hex": "#6ea900",
+      "rgb": [
+        110,
+        169,
+        0
+      ],
+      "cmyk": [
+        53,
+        28,
+        100,
+        8
+      ],
+      "oklab": {
+        "l": 0.66827,
+        "a": -0.11626,
+        "b": 0.13779
+      },
+      "oklch": {
+        "l": 0.66827,
+        "c": 0.18028,
+        "h": 130.16
+      },
+      "neutral": false,
+      "combinations": [
+        245,
+        299,
+        320
+      ]
+    },
+    {
+      "index": 104,
+      "name": "Diamine Green",
+      "slug": "diamine-green",
+      "aliases": [],
+      "sourceName": "Diamine Green",
+      "sourceSlug": "diamine-green",
+      "hex": "#1b8e13",
+      "rgb": [
+        27,
+        142,
+        19
+      ],
+      "cmyk": [
+        87,
+        32,
+        91,
+        18
+      ],
+      "oklab": {
+        "l": 0.56399,
+        "a": -0.14317,
+        "b": 0.11122
+      },
+      "oklch": {
+        "l": 0.56399,
+        "c": 0.18129,
+        "h": 142.16
+      },
+      "neutral": false,
+      "combinations": [
+        38,
+        146,
+        217,
+        242,
+        251,
+        313
+      ]
+    },
+    {
+      "index": 105,
+      "name": "Cossack Green",
+      "slug": "cossack-green",
+      "aliases": [],
+      "sourceName": "Cossack Green",
+      "sourceSlug": "cossack-green",
+      "hex": "#328e13",
+      "rgb": [
+        50,
+        142,
+        19
+      ],
+      "cmyk": [
+        76,
+        32,
+        91,
+        18
+      ],
+      "oklab": {
+        "l": 0.56964,
+        "a": -0.13281,
+        "b": 0.11235
+      },
+      "oklch": {
+        "l": 0.56964,
+        "c": 0.17396,
+        "h": 139.77
+      },
+      "neutral": false,
+      "combinations": [
+        5,
+        135,
+        262,
+        270,
+        278,
+        294,
+        319,
+        341,
+        348
+      ]
+    },
+    {
+      "index": 106,
+      "name": "Lincoln Green",
+      "slug": "lincoln-green",
+      "aliases": [],
+      "sourceName": "Lincoln Green",
+      "sourceSlug": "lincoln-green",
+      "hex": "#405416",
+      "rgb": [
+        64,
+        84,
+        22
+      ],
+      "cmyk": [
+        60,
+        48,
+        86,
+        37
+      ],
+      "oklab": {
+        "l": 0.4153,
+        "a": -0.05225,
+        "b": 0.07298
+      },
+      "oklch": {
+        "l": 0.4153,
+        "c": 0.08976,
+        "h": 125.6
+      },
+      "neutral": false,
+      "combinations": [
+        70,
+        121,
+        203,
+        210,
+        280,
+        290
+      ]
+    },
+    {
+      "index": 107,
+      "name": "Blackish Olive",
+      "slug": "blackish-olive",
+      "aliases": [],
+      "sourceName": "Blackish Olive",
+      "sourceSlug": "blackish-olive",
+      "hex": "#324e2a",
+      "rgb": [
+        50,
+        78,
+        42
+      ],
+      "cmyk": [
+        56,
+        32,
+        63,
+        55
+      ],
+      "oklab": {
+        "l": 0.39134,
+        "a": -0.0508,
+        "b": 0.04425
+      },
+      "oklch": {
+        "l": 0.39134,
+        "c": 0.06737,
+        "h": 138.94
+      },
+      "neutral": false,
+      "combinations": [
+        109,
+        318,
+        336
+      ]
+    },
+    {
+      "index": 108,
+      "name": "Deep Slate Olive",
+      "slug": "deep-slate-olive",
+      "aliases": [],
+      "sourceName": "Deep Slate Olive",
+      "sourceSlug": "deep-slate-olive",
+      "hex": "#172713",
+      "rgb": [
+        23,
+        39,
+        19
+      ],
+      "cmyk": [
+        76,
+        60,
+        80,
+        62
+      ],
+      "oklab": {
+        "l": 0.25204,
+        "a": -0.03211,
+        "b": 0.02743
+      },
+      "oklch": {
+        "l": 0.25204,
+        "c": 0.04223,
+        "h": 139.49
+      },
+      "neutral": true,
+      "combinations": [
+        189,
+        229,
+        268,
+        303,
+        310,
+        321,
+        332,
+        341,
+        342,
+        348
+      ]
+    },
+    {
+      "index": 109,
+      "name": "Nile Blue",
+      "slug": "nile-blue",
+      "aliases": [],
+      "sourceName": "Nile Blue",
+      "sourceSlug": "nile-blue",
+      "hex": "#bfffe6",
+      "rgb": [
+        191,
+        255,
+        230
+      ],
+      "cmyk": [
+        25,
+        0,
+        10,
+        0
+      ],
+      "oklab": {
+        "l": 0.95026,
+        "a": -0.07109,
+        "b": 0.01414
+      },
+      "oklch": {
+        "l": 0.95026,
+        "c": 0.07248,
+        "h": 168.75
+      },
+      "neutral": false,
+      "combinations": [
+        25,
+        250,
+        268,
+        302,
+        306,
+        330,
+        345
+      ]
+    },
+    {
+      "index": 110,
+      "name": "Pale King's Blue",
+      "slug": "pale-kings-blue",
+      "aliases": [],
+      "sourceName": "Pale King's Blue",
+      "sourceSlug": "pale-king's-blue",
+      "hex": "#abf5ed",
+      "rgb": [
+        171,
+        245,
+        237
+      ],
+      "cmyk": [
+        33,
+        4,
+        7,
+        0
+      ],
+      "oklab": {
+        "l": 0.9195,
+        "a": -0.07323,
+        "b": -0.00966
+      },
+      "oklch": {
+        "l": 0.9195,
+        "c": 0.07386,
+        "h": 187.51
+      },
+      "neutral": false,
+      "combinations": [
+        16,
+        49,
+        72,
+        75,
+        167,
+        196,
+        213,
+        234,
+        287
+      ]
+    },
+    {
+      "index": 111,
+      "name": "Light Glaucous Blue",
+      "slug": "light-glaucous-blue",
+      "aliases": [],
+      "sourceName": "Light Glaucous Blue",
+      "sourceSlug": "light-glaucous-blue",
+      "hex": "#a6e6db",
+      "rgb": [
+        166,
+        230,
+        219
+      ],
+      "cmyk": [
+        35,
+        10,
+        14,
+        0
+      ],
+      "oklab": {
+        "l": 0.87879,
+        "a": -0.06626,
+        "b": -0.0034
+      },
+      "oklch": {
+        "l": 0.87879,
+        "c": 0.06635,
+        "h": 182.94
+      },
+      "neutral": false,
+      "combinations": [
+        54,
+        93,
+        119,
+        152,
+        178,
+        204,
+        227,
+        320,
+        339,
+        341
+      ]
+    },
+    {
+      "index": 112,
+      "name": "Salvia Blue",
+      "slug": "salvia-blue",
+      "aliases": [],
+      "sourceName": "Salvia Blue",
+      "sourceSlug": "salvia-blue",
+      "hex": "#96bfe6",
+      "rgb": [
+        150,
+        191,
+        230
+      ],
+      "cmyk": [
+        41,
+        25,
+        10,
+        0
+      ],
+      "oklab": {
+        "l": 0.78889,
+        "a": -0.02721,
+        "b": -0.06556
+      },
+      "oklch": {
+        "l": 0.78889,
+        "c": 0.07098,
+        "h": 247.46
+      },
+      "neutral": false,
+      "combinations": [
+        29,
+        129,
+        135,
+        139,
+        142,
+        188,
+        209,
+        212,
+        237,
+        272,
+        294,
+        321,
+        330
+      ]
+    },
+    {
+      "index": 113,
+      "name": "Cobalt Green",
+      "slug": "cobalt-green",
+      "aliases": [],
+      "sourceName": "Cobalt Green",
+      "sourceSlug": "cobalt-green",
+      "hex": "#94ff94",
+      "rgb": [
+        148,
+        255,
+        148
+      ],
+      "cmyk": [
+        42,
+        0,
+        42,
+        0
+      ],
+      "oklab": {
+        "l": 0.91032,
+        "a": -0.14077,
+        "b": 0.10234
+      },
+      "oklch": {
+        "l": 0.91032,
+        "c": 0.17404,
+        "h": 143.98
+      },
+      "neutral": false,
+      "combinations": [
+        156,
+        188,
+        201,
+        202,
+        230,
+        271,
+        281,
+        282,
+        290,
+        291,
+        308,
+        333
+      ]
+    },
+    {
+      "index": 114,
+      "name": "Calamine Blue",
+      "slug": "calamine-blue",
+      "aliases": [
+        "Calamine BLue"
+      ],
+      "sourceName": "Calamine BLue",
+      "sourceSlug": "calamine-blue",
+      "hex": "#80ffcc",
+      "rgb": [
+        128,
+        255,
+        204
+      ],
+      "cmyk": [
+        50,
+        0,
+        20,
+        0
+      ],
+      "oklab": {
+        "l": 0.91336,
+        "a": -0.13082,
+        "b": 0.03499
+      },
+      "oklch": {
+        "l": 0.91336,
+        "c": 0.13542,
+        "h": 165.03
+      },
+      "neutral": false,
+      "combinations": [
+        20,
+        41,
+        65,
+        159,
+        176,
+        255,
+        261,
+        287,
+        291,
+        300
+      ]
+    },
+    {
+      "index": 115,
+      "name": "Venice Green",
+      "slug": "venice-green",
+      "aliases": [],
+      "sourceName": "Venice Green",
+      "sourceSlug": "venice-green",
+      "hex": "#6bffb3",
+      "rgb": [
+        107,
+        255,
+        179
+      ],
+      "cmyk": [
+        58,
+        0,
+        30,
+        0
+      ],
+      "oklab": {
+        "l": 0.9004,
+        "a": -0.15429,
+        "b": 0.06263
+      },
+      "oklch": {
+        "l": 0.9004,
+        "c": 0.16652,
+        "h": 157.91
+      },
+      "neutral": false,
+      "combinations": [
+        78,
+        128,
+        138,
+        189,
+        283,
+        345
+      ]
+    },
+    {
+      "index": 116,
+      "name": "Cerulean Blue",
+      "slug": "cerulean-blue",
+      "aliases": [
+        "Cerulian Blue"
+      ],
+      "sourceName": "Cerulian Blue",
+      "sourceSlug": "cerulian-blue",
+      "hex": "#29bdad",
+      "rgb": [
+        41,
+        189,
+        173
+      ],
+      "cmyk": [
+        84,
+        26,
+        32,
+        0
+      ],
+      "oklab": {
+        "l": 0.72119,
+        "a": -0.11965,
+        "b": -0.00785
+      },
+      "oklch": {
+        "l": 0.72119,
+        "c": 0.11991,
+        "h": 183.75
+      },
+      "neutral": false,
+      "combinations": [
+        1,
+        63,
+        99,
+        125,
+        148,
+        227,
+        240,
+        264
+      ]
+    },
+    {
+      "index": 117,
+      "name": "Peacock Blue",
+      "slug": "peacock-blue",
+      "aliases": [],
+      "sourceName": "Peacock Blue",
+      "sourceSlug": "peacock-blue",
+      "hex": "#00cf91",
+      "rgb": [
+        0,
+        207,
+        145
+      ],
+      "cmyk": [
+        100,
+        19,
+        43,
+        0
+      ],
+      "oklab": {
+        "l": 0.75578,
+        "a": -0.1564,
+        "b": 0.04822
+      },
+      "oklch": {
+        "l": 0.75578,
+        "c": 0.16366,
+        "h": 162.86
+      },
+      "neutral": false,
+      "combinations": [
+        131,
+        286
+      ]
+    },
+    {
+      "index": 118,
+      "name": "Green Blue",
+      "slug": "green-blue",
+      "aliases": [],
+      "sourceName": "Green Blue",
+      "sourceSlug": "green-blue",
+      "hex": "#2dbc94",
+      "rgb": [
+        45,
+        188,
+        148
+      ],
+      "cmyk": [
+        82,
+        24,
+        40,
+        3
+      ],
+      "oklab": {
+        "l": 0.71207,
+        "a": -0.12914,
+        "b": 0.02493
+      },
+      "oklch": {
+        "l": 0.71207,
+        "c": 0.13152,
+        "h": 169.07
+      },
+      "neutral": false,
+      "combinations": [
+        12,
+        74,
+        79,
+        178,
+        208,
+        252,
+        259,
+        271,
+        330
+      ]
+    },
+    {
+      "index": 119,
+      "name": "Olympic Blue",
+      "slug": "olympic-blue",
+      "aliases": [],
+      "sourceName": "Olympic Blue",
+      "sourceSlug": "olympic-blue",
+      "hex": "#4f8fe6",
+      "rgb": [
+        79,
+        143,
+        230
+      ],
+      "cmyk": [
+        69,
+        44,
+        10,
+        0
+      ],
+      "oklab": {
+        "l": 0.64811,
+        "a": -0.03386,
+        "b": -0.14259
+      },
+      "oklch": {
+        "l": 0.64811,
+        "c": 0.14656,
+        "h": 256.64
+      },
+      "neutral": false,
+      "combinations": [
+        44,
+        67,
+        157,
+        194,
+        231,
+        274,
+        324
+      ]
+    },
+    {
+      "index": 120,
+      "name": "Blue",
+      "slug": "blue",
+      "aliases": [],
+      "sourceName": "Blue",
+      "sourceSlug": "blue",
+      "hex": "#0d75ff",
+      "rgb": [
+        13,
+        117,
+        255
+      ],
+      "cmyk": [
+        95,
+        54,
+        0,
+        0
+      ],
+      "oklab": {
+        "l": 0.59365,
+        "a": -0.04275,
+        "b": -0.21842
+      },
+      "oklch": {
+        "l": 0.59365,
+        "c": 0.22256,
+        "h": 258.93
+      },
+      "neutral": false,
+      "combinations": [
+        49,
+        51,
+        88,
+        143,
+        154,
+        186,
+        191,
+        215,
+        257,
+        267,
+        295,
+        333
+      ]
+    },
+    {
+      "index": 121,
+      "name": "Antwerp Blue",
+      "slug": "antwerp-blue",
+      "aliases": [
+        "Antwarp Blue"
+      ],
+      "sourceName": "Antwarp Blue",
+      "sourceSlug": "antwarp-blue",
+      "hex": "#008aa1",
+      "rgb": [
+        0,
+        138,
+        161
+      ],
+      "cmyk": [
+        100,
+        40,
+        30,
+        10
+      ],
+      "oklab": {
+        "l": 0.58292,
+        "a": -0.08441,
+        "b": -0.05889
+      },
+      "oklch": {
+        "l": 0.58292,
+        "c": 0.10292,
+        "h": 214.9
+      },
+      "neutral": false,
+      "combinations": [
+        85,
+        106,
+        114,
+        140,
+        163,
+        172,
+        208,
+        244,
+        258,
+        281,
+        299,
+        302,
+        334
+      ]
+    },
+    {
+      "index": 122,
+      "name": "Helvetia Blue",
+      "slug": "helvetia-blue",
+      "aliases": [],
+      "sourceName": "Helvetia Blue",
+      "sourceSlug": "helvetia-blue",
+      "hex": "#0057ba",
+      "rgb": [
+        0,
+        87,
+        186
+      ],
+      "cmyk": [
+        100,
+        62,
+        19,
+        10
+      ],
+      "oklab": {
+        "l": 0.47529,
+        "a": -0.03734,
+        "b": -0.16779
+      },
+      "oklch": {
+        "l": 0.47529,
+        "c": 0.17189,
+        "h": 257.45
+      },
+      "neutral": false,
+      "combinations": [
+        39,
+        48,
+        161,
+        187,
+        218,
+        259,
+        312,
+        347
+      ]
+    },
+    {
+      "index": 123,
+      "name": "Dark Medici Blue",
+      "slug": "dark-medici-blue",
+      "aliases": [],
+      "sourceName": "Dark Medici Blue",
+      "sourceSlug": "dark-medici-blue",
+      "hex": "#417777",
+      "rgb": [
+        65,
+        119,
+        119
+      ],
+      "cmyk": [
+        70,
+        45,
+        45,
+        15
+      ],
+      "oklab": {
+        "l": 0.53216,
+        "a": -0.05541,
+        "b": -0.01543
+      },
+      "oklch": {
+        "l": 0.53216,
+        "c": 0.05752,
+        "h": 195.56
+      },
+      "neutral": false,
+      "combinations": [
+        160,
+        224,
+        241,
+        249
+      ]
+    },
+    {
+      "index": 124,
+      "name": "Dusky Green",
+      "slug": "dusky-green",
+      "aliases": [],
+      "sourceName": "Dusky Green",
+      "sourceSlug": "dusky-green",
+      "hex": "#00592e",
+      "rgb": [
+        0,
+        89,
+        46
+      ],
+      "cmyk": [
+        100,
+        30,
+        64,
+        50
+      ],
+      "oklab": {
+        "l": 0.4071,
+        "a": -0.09249,
+        "b": 0.04549
+      },
+      "oklch": {
+        "l": 0.4071,
+        "c": 0.10307,
+        "h": 153.81
+      },
+      "neutral": false,
+      "combinations": [
+        94,
+        219,
+        225,
+        278,
+        284,
+        318,
+        332,
+        338
+      ]
+    },
+    {
+      "index": 125,
+      "name": "Deep Lyons Blue",
+      "slug": "deep-lyons-blue",
+      "aliases": [],
+      "sourceName": "Deep Lyons Blue",
+      "sourceSlug": "deep-lyons-blue",
+      "hex": "#0024cc",
+      "rgb": [
+        0,
+        36,
+        204
+      ],
+      "cmyk": [
+        100,
+        85,
+        15,
+        6
+      ],
+      "oklab": {
+        "l": 0.40675,
+        "a": -0.02524,
+        "b": -0.24677
+      },
+      "oklch": {
+        "l": 0.40675,
+        "c": 0.24806,
+        "h": 264.16
+      },
+      "neutral": false,
+      "combinations": [
+        22,
+        38,
+        101,
+        126,
+        179,
+        199,
+        236,
+        247,
+        314,
+        344
+      ]
+    },
+    {
+      "index": 126,
+      "name": "Violet Blue",
+      "slug": "violet-blue",
+      "aliases": [],
+      "sourceName": "Violet Blue",
+      "sourceSlug": "violet-blue",
+      "hex": "#202d85",
+      "rgb": [
+        32,
+        45,
+        133
+      ],
+      "cmyk": [
+        85,
+        79,
+        38,
+        16
+      ],
+      "oklab": {
+        "l": 0.34928,
+        "a": 0.00049,
+        "b": -0.14679
+      },
+      "oklch": {
+        "l": 0.34928,
+        "c": 0.14679,
+        "h": 270.19
+      },
+      "neutral": false,
+      "combinations": [
+        75,
+        83,
+        89,
+        98,
+        125,
+        233,
+        286,
+        289,
+        297,
+        309,
+        339
+      ]
+    },
+    {
+      "index": 127,
+      "name": "Vanderpoel's Blue",
+      "slug": "vanderpoels-blue",
+      "aliases": [
+        "Vandar Poel's Blue"
+      ],
+      "sourceName": "Vandar Poel's Blue",
+      "sourceSlug": "vandar-poel's-blue",
+      "hex": "#003e83",
+      "rgb": [
+        0,
+        62,
+        131
+      ],
+      "cmyk": [
+        100,
+        73,
+        43,
+        10
+      ],
+      "oklab": {
+        "l": 0.37398,
+        "a": -0.03056,
+        "b": -0.12563
+      },
+      "oklch": {
+        "l": 0.37398,
+        "c": 0.12929,
+        "h": 256.33
+      },
+      "neutral": false,
+      "combinations": []
+    },
+    {
+      "index": 128,
+      "name": "Dark Tyrian Blue",
+      "slug": "dark-tyrian-blue",
+      "aliases": [],
+      "sourceName": "Dark Tyrian Blue",
+      "sourceSlug": "dark-tyrian-blue",
+      "hex": "#0d2b52",
+      "rgb": [
+        13,
+        43,
+        82
+      ],
+      "cmyk": [
+        90,
+        66,
+        36,
+        50
+      ],
+      "oklab": {
+        "l": 0.2907,
+        "a": -0.01865,
+        "b": -0.07728
+      },
+      "oklch": {
+        "l": 0.2907,
+        "c": 0.0795,
+        "h": 256.43
+      },
+      "neutral": false,
+      "combinations": [
+        2,
+        60,
+        67,
+        119,
+        141,
+        245,
+        279
+      ]
+    },
+    {
+      "index": 129,
+      "name": "Dull Violet Black",
+      "slug": "dull-violet-black",
+      "aliases": [],
+      "sourceName": "Dull Violet Black",
+      "sourceSlug": "dull-violet-black",
+      "hex": "#06004f",
+      "rgb": [
+        6,
+        0,
+        79
+      ],
+      "cmyk": [
+        95,
+        106,
+        38,
+        50
+      ],
+      "oklab": {
+        "l": 0.19768,
+        "a": -0.00268,
+        "b": -0.13089
+      },
+      "oklch": {
+        "l": 0.19768,
+        "c": 0.13092,
+        "h": 268.83
+      },
+      "neutral": false,
+      "combinations": [
+        95,
+        106,
+        145,
+        265,
+        277,
+        289,
+        295,
+        331
+      ]
+    },
+    {
+      "index": 130,
+      "name": "Deep Indigo",
+      "slug": "deep-indigo",
+      "aliases": [],
+      "sourceName": "Deep Indigo",
+      "sourceSlug": "deep-indigo",
+      "hex": "#000831",
+      "rgb": [
+        0,
+        8,
+        49
+      ],
+      "cmyk": [
+        100,
+        92,
+        52,
+        60
+      ],
+      "oklab": {
+        "l": 0.16411,
+        "a": -0.01006,
+        "b": -0.08252
+      },
+      "oklch": {
+        "l": 0.16411,
+        "c": 0.08313,
+        "h": 263.05
+      },
+      "neutral": false,
+      "combinations": [
+        6,
+        28,
+        139,
+        155,
+        182,
+        211,
+        232
+      ]
+    },
+    {
+      "index": 131,
+      "name": "Deep Slate Green",
+      "slug": "deep-slate-green",
+      "aliases": [],
+      "sourceName": "Deep Slate Green",
+      "sourceSlug": "deep-slate-green",
+      "hex": "#0f261f",
+      "rgb": [
+        15,
+        38,
+        31
+      ],
+      "cmyk": [
+        80,
+        50,
+        60,
+        70
+      ],
+      "oklab": {
+        "l": 0.24721,
+        "a": -0.03199,
+        "b": 0.00475
+      },
+      "oklch": {
+        "l": 0.24721,
+        "c": 0.03234,
+        "h": 171.55
+      },
+      "neutral": true,
+      "combinations": [
+        84,
+        149,
+        166,
+        271,
+        318,
+        325
+      ]
+    },
+    {
+      "index": 132,
+      "name": "Grayish Lavender A",
+      "slug": "grayish-lavender-a",
+      "aliases": [
+        "Grayish Lavender",
+        "Grayish Lavender - A"
+      ],
+      "sourceName": "Grayish Lavender - A",
+      "sourceSlug": "grayish-lavender---a",
+      "hex": "#b8b8ff",
+      "rgb": [
+        184,
+        184,
+        255
+      ],
+      "cmyk": [
+        28,
+        28,
+        0,
+        0
+      ],
+      "oklab": {
+        "l": 0.80828,
+        "a": 0.02404,
+        "b": -0.0968
+      },
+      "oklch": {
+        "l": 0.80828,
+        "c": 0.09974,
+        "h": 283.95
+      },
+      "neutral": false,
+      "combinations": [
+        8,
+        15,
+        159,
+        177,
+        218,
+        248,
+        307
+      ],
+      "variant": "A"
+    },
+    {
+      "index": 133,
+      "name": "Grayish Lavender B",
+      "slug": "grayish-lavender-b",
+      "aliases": [
+        "Grayish Lavender",
+        "Grayish Lavender - B"
+      ],
+      "sourceName": "Grayish Lavender - B",
+      "sourceSlug": "grayish-lavender---b",
+      "hex": "#bfabcc",
+      "rgb": [
+        191,
+        171,
+        204
+      ],
+      "cmyk": [
+        25,
+        33,
+        20,
+        0
+      ],
+      "oklab": {
+        "l": 0.7689,
+        "a": 0.03434,
+        "b": -0.03799
+      },
+      "oklch": {
+        "l": 0.7689,
+        "c": 0.05121,
+        "h": 312.11
+      },
+      "neutral": false,
+      "combinations": [
+        47,
+        56,
+        174,
+        187,
+        235,
+        327,
+        329,
+        338
+      ],
+      "variant": "B"
+    },
+    {
+      "index": 134,
+      "name": "Laelia Pink",
+      "slug": "laelia-pink",
+      "aliases": [],
+      "sourceName": "Laelia Pink",
+      "sourceSlug": "laelia-pink",
+      "hex": "#cc85d1",
+      "rgb": [
+        204,
+        133,
+        209
+      ],
+      "cmyk": [
+        20,
+        48,
+        18,
+        0
+      ],
+      "oklab": {
+        "l": 0.71526,
+        "a": 0.10769,
+        "b": -0.07671
+      },
+      "oklch": {
+        "l": 0.71526,
+        "c": 0.13222,
+        "h": 324.54
+      },
+      "neutral": false,
+      "combinations": [
+        20,
+        254,
+        280,
+        337
+      ]
+    },
+    {
+      "index": 135,
+      "name": "Lilac",
+      "slug": "lilac",
+      "aliases": [],
+      "sourceName": "Lilac",
+      "sourceSlug": "lilac",
+      "hex": "#b875eb",
+      "rgb": [
+        184,
+        117,
+        235
+      ],
+      "cmyk": [
+        28,
+        54,
+        8,
+        0
+      ],
+      "oklab": {
+        "l": 0.681,
+        "a": 0.11114,
+        "b": -0.13916
+      },
+      "oklch": {
+        "l": 0.681,
+        "c": 0.17809,
+        "h": 308.61
+      },
+      "neutral": false,
+      "combinations": [
+        143,
+        162,
+        282,
+        347
+      ]
+    },
+    {
+      "index": 136,
+      "name": "Eupatorium Purple",
+      "slug": "eupatorium-purple",
+      "aliases": [],
+      "sourceName": "Eupatorium Purple",
+      "sourceSlug": "eupatorium-purple",
+      "hex": "#bf36e0",
+      "rgb": [
+        191,
+        54,
+        224
+      ],
+      "cmyk": [
+        25,
+        79,
+        12,
+        0
+      ],
+      "oklab": {
+        "l": 0.60907,
+        "a": 0.19055,
+        "b": -0.16663
+      },
+      "oklch": {
+        "l": 0.60907,
+        "c": 0.25313,
+        "h": 318.83
+      },
+      "neutral": false,
+      "combinations": [
+        23,
+        80,
+        128,
+        134,
+        180,
+        274,
+        331
+      ]
+    },
+    {
+      "index": 137,
+      "name": "Light Mauve",
+      "slug": "light-mauve",
+      "aliases": [],
+      "sourceName": "Light Mauve",
+      "sourceSlug": "light-mauve",
+      "hex": "#9161f2",
+      "rgb": [
+        145,
+        97,
+        242
+      ],
+      "cmyk": [
+        43,
+        62,
+        5,
+        0
+      ],
+      "oklab": {
+        "l": 0.61576,
+        "a": 0.08721,
+        "b": -0.18881
+      },
+      "oklch": {
+        "l": 0.61576,
+        "c": 0.20798,
+        "h": 294.79
+      },
+      "neutral": false,
+      "combinations": [
+        23,
+        80,
+        128,
+        134,
+        180,
+        274,
+        331
+      ]
+    },
+    {
+      "index": 138,
+      "name": "Aconite Violet",
+      "slug": "aconite-violet",
+      "aliases": [],
+      "sourceName": "Aconite Violet",
+      "sourceSlug": "aconite-violet",
+      "hex": "#9c52f2",
+      "rgb": [
+        156,
+        82,
+        242
+      ],
+      "cmyk": [
+        39,
+        68,
+        5,
+        0
+      ],
+      "oklab": {
+        "l": 0.60654,
+        "a": 0.11775,
+        "b": -0.19609
+      },
+      "oklch": {
+        "l": 0.60654,
+        "c": 0.22873,
+        "h": 300.98
+      },
+      "neutral": false,
+      "combinations": [
+        43,
+        64,
+        90,
+        187,
+        220,
+        257,
+        269,
+        301,
+        307,
+        324,
+        344
+      ]
+    },
+    {
+      "index": 139,
+      "name": "Dull Blue Violet",
+      "slug": "dull-blue-violet",
+      "aliases": [],
+      "sourceName": "Dull Blue Violet",
+      "sourceSlug": "dull-blue-violet",
+      "hex": "#6e66d4",
+      "rgb": [
+        110,
+        102,
+        212
+      ],
+      "cmyk": [
+        57,
+        60,
+        17,
+        0
+      ],
+      "oklab": {
+        "l": 0.57287,
+        "a": 0.03743,
+        "b": -0.15931
+      },
+      "oklch": {
+        "l": 0.57287,
+        "c": 0.16365,
+        "h": 283.22
+      },
+      "neutral": false,
+      "combinations": [
+        9,
+        100
+      ]
+    },
+    {
+      "index": 140,
+      "name": "Dark Soft Violet",
+      "slug": "dark-soft-violet",
+      "aliases": [],
+      "sourceName": "Dark Soft Violet",
+      "sourceSlug": "dark-soft-violet",
+      "hex": "#4d52de",
+      "rgb": [
+        77,
+        82,
+        222
+      ],
+      "cmyk": [
+        70,
+        68,
+        13,
+        0
+      ],
+      "oklab": {
+        "l": 0.52184,
+        "a": 0.01785,
+        "b": -0.20782
+      },
+      "oklch": {
+        "l": 0.52184,
+        "c": 0.20859,
+        "h": 274.91
+      },
+      "neutral": false,
+      "combinations": [
+        64,
+        127,
+        197
+      ]
+    },
+    {
+      "index": 141,
+      "name": "Blue Violet",
+      "slug": "blue-violet",
+      "aliases": [],
+      "sourceName": "Blue Violet",
+      "sourceSlug": "blue-violet",
+      "hex": "#4733ff",
+      "rgb": [
+        71,
+        51,
+        255
+      ],
+      "cmyk": [
+        72,
+        80,
+        0,
+        0
+      ],
+      "oklab": {
+        "l": 0.50785,
+        "a": 0.02156,
+        "b": -0.27722
+      },
+      "oklch": {
+        "l": 0.50785,
+        "c": 0.27806,
+        "h": 274.45
+      },
+      "neutral": false,
+      "combinations": [
+        116,
+        175,
+        196,
+        322,
+        345
+      ]
+    },
+    {
+      "index": 142,
+      "name": "Purple Drab",
+      "slug": "purple-drab",
+      "aliases": [],
+      "sourceName": "Purple Drab",
+      "sourceSlug": "purple-drab",
+      "hex": "#754260",
+      "rgb": [
+        117,
+        66,
+        96
+      ],
+      "cmyk": [
+        38,
+        65,
+        49,
+        26
+      ],
+      "oklab": {
+        "l": 0.45059,
+        "a": 0.07848,
+        "b": -0.02154
+      },
+      "oklch": {
+        "l": 0.45059,
+        "c": 0.08138,
+        "h": 344.65
+      },
+      "neutral": false,
+      "combinations": [
+        236
+      ]
+    },
+    {
+      "index": 143,
+      "name": "Deep Violet",
+      "slug": "deep-violet",
+      "aliases": [
+        "Deep Violet / Plumbeous",
+        "Plumbeous"
+      ],
+      "sourceName": "Deep Violet / Plumbeous",
+      "sourceSlug": "deep-violet-plumbeous",
+      "hex": "#5c7287",
+      "rgb": [
+        92,
+        114,
+        135
+      ],
+      "cmyk": [
+        61,
+        52,
+        43,
+        7
+      ],
+      "oklab": {
+        "l": 0.54234,
+        "a": -0.01616,
+        "b": -0.03881
+      },
+      "oklch": {
+        "l": 0.54234,
+        "c": 0.04204,
+        "h": 247.39
+      },
+      "neutral": true,
+      "combinations": [
+        183,
+        192,
+        218
+      ]
+    },
+    {
+      "index": 144,
+      "name": "Veronia Purple",
+      "slug": "veronia-purple",
+      "aliases": [],
+      "sourceName": "Veronia Purple",
+      "sourceSlug": "veronia-purple",
+      "hex": "#7e3075",
+      "rgb": [
+        126,
+        48,
+        117
+      ],
+      "cmyk": [
+        42,
+        78,
+        46,
+        15
+      ],
+      "oklab": {
+        "l": 0.44582,
+        "a": 0.12272,
+        "b": -0.06422
+      },
+      "oklch": {
+        "l": 0.44582,
+        "c": 0.13851,
+        "h": 332.38
+      },
+      "neutral": false,
+      "combinations": [
+        13,
+        24,
+        168,
+        183
+      ]
+    },
+    {
+      "index": 145,
+      "name": "Dark Slate Purple",
+      "slug": "dark-slate-purple",
+      "aliases": [],
+      "sourceName": "Dark Slate Purple",
+      "sourceSlug": "dark-slate-purple",
+      "hex": "#53225c",
+      "rgb": [
+        83,
+        34,
+        92
+      ],
+      "cmyk": [
+        64,
+        85,
+        60,
+        10
+      ],
+      "oklab": {
+        "l": 0.34866,
+        "a": 0.08578,
+        "b": -0.06901
+      },
+      "oklch": {
+        "l": 0.34866,
+        "c": 0.11009,
+        "h": 321.18
+      },
+      "neutral": false,
+      "combinations": [
+        225,
+        248
+      ]
+    },
+    {
+      "index": 146,
+      "name": "Taupe Brown",
+      "slug": "taupe-brown",
+      "aliases": [],
+      "sourceName": "Taupe Brown",
+      "sourceSlug": "taupe-brown",
+      "hex": "#6b2e63",
+      "rgb": [
+        107,
+        46,
+        99
+      ],
+      "cmyk": [
+        30,
+        70,
+        35,
+        40
+      ],
+      "oklab": {
+        "l": 0.40547,
+        "a": 0.09973,
+        "b": -0.05149
+      },
+      "oklch": {
+        "l": 0.40547,
+        "c": 0.11224,
+        "h": 332.69
+      },
+      "neutral": false,
+      "combinations": [
+        57,
+        123,
+        174,
+        224,
+        275,
+        280,
+        288
+      ]
+    },
+    {
+      "index": 147,
+      "name": "Violet Carmine",
+      "slug": "violet-carmine",
+      "aliases": [],
+      "sourceName": "Violet Carmine",
+      "sourceSlug": "violet-carmine",
+      "hex": "#531745",
+      "rgb": [
+        83,
+        23,
+        69
+      ],
+      "cmyk": [
+        64,
+        90,
+        70,
+        10
+      ],
+      "oklab": {
+        "l": 0.32054,
+        "a": 0.09866,
+        "b": -0.03915
+      },
+      "oklch": {
+        "l": 0.32054,
+        "c": 0.10614,
+        "h": 338.36
+      },
+      "neutral": false,
+      "combinations": [
+        337
+      ]
+    },
+    {
+      "index": 148,
+      "name": "Violet",
+      "slug": "violet",
+      "aliases": [],
+      "sourceName": "Violet",
+      "sourceSlug": "violet",
+      "hex": "#2619d1",
+      "rgb": [
+        38,
+        25,
+        209
+      ],
+      "cmyk": [
+        85,
+        90,
+        18,
+        0
+      ],
+      "oklab": {
+        "l": 0.41321,
+        "a": -0.00051,
+        "b": -0.25342
+      },
+      "oklch": {
+        "l": 0.41321,
+        "c": 0.25342,
+        "h": 269.88
+      },
+      "neutral": false,
+      "combinations": [
+        42,
+        56,
+        130,
+        156,
+        164,
+        181,
+        205,
+        214,
+        226,
+        316,
+        331,
+        335
+      ]
+    },
+    {
+      "index": 149,
+      "name": "Red Violet",
+      "slug": "red-violet",
+      "aliases": [],
+      "sourceName": "Red Violet",
+      "sourceSlug": "red-violet",
+      "hex": "#3400a3",
+      "rgb": [
+        52,
+        0,
+        163
+      ],
+      "cmyk": [
+        76,
+        100,
+        25,
+        15
+      ],
+      "oklab": {
+        "l": 0.3506,
+        "a": 0.038,
+        "b": -0.20814
+      },
+      "oklch": {
+        "l": 0.3506,
+        "c": 0.21158,
+        "h": 280.35
+      },
+      "neutral": false,
+      "combinations": [
+        4,
+        37,
+        134,
+        136,
+        170,
+        172,
+        183,
+        316
+      ]
+    },
+    {
+      "index": 150,
+      "name": "Cotinga Purple",
+      "slug": "cotinga-purple",
+      "aliases": [],
+      "sourceName": "Cotinga Purple",
+      "sourceSlug": "cotinga-purple",
+      "hex": "#340059",
+      "rgb": [
+        52,
+        0,
+        89
+      ],
+      "cmyk": [
+        66,
+        100,
+        42,
+        40
+      ],
+      "oklab": {
+        "l": 0.26281,
+        "a": 0.07606,
+        "b": -0.11464
+      },
+      "oklch": {
+        "l": 0.26281,
+        "c": 0.13758,
+        "h": 303.56
+      },
+      "neutral": false,
+      "combinations": [
+        61,
+        181,
+        238,
+        253,
+        307,
+        329,
+        348
+      ]
+    },
+    {
+      "index": 151,
+      "name": "Dusky Madder Violet",
+      "slug": "dusky-madder-violet",
+      "aliases": [],
+      "sourceName": "Dusky Madder Violet",
+      "sourceSlug": "dusky-madder-violet",
+      "hex": "#2d0060",
+      "rgb": [
+        45,
+        0,
+        96
+      ],
+      "cmyk": [
+        75,
+        100,
+        46,
+        30
+      ],
+      "oklab": {
+        "l": 0.26067,
+        "a": 0.0599,
+        "b": -0.1303
+      },
+      "oklch": {
+        "l": 0.26067,
+        "c": 0.14341,
+        "h": 294.69
+      },
+      "neutral": false,
+      "combinations": [
+        18,
+        50,
+        53,
+        82,
+        103,
+        314
+      ]
+    },
+    {
+      "index": 152,
+      "name": "White",
+      "slug": "white",
+      "aliases": [],
+      "sourceName": "White",
+      "sourceSlug": "white",
+      "hex": "#ffffff",
+      "rgb": [
+        255,
+        255,
+        255
+      ],
+      "cmyk": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "oklab": {
+        "l": 1,
+        "a": 0,
+        "b": 0
+      },
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      },
+      "neutral": true,
+      "combinations": [
+        55
+      ]
+    },
+    {
+      "index": 153,
+      "name": "Neutral Gray",
+      "slug": "neutral-gray",
+      "aliases": [],
+      "sourceName": "Neutral Gray",
+      "sourceSlug": "neutral-gray",
+      "hex": "#b5d1cc",
+      "rgb": [
+        181,
+        209,
+        204
+      ],
+      "cmyk": [
+        29,
+        18,
+        20,
+        0
+      ],
+      "oklab": {
+        "l": 0.83856,
+        "a": -0.03069,
+        "b": -0.00195
+      },
+      "oklch": {
+        "l": 0.83856,
+        "c": 0.03075,
+        "h": 183.64
+      },
+      "neutral": true,
+      "combinations": [
+        34,
+        139,
+        180,
+        195,
+        197,
+        221,
+        228,
+        229,
+        273,
+        303,
+        324,
+        340
+      ]
+    },
+    {
+      "index": 154,
+      "name": "Mineral Gray",
+      "slug": "mineral-gray",
+      "aliases": [],
+      "sourceName": "Mineral Gray",
+      "sourceSlug": "mineral-gray",
+      "hex": "#9fc2b2",
+      "rgb": [
+        159,
+        194,
+        178
+      ],
+      "cmyk": [
+        33,
+        18,
+        25,
+        7
+      ],
+      "oklab": {
+        "l": 0.78377,
+        "a": -0.04255,
+        "b": 0.01078
+      },
+      "oklch": {
+        "l": 0.78377,
+        "c": 0.04389,
+        "h": 165.78
+      },
+      "neutral": true,
+      "combinations": [
+        11,
+        30
+      ]
+    },
+    {
+      "index": 155,
+      "name": "Warm Gray",
+      "slug": "warm-gray",
+      "aliases": [],
+      "sourceName": "Warm Gray",
+      "sourceSlug": "warm-gray",
+      "hex": "#9cb29e",
+      "rgb": [
+        156,
+        178,
+        158
+      ],
+      "cmyk": [
+        37,
+        28,
+        36,
+        3
+      ],
+      "oklab": {
+        "l": 0.74096,
+        "a": -0.03162,
+        "b": 0.01996
+      },
+      "oklch": {
+        "l": 0.74096,
+        "c": 0.03739,
+        "h": 147.74
+      },
+      "neutral": true,
+      "combinations": [
+        69,
+        76,
+        81,
+        143,
+        169,
+        238,
+        259,
+        261
+      ]
+    },
+    {
+      "index": 156,
+      "name": "Slate Color",
+      "slug": "slate-color",
+      "aliases": [],
+      "sourceName": "Slate Color",
+      "sourceSlug": "slate-color",
+      "hex": "#1b3644",
+      "rgb": [
+        27,
+        54,
+        68
+      ],
+      "cmyk": [
+        85,
+        70,
+        62,
+        30
+      ],
+      "oklab": {
+        "l": 0.31807,
+        "a": -0.02507,
+        "b": -0.03295
+      },
+      "oklch": {
+        "l": 0.31807,
+        "c": 0.0414,
+        "h": 232.73
+      },
+      "neutral": true,
+      "combinations": [
+        27,
+        33,
+        57,
+        140,
+        202,
+        243,
+        245,
+        251,
+        253,
+        263,
+        296,
+        329,
+        335
+      ]
+    },
+    {
+      "index": 157,
+      "name": "Black",
+      "slug": "black",
+      "aliases": [],
+      "sourceName": "Black",
+      "sourceSlug": "black",
+      "hex": "#000000",
+      "rgb": [
+        0,
+        0,
+        0
+      ],
+      "cmyk": [
+        20,
+        10,
+        15,
+        100
+      ],
+      "oklab": {
+        "l": 0,
+        "a": 0,
+        "b": 0
+      },
+      "oklch": {
+        "l": 0,
+        "c": 0,
+        "h": 0
+      },
+      "neutral": true,
+      "combinations": [
+        46,
+        52,
+        62,
+        69,
+        112,
+        117,
+        144,
+        190,
+        198,
+        207,
+        216,
+        221,
+        242,
+        255,
+        256,
+        269,
+        276,
+        288,
+        313,
+        323,
+        337,
+        340,
+        344
+      ]
+    }
+  ]
+}
