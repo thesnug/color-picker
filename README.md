@@ -222,6 +222,41 @@ The weights are `RECOMMEND_WEIGHTS`. Pass `weights` to change them, or call
 analyzing the design again. Options: `product` (an ID or a loaded product;
 default Comfort Colors 1717) and `availableOnly` (default true).
 
+### Recommend garment colors with recoloring
+
+`recolorPlans` answers "which shirts would this design work on if I changed its
+colors?" For each garment it picks a Wada combination around one of the
+garment's stored equivalents, maps the design's colors onto the combination's
+other members by lightness (darkest to darkest, so hierarchy survives), and
+writes a prompt naming every swap:
+
+```ts
+import { recolorPlans } from "@thesnug/color-picker";
+import { applyRecolor, fingerprint } from "@thesnug/color-picker/fingerprint";
+
+const design = await fingerprint("art/flat-mark.png");
+const [plan] = recolorPlans(design, { n: 5 });
+plan.color.name;   // "Graphite"
+plan.mapping[0];   // { from: { hex: "#e8836b", share: 0.5095 }, to: { index: …, name: "Ochraceous Salmon", hex: "#d99e73" } }
+plan.prompt;       // "Recolor the artwork for a Graphite shirt: change the #e8836b areas to Ochraceous Salmon #d99e73; …"
+
+await applyRecolor("art/flat-mark.png", plan.mapping, { out: "art/flat-mark-graphite.png", fingerprint: design });
+```
+
+Within a garment, a book combination with enough members beats a harmony,
+and both beat a combination with fewer members, where neighbors in lightness
+share an ink. Any plan where a new ink is within the print minimum distance of
+the garment is `flagged` and used only when the garment has nothing else.
+`score` adds `contrast` (0.6, as for `recommendProductColors`), subtracts
+`vanish` (0.6), and adds `fidelity` (0.3), which favors the plan that changes
+the design least; the weights are `RECOLOR_WEIGHTS`.
+
+`applyRecolor` recolors flat-color art exactly: every visible pixel takes the
+new ink of its nearest design color, keeping its alpha. When the fingerprint's
+palette covers less than 90% of the design, or more than 5% of the pixels are
+farther than 10 from every mapped color, the art counts as photographic and it
+returns `{ applicable: false, reason }`; use the prompt instead.
+
 ### CLI
 
 `color-picker` answers the same questions from the command line and shows
@@ -235,6 +270,7 @@ color-picker combos "#808080" --limit 4       # a gray anchors on a neutral
 color-picker show 176 227                     # book combinations by ID
 color-picker palettes "Blue Spruce"           # palettes for a garment color
 color-picker recommend art/light-ink.png -n 3 # garment colors for a design
+color-picker recolor art/flat-mark.png --apply out/  # with recoloring
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
 color-picker theme "#1a1a40" --mode dark --format tailwind

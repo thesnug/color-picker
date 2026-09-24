@@ -22,6 +22,16 @@ import {
   type PaletteOptions,
   type RgbaPixels,
 } from "./quantize.js";
+import { type ApplyRecolorOptions, RECOLOR_DEFAULTS, type RecolorSwap, recolorPixels } from "./recolor.js";
+
+export {
+  type ApplyRecolorOptions,
+  RECOLOR_DEFAULTS,
+  type RecoloredPixels,
+  type RecolorPixelOptions,
+  type RecolorSwap,
+  recolorPixels,
+} from "./recolor.js";
 
 export {
   extractPalette,
@@ -97,27 +107,23 @@ const FORMATS = new Set(["png", "webp", "jpeg"]);
  * invent palette entries.
  */
 export const sharpDecoder: Decoder = async (bytes, { maxDimension }) => {
-  let sharp: typeof import("sharp").default;
-  try {
-    sharp = (await import("sharp")).default;
-  } catch {
-    throw new Error(
-      "Design fingerprinting needs `sharp`, an optional peer dependency. Install it with `npm install sharp`, or pass a `decoder`.",
-    );
-  }
+  const sharp = await loadSharp("Design fingerprinting", ", or pass a `decoder`");
   const meta = await sharp(bytes).metadata();
   if (!FORMATS.has(meta.format)) {
     throw new TypeError(`Unsupported image format "${meta.format}"; expected PNG, WebP, or JPEG.`);
   }
-  const { data, info } = await sharp(bytes)
-    .autoOrient()
-    .resize({
+  let pipeline = sharp(bytes).autoOrient();
+  // An infinite hint means full size, as `applyRecolor` needs.
+  if (Number.isFinite(maxDimension)) {
+    pipeline = pipeline.resize({
       width: maxDimension,
       height: maxDimension,
       fit: "inside",
       withoutEnlargement: true,
       kernel: "nearest",
-    })
+    });
+  }
+  const { data, info } = await pipeline
     .toColorspace("srgb")
     .ensureAlpha()
     .raw()
@@ -128,6 +134,16 @@ export const sharpDecoder: Decoder = async (bytes, { maxDimension }) => {
     pixels: { data, width: info.width, height: info.height },
   };
 };
+
+async function loadSharp(what: string, alternative = ""): Promise<typeof import("sharp").default> {
+  try {
+    return (await import("sharp")).default;
+  } catch {
+    throw new Error(
+      `${what} needs \`sharp\`, an optional peer dependency. Install it with \`npm install sharp\`${alternative}.`,
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Cache
@@ -214,4 +230,84 @@ export async function fingerprint(
     await writeCache(dir, path, { version: FINGERPRINT_VERSION, settings, fingerprint: result });
   }
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Recolor
+
+export type AppliedRecolor =
+  | {
+      applicable: true;
+      /** The PNG written. */
+      out: string;
+      width: number;
+      height: number;
+      /** Alpha-weighted share of visible pixels farther than `tolerance` from every `from` color. */
+      unmatched: number;
+    }
+  | {
+      applicable: false;
+      /** Why the art was not recolored; use the plan's prompt instead. */
+      reason: string;
+    };
+
+/**
+ * Recolor flat-color art by a recolor mapping and write the result as a PNG:
+ * every visible pixel takes the `to` color of its nearest `from` color in
+ * OKLab, keeping its alpha, so the output holds only the mapped colors plus
+ * transparency. `mapping` is a `RecolorPlan`'s `mapping`.
+ *
+ * Photographic or heavily gradient art cannot be recolored this way. It is
+ * detected first from the fingerprint, when its palette covers less than
+ * `minCoverage` of the design, then from the pixels, when more than
+ * `maxUnmatched` of them are farther than `tolerance` from every `from` color.
+ * Either returns `{ applicable: false, reason }` and writes nothing.
+ *
+ * @throws {Error} when `sharp` is missing.
+ * @throws {TypeError} when the file is not PNG, WebP, or JPEG.
+ */
+export async function applyRecolor(
+  file: string | URL | Uint8Array,
+  mapping: readonly RecolorSwap[],
+  options: ApplyRecolorOptions & {
+    /** Where to write the PNG. */
+    out: string;
+    /** The design's fingerprint, when already computed. */
+    fingerprint?: Fingerprint;
+    /** As for `fingerprint`, when it is computed here. */
+    cache?: string | false;
+  },
+): Promise<AppliedRecolor> {
+  const { minCoverage, maxUnmatched, tolerance } = { ...RECOLOR_DEFAULTS, ...options };
+  const bytes = file instanceof Uint8Array ? file : await readFile(file);
+  const print =
+    options.fingerprint ??
+    (await fingerprint(bytes, options.cache === undefined ? {} : { cache: options.cache }));
+
+  const coverage = print.palette.reduce((sum, c) => sum + c.share, 0);
+  if (coverage < minCoverage) {
+    return {
+      applicable: false,
+      reason:
+        `The design's ${print.palette.length} main colors cover only ${Math.round(coverage * 100)}% of it, ` +
+        `below ${Math.round(minCoverage * 100)}%; it looks photographic or gradient-heavy, so use the prompt instead.`,
+    };
+  }
+
+  const { width, height, pixels } = await sharpDecoder(bytes, { maxDimension: Infinity });
+  const result = recolorPixels(pixels, mapping, { tolerance });
+  if (result.unmatched > maxUnmatched) {
+    return {
+      applicable: false,
+      reason:
+        `${Math.round(result.unmatched * 100)}% of the design is farther than ${tolerance} from every mapped color, ` +
+        `above ${Math.round(maxUnmatched * 100)}%; it is not flat enough to recolor exactly, so use the prompt instead.`,
+    };
+  }
+
+  const sharp = await loadSharp("Recoloring");
+  await sharp(result.pixels.data, { raw: { width: pixels.width, height: pixels.height, channels: 4 } })
+    .png({ compressionLevel: 9 })
+    .toFile(options.out);
+  return { applicable: true, out: options.out, width, height, unmatched: result.unmatched };
 }

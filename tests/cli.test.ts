@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -258,6 +258,54 @@ describe("cli", () => {
     });
   });
 
+  describe("recolor", () => {
+    it("prints a mapping and a prompt per garment", async () => {
+      const c = capture();
+      expect(await run(["recolor", FLAT_MARK, "-n", "2"], c.io)).toBe(0);
+      const out = c.out();
+      expect(out.split("\n")[0]).toBe(`Comfort Colors 1717 colors for ${FLAT_MARK}, recolored`);
+      expect(out.match(/^\d\. .+ · (combination \d+|.+ harmony) · score /gm)).toHaveLength(2);
+      expect(out.match(/^ {2}#e8836b \(51%\) -> .+ #[0-9a-f]{6}$/gm)).toHaveLength(2);
+      expect(out.match(/^ {2}Prompt: Recolor the artwork for a .+ shirt: change /gm)).toHaveLength(2);
+    });
+
+    it("prints the plans as JSON", async () => {
+      const c = capture();
+      expect(await run(["recolor", FLAT_MARK, "--json", "-n", "3"], c.io)).toBe(0);
+      const json = JSON.parse(c.out());
+      expect(json.plans).toHaveLength(3);
+      expect(Object.keys(json.plans[0])).toEqual(
+        expect.arrayContaining(["color", "combination", "mapping", "prompt", "score", "reasons"]),
+      );
+      expect(json.plans[0].applied).toBeUndefined();
+    });
+
+    it("writes before and after chips beside each product card", async () => {
+      const c = capture();
+      await run(["recolor", FLAT_MARK, "-n", "2", "--html", "r.html"], c.io);
+      const html = c.files.get("r.html")!;
+      expect(html.match(/<h2>\d\. /g)).toHaveLength(2);
+      // The design's colors as before chips on both cards.
+      expect(html.match(/fill="#e8836b"/g)).toHaveLength(2);
+      expect(html.match(/>→</g)).toHaveLength(4);
+    });
+
+    it("writes a recolored PNG per garment with --apply", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "cli-recolor-"));
+      try {
+        const c = capture();
+        expect(await run(["recolor", FLAT_MARK, "-n", "2", "--apply", dir, "--json"], c.io)).toBe(0);
+        const json = JSON.parse(c.out());
+        for (const plan of json.plans) {
+          expect(plan.applied).toMatchObject({ applicable: true, out: join(dir, `flat-mark-${plan.color.slug}.png`) });
+        }
+        expect(readdirSync(dir)).toHaveLength(2);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
   describe("palettes", () => {
     it("lists palettes for a garment color, the garment first", async () => {
       const c = capture();
@@ -305,6 +353,8 @@ describe("cli", () => {
       [["theme", "999"], "unknown combination 999"],
       [["recommend", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
+      [["recolor", "no/such/design.png"], 'no such design file "no/such/design.png"'],
+      [["recolor", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
       [["palettes", "Emerald"], 'has no color named "Emerald". Colors: Banana, Bay,'],
       [["palettes", "Blue Spruce", "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
@@ -322,9 +372,11 @@ describe("cli", () => {
       [["combos", "red", "--limit", "2.5"], "--limit must be a positive integer"],
       [["nearest", "red", "--size", "3"], "--size applies only to combos and palettes"],
       [["combos", "red", "-k", "3"], "-k applies only to nearest"],
-      [["combos", "red", "--product", "comfort-colors-1717"], "--product applies only to recommend and palettes"],
+      [["combos", "red", "--product", "comfort-colors-1717"], "--product applies only to recommend, recolor, and palettes"],
       [["nearest", "red", "-n", "3"], "-n applies only to recommend"],
       [["recommend"], "recommend takes one design file"],
+      [["recolor"], "recolor takes one design file"],
+      [["recommend", FLAT_MARK, "--apply", "out"], "--apply applies only to recolor"],
       [["palettes"], "palettes needs a product color name"],
       [["palettes", "blue", "spruce"], "quote names with spaces"],
       [["palettes", "Blue Spruce", "-k", "3"], "-k applies only to nearest"],
