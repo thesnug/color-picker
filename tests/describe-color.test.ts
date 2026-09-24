@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { ChoiceQuestion, Questions, SystemOneRequest, SystemOneResult } from "@typesafe-ai/sdk";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { scoreDescribeColor } from "../scripts/score-describe-color.js";
 import { defaultProduct, loadColors } from "../src/data/index.js";
 import {
   DESCRIBE_COLOR_TOP,
@@ -104,6 +105,21 @@ describe("describeToColor", () => {
     expect(result.none).toBe(0.8);
     expect(result.matches).toHaveLength(DESCRIBE_COLOR_TOP);
     expect(result.matches.map((m) => m.color.name)).not.toContain(NONE_LABEL);
+  });
+
+  it("scores none in second place as top-3 but not top-1", async () => {
+    const client = fakeClient({ White: 0.6, [NONE_LABEL]: 0.3, Black: 0.08, Red: 0.02 });
+    const result = await describeToColor("quarterly revenue forecast", { cache, client });
+    if (result.via !== "jev") throw new Error("expected a Jev result");
+    expect(result.noneTop).toBe(false);
+    expect(scoreDescribeColor(result, [NONE_LABEL])).toEqual({ top1: false, top3: true });
+  });
+
+  it("scores none in first place as top-1 and top-3", async () => {
+    const client = fakeClient({ [NONE_LABEL]: 0.8, White: 0.1, Black: 0.05 });
+    const result = await describeToColor("quarterly revenue forecast", { cache, client });
+    if (result.via !== "jev") throw new Error("expected a Jev result");
+    expect(scoreDescribeColor(result, [NONE_LABEL])).toEqual({ top1: true, top3: true });
   });
 
   it("chooses among the product's colors, including unstocked ones", async () => {

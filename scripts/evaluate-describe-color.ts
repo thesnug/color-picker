@@ -12,7 +12,8 @@
 
 import { readFileSync } from "node:fs";
 
-import { describeToColor, NONE_LABEL, type DescribeSet } from "../src/jev/index.js";
+import { describeToColor, type DescribeSet } from "../src/jev/index.js";
+import { scoreDescribeColor } from "./score-describe-color.js";
 
 interface Phrase {
   text: string;
@@ -35,12 +36,7 @@ for (const phrase of fixture.phrases) {
     rows.push(`SKIP  ${phrase.text}: resolved by name, so not a Jev case`);
     continue;
   }
-  // `none` counts as the top answer when Jev chose it; otherwise the top color.
-  const ranked = result.noneTop
-    ? [NONE_LABEL, ...result.matches.map((m) => m.color.name)]
-    : result.matches.map((m) => m.color.name);
-  const hit1 = phrase.expected.includes(ranked[0]!);
-  const hit3 = ranked.slice(0, 3).some((name) => phrase.expected.includes(name));
+  const { top1: hit1, top3: hit3 } = scoreDescribeColor(result, phrase.expected);
   if (hit1) top1 += 1;
   if (hit3) top3 += 1;
 
