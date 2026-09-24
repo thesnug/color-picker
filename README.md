@@ -39,6 +39,7 @@ https://github.com/thesnug/color-picker/tags.
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
 | `@thesnug/color-picker/fingerprint` | Design fingerprints from image files |
+| `@thesnug/color-picker/jev` | The cached TypeSafe client that Jev judgments go through |
 | `bin: color-picker` | CLI |
 | `bin: color-picker-mcp` | MCP server |
 
@@ -154,6 +155,48 @@ package, or pass `decoder` with your own:
 ```bash
 npm install sharp
 ```
+### Jev client
+
+Jev (TypeSafe System One) is used only for judgments code cannot make. Every Jev
+call in this package goes through `ask`, which sends all of a feature's
+questions about one state in a single request and caches the answers, so a
+judgment is paid for once.
+
+```ts
+import { ask } from "@thesnug/color-picker/jev";
+
+const { answers, cached } = await ask(
+  { design: "A coral sun over cream waves", shirt: "Moss" },
+  {
+    legible: { type: "noul", instructions: "Does the ink read clearly on the shirt?" },
+    mood: { type: "choice", instructions: "Which mood fits?", criteria: { playful: null, calm: null } },
+  },
+  { version: 1 },
+);
+answers.legible.noul; // probability of yes, 0 to 1
+answers.mood.choice; // "playful" | "calm"
+```
+
+- Answers are cached as JSON under `$XDG_CACHE_HOME/color-picker/jev` (or
+  `~/.cache/…`), keyed by the SHA-256 of `version`, the questions, and the state.
+  Object key order does not matter. Bump `version` when a question's meaning
+  changes to invalidate its answers. Pass `cache: COMMITTED_CACHE_DIR` to use
+  the answers committed under `assets/cache/`, another directory, or `false` to
+  skip the cache.
+- A cache hit needs neither the SDK nor a key.
+- On a miss, `ask` needs `@typesafe-ai/sdk`, an optional peer dependency, and
+  `TYPESAFE_API_KEY` in the environment. Without either it throws
+  `JevUnavailableError` with `reason` set to `"sdk-missing"` or
+  `"api-key-missing"`. `jevAvailability()` checks both up front so a feature
+  can skip Jev and say why.
+- The key is read by the SDK from the environment only. This package never
+  passes it, stores it, or logs it.
+
+```bash
+npm install @typesafe-ai/sdk
+export TYPESAFE_API_KEY=...
+```
+
 ### Web themes
 
 `theme` turns a combination into a UI theme. Background, text, and accent come
