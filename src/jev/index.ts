@@ -13,7 +13,7 @@
  * module never reads its value, passes it, or logs it.
  */
 
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -217,7 +217,7 @@ async function readCache<Q extends Questions>(
 async function writeCache(dir: string, path: string, entry: CacheEntry): Promise<void> {
   await mkdir(dir, { recursive: true });
   // Write then rename, so a concurrent reader never sees half a file.
-  const temp = `${path}.${process.pid}.${Date.now()}.tmp`;
+  const temp = `${path}.${process.pid}.${randomUUID()}.tmp`;
   await writeFile(temp, `${JSON.stringify(entry, null, 2)}\n`);
   await rename(temp, path);
 }

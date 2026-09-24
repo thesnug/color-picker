@@ -106,6 +106,23 @@ describe("ask", () => {
     expect(readdirSync(cache)).toEqual([`${first.key}.json`]);
   });
 
+  it("lets concurrent misses write the same cache key without temporary-file collisions", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(1234567890);
+    const client = fakeClient();
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () => ask(STATE, QUESTIONS, { version: 1, cache, client })),
+    );
+
+    expect(client.requests).toHaveLength(20);
+    expect(results.every((result) => !result.cached && result.key === results[0]!.key)).toBe(true);
+    expect(results.every((result) => JSON.stringify(result.answers) === JSON.stringify(results[0]!.answers))).toBe(true);
+    expect(readdirSync(cache)).toEqual([`${results[0]!.key}.json`]);
+    const cached = await ask(STATE, QUESTIONS, { version: 1, cache, client });
+    expect(cached.cached).toBe(true);
+    expect(cached.answers).toEqual(results[0]!.answers);
+    expect(client.requests).toHaveLength(20);
+  });
+
   it("hits the cache however the state's keys are ordered", async () => {
     const client = fakeClient();
     await ask(STATE, QUESTIONS, { version: 1, cache, client });
