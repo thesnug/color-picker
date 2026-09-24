@@ -9,6 +9,17 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ### Library
 
+- `describeToColor` in `@thesnug/color-picker/jev` resolves a free-text color
+  description ("the brick shirt", "something autumnal for a coffee brand") to a
+  Wada color or a product color. The name lookup runs first; Jev is asked only
+  when it misses. Name matches return nearest colors with distances; Jev matches
+  return up to three colors with probabilities.
+- `rerankByMood` in `@thesnug/color-picker/jev` re-ranks the top ten garment
+  recommendations or palettes by how well each suits the design's subject and
+  mood, with one cached Jev request of Score questions. Each candidate gains
+  `moodScore`, `confidence`, `moodLevel`, and a `combinedScore` weighted by
+  `MOOD_WEIGHT`; `combineMood` reweighs without calling Jev. Without Jev the
+  order is unchanged and a note says why.
 - `vettedRecolorPlans` and `vetRecolorPlans` in `@thesnug/color-picker/jev` ask
   Jev whether each recolor swap keeps the design reading as the same subject.
   Each mapping entry gains `plausibility`; a plan below `PLAUSIBILITY_THRESHOLD`
@@ -18,9 +29,18 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ### CLI and MCP
 
+- `--mood` on `recommend` and `palettes` (with `--design <file>`), and `mood` on
+  the `recommend_product_colors` and `palettes_for_product_color` tools. HTML
+  cards show the mood level as a badge.
 - `color-picker recolor --vet` and `recolor_plans` with `vet` describe the
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
+
+### Release tooling
+
+- The release script reports a failed tag push with the commands to recover or
+  delete the local tag. `tag X.Y.Z --push-existing` validates its version and
+  built release tree before pushing without rebuilding it.
 
 ## [0.1.0] - 2026-09-24
 

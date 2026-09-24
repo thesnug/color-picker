@@ -66,14 +66,19 @@ const rejectsBody = fakeClient((q) => (q.includes("strawberry body") ? 0.08 : 0.
 
 let cache: string;
 const savedKey = process.env.TYPESAFE_API_KEY;
+const savedCacheHome = process.env.XDG_CACHE_HOME;
 beforeEach(() => {
   cache = mkdtempSync(join(tmpdir(), "vet-test-"));
+  // Fingerprints and descriptions made by recolorView stay out of the real cache.
+  process.env.XDG_CACHE_HOME = join(cache, "xdg");
   delete process.env.TYPESAFE_API_KEY;
   resetJevClient();
   rejectsBody.requests.length = 0;
 });
 afterEach(() => {
   rmSync(cache, { recursive: true, force: true });
+  if (savedCacheHome === undefined) delete process.env.XDG_CACHE_HOME;
+  else process.env.XDG_CACHE_HOME = savedCacheHome;
   if (savedKey === undefined) delete process.env.TYPESAFE_API_KEY;
   else process.env.TYPESAFE_API_KEY = savedKey;
 });
@@ -244,9 +249,7 @@ describe("recolorView with vet", () => {
     const view = await recolorView({
       file: FLAT_MARK,
       n: 2,
-      vet: true,
-      describe: { cache: false, providers: [await fakeVision()] },
-      jev: { cache, client: rejectsBody },
+      vet: { providers: [await fakeVision()], client: rejectsBody, cache },
     });
     const json = view.json as { design: { description?: unknown }; plans: { plausibility: number | null }[]; vet: any };
     expect(json.design.description).toMatchObject({ subject: "a strawberry badge" });
@@ -262,10 +265,8 @@ describe("recolorView with vet", () => {
     const view = await recolorView({
       file: FLAT_MARK,
       n: 1,
-      vet: true,
       includeImplausible: true,
-      describe: { cache: false, providers: [await fakeVision()] },
-      jev: { cache, client: rejectsBody },
+      vet: { providers: [await fakeVision()], client: rejectsBody, cache },
     });
     const text = view.text(false);
     expect(text).toMatch(/ · implausible \(0\.08\)/);
@@ -282,14 +283,41 @@ describe("recolorView with vet", () => {
     const view = await recolorView({
       file: FLAT_MARK,
       n: 2,
-      vet: true,
-      describe: { cache: false, providers: [failing] },
-      jev: { cache, client: rejectsBody },
+      vet: { providers: [failing], client: rejectsBody, cache },
     });
     const json = view.json as { plans: unknown[]; vet: any };
     expect(json.plans).toHaveLength(2);
     expect(json.vet).toMatchObject({ requested: true, applied: false, vetted: 0 });
     expect(json.vet.reason).toMatch(/^Swaps were not vetted: No vision provider could describe the design/);
     expect(rejectsBody.requests).toHaveLength(0);
+  });
+
+  it("falls back to the deterministic plans when the request fails", async () => {
+    const broken: SystemOneClient = {
+      async systemOne() {
+        throw new Error("503 from TypeSafe");
+      },
+    };
+    const view = await recolorView({ file: FLAT_MARK, n: 2, vet: { providers: [await fakeVision()], client: broken, cache } });
+    const json = view.json as { plans: unknown[]; vet: any };
+    expect(json.plans).toHaveLength(2);
+    expect(json.vet).toMatchObject({ applied: false, vetted: 0 });
+    expect(json.vet.reason).toBe("Swaps were not vetted: the request failed: 503 from TypeSafe");
+  });
+
+  it("spends no vision call when Jev cannot be called", async () => {
+    let calls = 0;
+    const counting: VisionProvider = {
+      name: "codex",
+      async describe() {
+        calls += 1;
+        throw new Error("should not be called");
+      },
+    };
+    const view = await recolorView({ file: FLAT_MARK, n: 2, vet: { providers: [counting], cache } });
+    const json = view.json as { plans: unknown[]; vet: any };
+    expect(calls).toBe(0);
+    expect(json.plans).toHaveLength(2);
+    expect(json.vet.reason).toMatch(/^Swaps were not vetted: .*TYPESAFE_API_KEY/);
   });
 });

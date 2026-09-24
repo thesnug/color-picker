@@ -13,17 +13,30 @@ import { hasHex, loadColors, loadCombinations, loadProduct, loadProductIndex, ty
 import {
   type AppliedRecolor,
   applyRecolor,
-  type DescribeOptions,
+  defaultVisionProviders,
   describeDesign,
-  type Fingerprint,
   fingerprint,
+  type Fingerprint,
+  type VisionProvider,
   VisionUnavailableError,
 } from "../fingerprint/index.js";
-import { type VetOptions, type VettedPlan, vettedRecolorPlans } from "../jev/vet.js";
+import {
+  jevAvailability,
+  JevUnavailableError,
+  type MoodCandidate,
+  type MoodFields,
+  type MoodRerank,
+  MOOD_TOP,
+  rerankByMood,
+  type SystemOneClient,
+  type VetOptions,
+  type VettedPlan,
+  vettedRecolorPlans,
+} from "../jev/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
 import { palettesForProductColor, type ProductPalette } from "../palettes.js";
 import { type RecolorPlan, recolorPlans } from "../recolor.js";
-import { recommendProductColors } from "../recommend.js";
+import { type ProductColorRecommendation, recommendProductColors } from "../recommend.js";
 import {
   type HtmlSection,
   renderAnsi,
@@ -173,44 +186,76 @@ export interface PalettesArgs {
   limit: number;
   size?: number;
   product?: string;
+  /** The design to judge palettes against, for `mood`. */
+  design?: DesignArgs;
+  /** Re-rank the palettes by how well each suits the design's mood, with Jev. Needs `design`. */
+  mood?: boolean | MoodSetup;
 }
 
 /** Palettes for a garment color: the garment first, then the ink colors printed on it. */
-export function palettesView({ name, limit, size, product: productId }: PalettesArgs): View {
+export async function palettesView({
+  name,
+  limit,
+  size,
+  product: productId,
+  design: designArgs,
+  mood,
+}: PalettesArgs): Promise<View> {
   let product: Product;
   try {
     product = loadProduct(productId ?? loadProductIndex().default);
   } catch (error) {
     throw new InputError((error as Error).message);
   }
-  const result = palettesForProductColor(name, { product, limit, ...(size !== undefined && { size }) });
-  const color = result.color;
+  const setup = moodSetup(mood);
+  if (setup && !designArgs) throw new InputError("mood re-ranking of palettes needs a design file");
+
+  const found = palettesForProductColor(name, {
+    product,
+    limit: setup ? Math.max(limit, MOOD_TOP) : limit,
+    ...(size !== undefined && { size }),
+  });
+  const color = found.color;
   if (!color) {
     const names = product.colors.map((c) => c.name).join(", ");
-    throw new InputError(`${result.reason} Colors: ${names}.`);
+    throw new InputError(`${found.reason} Colors: ${names}.`);
   }
+
+  let palettes: (ProductPalette & Partial<MoodFields>)[] = found.palettes.slice(0, limit);
+  let moodStatus: MoodStatus | undefined;
+  let design: Fingerprint | undefined;
+  if (setup && designArgs) {
+    design = await fingerprintDesign(designArgs.file, designArgs.bytes);
+    const ranked = await moodRerank(found.palettes, design, designArgs.bytes ?? designArgs.file, setup);
+    design = ranked.design;
+    palettes = ranked.rerank.candidates.slice(0, limit);
+    moodStatus = statusOf(ranked.rerank);
+  }
+  const result = { ...found, palettes };
 
   const title = `Palettes for ${color.name} ${color.hex ?? "(no hex)"} · ${product.brand} ${product.model}`;
   const lines = [
     `Wada equivalents: ${result.equivalents.map((e) => `${e.name} (distance ${fmt(e.distance)})`).join(", ") || "none"}`,
     ...(color.available ? [] : [`Warning: ${color.name} is not stocked by the print provider.`]),
+    ...(moodStatus && designArgs ? [moodLine(moodStatus, designArgs.file)] : []),
   ];
-  const heading = (p: ProductPalette) =>
-    `${productPaletteTitle(p)} · via ${p.equivalent.name} · contrast ${fmt(p.contrast)} (lowest ${fmt(p.minContrast)})`;
+  const heading = (p: ProductPalette & Partial<MoodFields>) =>
+    `${productPaletteTitle(p)} · via ${p.equivalent.name} · contrast ${fmt(p.contrast)} (lowest ${fmt(p.minContrast)})${moodSuffix(p)}`;
   const inkSwatches = (p: ProductPalette): Swatch[] =>
     p.colors.slice(1).map((c) => ({ hex: c.hex, name: `${c.name} · ${fmt(contrastOn(p, c.hex))}:1` }));
+  const json = { ...result, ...(design && { design }), ...(moodStatus && { mood: moodStatus }) };
 
   if (result.palettes.length === 0 || !hasHex(color)) {
     return {
       title,
-      json: result,
+      json,
       text: () => `${title}\n${lines.join("\n")}\n\n${result.reason ?? "No palettes."}\n`,
       sections: [],
     };
   }
   return {
     title,
-    json: result,
+    json,
     text: (useColor) =>
       [
         `${title}\n${lines.join("\n")}\n`,
@@ -220,6 +265,7 @@ export function palettesView({ name, limit, size, product: productId }: Palettes
     // one, and the ink colors beside it.
     sections: result.palettes.map((p) => ({
       title: productPaletteTitle(p),
+      ...moodBadge(p),
       svg: renderProductCard(color, { designColors: inkSwatches(p) }),
       caption: `via ${p.equivalent.name} · contrast ${fmt(p.contrast)}, lowest ${fmt(p.minContrast)}`,
     })),
@@ -238,16 +284,14 @@ function contrastOn(p: ProductPalette, hex: string): number {
 /** Default `-n` for `recommend`. */
 export const DEFAULT_RECOMMEND_N = 5;
 
-export interface RecommendArgs {
-  /** The design file's path, or its label when `bytes` are given. */
-  file: string;
-  /** The design file's contents, read instead of `file` when given. */
-  bytes?: Uint8Array;
+export interface RecommendArgs extends DesignArgs {
   n: number;
   product?: string;
+  /** Re-rank the picks by how well each garment suits the design's mood, with Jev. */
+  mood?: boolean | MoodSetup;
 }
 
-export async function recommendView({ file, bytes, n, product: productId }: RecommendArgs): Promise<View> {
+export async function recommendView({ file, bytes, n, product: productId, mood }: RecommendArgs): Promise<View> {
   let product: Product;
   try {
     product = loadProduct(productId ?? loadProductIndex().default);
@@ -255,23 +299,40 @@ export async function recommendView({ file, bytes, n, product: productId }: Reco
     throw new InputError((error as Error).message);
   }
 
-  const design = await fingerprintDesign(file, bytes);
+  let design = await fingerprintDesign(file, bytes);
+  const setup = moodSetup(mood);
 
-  const picks = recommendProductColors(design, { product, n });
+  const ranked = recommendProductColors(design, { product, n: setup ? Math.max(n, MOOD_TOP) : n });
+  let picks: (ProductColorRecommendation & Partial<MoodFields>)[] = ranked.slice(0, n);
+  let moodStatus: MoodStatus | undefined;
+  if (setup) {
+    const reranked = await moodRerank(ranked, design, bytes ?? file, setup);
+    design = reranked.design;
+    picks = reranked.rerank.candidates.slice(0, n);
+    moodStatus = statusOf(reranked.rerank);
+  }
+
   const title = `${product.brand} ${product.model} colors for ${file}`;
   const chips: Swatch[] = design.palette.map((entry, i) => ({
     hex: entry.hex,
     name: `${Math.round(entry.share * 100)}% · near ${picks[0]?.designColors[i]?.wada.name ?? entry.hex}`,
   }));
-  const heading = (i: number) => `${i + 1}. ${picks[i]!.color.name} · score ${fmt(picks[i]!.score, 3)}`;
+  const heading = (i: number) =>
+    `${i + 1}. ${picks[i]!.color.name} · score ${fmt(picks[i]!.score, 3)}${moodSuffix(picks[i]!)}`;
 
   const designLine = `Design: ${chips.map((c) => `${c.hex} ${c.name}`).join(", ")}; ink luminance ${fmt(design.inkLuminance)}`;
+  const header = [designLine, ...(moodStatus ? [moodLine(moodStatus, file)] : [])].join("\n");
   return {
     title,
-    json: { product: { id: product.id, name: product.name }, design, picks },
+    json: {
+      product: { id: product.id, name: product.name },
+      design,
+      picks,
+      ...(moodStatus && { mood: moodStatus }),
+    },
     text: (color) =>
       [
-        `${title}\n${designLine}\n`,
+        `${title}\n${header}\n`,
         ...picks.map((pick, i) =>
           [
             heading(i),
@@ -283,69 +344,25 @@ export async function recommendView({ file, bytes, n, product: productId }: Reco
       ].join("\n"),
     sections: picks.map((pick, i) => ({
       title: heading(i),
+      ...moodBadge(pick),
       svg: renderProductCard(pick.color, { designColors: chips }),
       caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
     })),
   };
 }
 
-/** ` · plausibility 0.83` or ` · implausible (0.12)` for a vetted plan; empty otherwise. */
-function plausibilityNote(plan: RecolorPlan | VettedPlan): string {
-  if (!("plausibility" in plan) || plan.plausibility === null) return "";
-  return plan.implausible
-    ? ` · implausible (${fmt(plan.plausibility, 2)})`
-    : ` · plausibility ${fmt(plan.plausibility, 2)}`;
-}
-
 /** Default `-n` for `recolor`. */
 export const DEFAULT_RECOLOR_N = 5;
 
-export interface RecolorArgs {
-  /** The design file's path, or its label when `bytes` are given. */
-  file: string;
-  /** The design file's contents, read instead of `file` when given. */
-  bytes?: Uint8Array;
+export interface RecolorArgs extends DesignArgs {
   n: number;
   product?: string;
   /** Directory to write each recolored PNG to. */
   apply?: string;
   /** Describe the design and check each swap's plausibility with Jev. */
-  vet?: boolean;
+  vet?: boolean | VetSetup;
   /** With `vet`, keep implausible plans, marked, instead of dropping them. */
   includeImplausible?: boolean;
-  /** With `vet`: replaces the vision providers and cache, as tests do. */
-  describe?: DescribeOptions;
-  /** With `vet`: replaces the Jev client, cache, and threshold, as tests do. */
-  jev?: VetOptions;
-}
-
-/** What swap vetting did, in the `vet` field of `recolor`'s JSON. */
-export interface VetStatus {
-  requested: true;
-  /** True when at least one plan was judged by Jev. */
-  applied: boolean;
-  /** Plans judged. */
-  vetted: number;
-  /** Implausible plans left out, as garment and the reasons naming the swap. */
-  dropped: { garment: string; plausibility: number; reasons: string[] }[];
-  /** Why some or all plans went unvetted. */
-  reason?: string;
-  model?: string;
-}
-
-/** Describe the design for vetting; a missing vision provider leaves it undescribed with a note. */
-async function describeForVet(
-  design: Fingerprint,
-  file: string,
-  bytes: Uint8Array | undefined,
-  options: DescribeOptions | undefined,
-): Promise<{ design: Fingerprint; note?: string }> {
-  try {
-    return { design: await describeDesign(design, bytes ?? file, options) };
-  } catch (error) {
-    if (!(error instanceof VisionUnavailableError)) throw error;
-    return { design, note: `Swaps were not vetted: ${error.message}` };
-  }
 }
 
 export async function recolorView({
@@ -356,8 +373,6 @@ export async function recolorView({
   apply,
   vet,
   includeImplausible,
-  describe,
-  jev,
 }: RecolorArgs): Promise<View> {
   let product: Product;
   try {
@@ -371,23 +386,11 @@ export async function recolorView({
   let plans: (RecolorPlan | VettedPlan)[];
   let vetStatus: VetStatus | undefined;
   if (vet) {
-    const described = await describeForVet(design, file, bytes, describe);
-    design = described.design;
-    const result = await vettedRecolorPlans(design, { ...jev, product, n, includeImplausible: includeImplausible ?? false });
-    plans = result.plans;
-    vetStatus = {
-      requested: true,
-      applied: result.vetted > 0,
-      vetted: result.vetted,
-      dropped: result.dropped.map((p) => ({
-        garment: p.color.name,
-        plausibility: p.plausibility!,
-        reasons: p.reasons.filter((r) => r.startsWith("Implausible:")),
-      })),
-    };
-    const reason = described.note ?? result.skipped?.note;
-    if (reason) vetStatus.reason = reason;
-    if (result.model) vetStatus.model = result.model;
+    const setup = vet === true ? {} : vet;
+    const vetted = await vetPlans(design, bytes ?? file, { product, n, includeImplausible: includeImplausible ?? false }, setup);
+    design = vetted.design;
+    plans = vetted.plans;
+    vetStatus = vetted.status;
   } else {
     plans = recolorPlans(design, { product, n });
   }
@@ -594,6 +597,191 @@ function themeForColor(query: string, mode: ThemeMode): ThemeSource {
 }
 
 // ---------------------------------------------------------------------------
+
+/** A design file for a command that reads one. */
+export interface DesignArgs {
+  /** The design file's path, or its label when `bytes` are given. */
+  file: string;
+  /** The design file's contents, read instead of `file` when given. */
+  bytes?: Uint8Array;
+}
+
+/** Replaces the vision providers, Jev client, or Jev answer cache for a mood re-rank, as tests do. */
+export interface MoodSetup {
+  providers?: readonly VisionProvider[];
+  client?: SystemOneClient;
+  /** Jev answer cache directory, or `false` to skip it. Defaults to the `ask` default. */
+  cache?: string | false;
+}
+
+/** How a view reports a requested mood re-rank. */
+export interface MoodStatus {
+  requested: true;
+  applied: boolean;
+  /** The weight the combined score used. */
+  weight: number;
+  /** Why the order is the deterministic one. Absent when Jev's scores were applied. */
+  reason?: string;
+  model?: string;
+  cached?: boolean;
+}
+
+function moodSetup(mood: boolean | MoodSetup | undefined): MoodSetup | undefined {
+  if (mood === true) return {};
+  return mood || undefined;
+}
+
+/**
+ * Describe the design when it has no description yet, then re-rank the
+ * candidates by mood. Never throws for want of Jev or a vision provider, or
+ * for a failed request: the candidates keep their deterministic order and the
+ * status says why. When Jev cannot be called, only a cached description is
+ * read, so no vision call is spent on a re-rank that cannot happen.
+ */
+async function moodRerank<C extends MoodCandidate>(
+  candidates: readonly C[],
+  design: Fingerprint,
+  input: string | Uint8Array,
+  setup: MoodSetup,
+): Promise<{ design: Fingerprint; rerank: MoodRerank<C> }> {
+  const jev = setup.client ? { available: true as const } : await jevAvailability();
+  const deterministic = async (reason: string) => {
+    const rerank = await rerankByMood(candidates, { palette: design.palette });
+    return { ...rerank, note: `${reason} The order is the deterministic one.` };
+  };
+
+  let described = design;
+  if (!design.description) {
+    try {
+      described = await describeDesign(design, input, {
+        providers: jev.available ? (setup.providers ?? defaultVisionProviders()) : [],
+      });
+    } catch (error) {
+      if (!(error instanceof VisionUnavailableError)) throw error;
+      const reason = jev.available ? error.message.replace(/\n+/g, " ") : new JevUnavailableError(jev.reason).message;
+      return { design, rerank: await deterministic(reason) };
+    }
+  }
+
+  try {
+    const rerank = await rerankByMood(candidates, described, {
+      ...(setup.client && { client: setup.client }),
+      ...(setup.cache !== undefined && { cache: setup.cache }),
+    });
+    return { design: described, rerank };
+  } catch (error) {
+    return { design: described, rerank: await deterministic(`Mood re-ranking failed: ${(error as Error).message}.`) };
+  }
+}
+
+function statusOf(rerank: MoodRerank<unknown>): MoodStatus {
+  return {
+    requested: true,
+    applied: rerank.applied,
+    weight: rerank.weight,
+    ...(rerank.note !== undefined && { reason: rerank.note }),
+    ...(rerank.model !== undefined && { model: rerank.model }),
+    ...(rerank.cached !== undefined && { cached: rerank.cached }),
+  };
+}
+
+function moodLine(status: MoodStatus, file: string): string {
+  return status.applied
+    ? `Mood: re-ranked by Jev for ${file}, mood weight ${status.weight}${status.cached ? " (cached)" : ""}`
+    : `Mood: not applied. ${status.reason}`;
+}
+
+function moodSuffix(candidate: Partial<MoodFields>): string {
+  return candidate.moodLevel ? ` · mood ${candidate.moodLevel} (${fmt(candidate.moodScore!, 2)})` : "";
+}
+
+function moodBadge(candidate: Partial<MoodFields>): { badge?: string } {
+  return candidate.moodLevel ? { badge: `Mood: ${candidate.moodLevel}` } : {};
+}
+
+/** Replaces the vision providers, Jev client, Jev answer cache, or threshold for swap vetting, as tests do. */
+export interface VetSetup extends MoodSetup {
+  threshold?: number;
+}
+
+/** What swap vetting did, in the `vet` field of `recolor`'s JSON. */
+export interface VetStatus {
+  requested: true;
+  /** True when at least one plan was judged by Jev. */
+  applied: boolean;
+  /** Plans judged. */
+  vetted: number;
+  /** Implausible plans left out, as garment and the reasons naming the swap. */
+  dropped: { garment: string; plausibility: number; reasons: string[] }[];
+  /** Why some or all plans went unvetted. */
+  reason?: string;
+  model?: string;
+}
+
+/**
+ * Describe the design when it has no description yet, then plan and vet.
+ * Never throws for want of Jev or a vision provider, or for a failed request:
+ * the plans are the deterministic ones and the status says why. When Jev
+ * cannot be called, only a cached description is read, so no vision call is
+ * spent on vetting that cannot happen; cached Jev answers still apply.
+ */
+async function vetPlans(
+  design: Fingerprint,
+  input: string | Uint8Array,
+  options: { product: Product; n: number; includeImplausible: boolean },
+  setup: VetSetup,
+): Promise<{ design: Fingerprint; plans: (RecolorPlan | VettedPlan)[]; status: VetStatus }> {
+  const jev = setup.client ? { available: true as const } : await jevAvailability();
+  const deterministic = (reason: string) => ({
+    plans: recolorPlans(design, { product: options.product, n: options.n }),
+    status: { requested: true as const, applied: false, vetted: 0, dropped: [], reason: `Swaps were not vetted: ${reason}` },
+  });
+
+  let described = design;
+  if (!design.description) {
+    try {
+      described = await describeDesign(design, input, {
+        providers: jev.available ? (setup.providers ?? defaultVisionProviders()) : [],
+      });
+    } catch (error) {
+      if (!(error instanceof VisionUnavailableError)) throw error;
+      const reason = jev.available ? error.message.replace(/\n+/g, " ") : new JevUnavailableError(jev.reason).message;
+      return { design, ...deterministic(reason) };
+    }
+  }
+
+  const vetOptions: VetOptions = {};
+  if (setup.client) vetOptions.client = setup.client;
+  if (setup.cache !== undefined) vetOptions.cache = setup.cache;
+  if (setup.threshold !== undefined) vetOptions.threshold = setup.threshold;
+  let result;
+  try {
+    result = await vettedRecolorPlans(described, { ...vetOptions, ...options });
+  } catch (error) {
+    return { design: described, ...deterministic(`the request failed: ${(error as Error).message}`) };
+  }
+  const status: VetStatus = {
+    requested: true,
+    applied: result.vetted > 0,
+    vetted: result.vetted,
+    dropped: result.dropped.map((p) => ({
+      garment: p.color.name,
+      plausibility: p.plausibility!,
+      reasons: p.reasons.filter((r) => r.startsWith("Implausible:")),
+    })),
+  };
+  if (result.skipped) status.reason = result.skipped.note;
+  if (result.model) status.model = result.model;
+  return { design: described, plans: result.plans, status };
+}
+
+/** ` · plausibility 0.83` or ` · implausible (0.12)` for a vetted plan; empty otherwise. */
+function plausibilityNote(plan: RecolorPlan | VettedPlan): string {
+  if (!("plausibility" in plan) || plan.plausibility === null) return "";
+  return plan.implausible
+    ? ` · implausible (${fmt(plan.plausibility, 2)})`
+    : ` · plausibility ${fmt(plan.plausibility, 2)}`;
+}
 
 /** Fingerprint a design from its bytes when given, else from the file at `file`. */
 async function fingerprintDesign(file: string, bytes: Uint8Array | undefined) {

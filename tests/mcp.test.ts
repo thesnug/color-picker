@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fingerprint } from "../src/fingerprint/index.js";
 import { descriptionCachePath, describePrompt, writeDescriptionCache } from "../src/fingerprint/describe.js";
 import { createServer, SERVER_NAME } from "../src/mcp/index.js";
-import { jevStatus, RESULT_HISTORY, ResultStore } from "../src/mcp/tools.js";
+import { RESULT_HISTORY, ResultStore } from "../src/mcp/tools.js";
 
 const ROOT = join(import.meta.dirname, "..");
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
@@ -44,20 +44,6 @@ describe("mcp", () => {
     expect(RESULT_HISTORY).toBeGreaterThan(2);
   });
 
-  it("reports why a Jev option was skipped without revealing the key", () => {
-    const saved = process.env.TYPESAFE_API_KEY;
-    try {
-      delete process.env.TYPESAFE_API_KEY;
-      expect(jevStatus("mood")).toMatchObject({ requested: true, applied: false });
-      expect(jevStatus("mood").reason).toMatch(/TYPESAFE_API_KEY is not set/);
-      process.env.TYPESAFE_API_KEY = "secret-value";
-      expect(jevStatus("mood").reason).toMatch(/not available in this version/);
-      expect(jevStatus("mood").reason).not.toContain("secret-value");
-    } finally {
-      if (saved === undefined) delete process.env.TYPESAFE_API_KEY;
-      else process.env.TYPESAFE_API_KEY = saved;
-    }
-  });
 });
 
 describe("mcp over stdio", () => {
@@ -145,7 +131,7 @@ describe("mcp over stdio", () => {
     expect(fromBytes.design.hash).toBe(fromPath.design.hash);
     expect(fromBytes.picks.map((p: any) => p.color.slug)).toEqual(fromPath.picks.map((p: any) => p.color.slug));
     expect(fromBytes.mood).toMatchObject({ requested: true, applied: false });
-    expect(fromBytes.mood.reason).toMatch(/TYPESAFE_API_KEY is not set/);
+    expect(fromBytes.mood.reason).toMatch(/TYPESAFE_API_KEY/);
 
     // Both calls share one cached fingerprint.
     const cached = readdirSync(join(scratch, "cache", "color-picker", "fingerprints"));
