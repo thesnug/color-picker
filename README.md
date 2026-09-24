@@ -188,9 +188,34 @@ To add a product:
 4. Run `npm run products:check`. It fails on schema errors, duplicate slugs, a
    `reviewed` color without a date, or a file missing from the index. CI runs it
    too.
+5. Run `npm run products:equivalents` and commit the `<id>.equivalents.json` it
+   writes.
 
 ```bash
 npm run products:check  # validate assets/products/
+```
+
+### Wada equivalents
+
+Each product color's three nearest Wada colors are computed once and committed in
+`assets/products/<id>.equivalents.json`, so a shirt-name query never runs a nearest
+match and the mapping is reviewable in a diff. Each entry, keyed by color slug,
+holds the product hex, its OKLCH, its family, and the matches as
+`{ index, name, distance }`. Colors with no hex are listed with no matches.
+
+```ts
+import { equivalentsFor } from "@thesnug/color-picker";
+
+equivalentsFor("comfort-colors-1717", "blue-spruce")?.matches[0];
+```
+
+Rebuild after changing a product file or the derived Wada data. The build prints
+the spread of best-match distances and every color whose best match is farther than
+10. CI fails when a committed file is stale.
+
+```bash
+npm run products:equivalents        # write assets/products/*.equivalents.json
+npm run products:equivalents:check  # exit 1 if stale
 ```
 
 ### Refreshing product colors
@@ -206,6 +231,7 @@ blueprint, as POD does. See docs/DESIGN.md, "Hex provenance for Comfort Colors 1
 PRINTIFY_API_TOKEN=... npm run products:import -- \
   --color-study ../maker-method-picker/app/prototype/color-study/colors.json
 npm run products:check
+npm run products:equivalents
 ```
 
 - The token is read from the environment only. Never commit it.

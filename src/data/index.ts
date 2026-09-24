@@ -7,6 +7,8 @@
  * `assets/derived/combinations.json` from it; CI fails when they are stale.
  * Products live one file each in `assets/products/`, validated against
  * `assets/schemas/product.schema.json` by `scripts/validate-products.ts`.
+ * `scripts/build-equivalents.ts` writes each product's nearest Wada colors to
+ * `assets/products/<id>.equivalents.json`; CI fails when they are stale.
  * See docs/DESIGN.md, "Data".
  */
 
@@ -190,6 +192,39 @@ export interface ProductIndex {
   products: { id: string; name: string }[];
 }
 
+/** One Wada color close to a product color. */
+export interface EquivalentMatch {
+  /** Wada color index. */
+  index: number;
+  /** Canonical Wada name. */
+  name: string;
+  /** `distance()` from the product hex, rounded to three places. */
+  distance: number;
+}
+
+/** A product color's stored Wada equivalents. */
+export interface ProductColorEquivalents {
+  name: string;
+  /** The product hex the matches were computed from. Null when the color has no hex. */
+  hex: string | null;
+  /** OKLCH of the product hex. Null when the color has no hex. */
+  oklch: Oklch | null;
+  /** The product file's family for this color. */
+  family: string;
+  /** Closest Wada colors, nearest first. Empty when the color has no hex. */
+  matches: EquivalentMatch[];
+}
+
+/**
+ * `assets/products/<id>.equivalents.json`, written by
+ * `scripts/build-equivalents.ts`. Never edited by hand.
+ */
+export interface ProductEquivalentsFile {
+  product: string;
+  /** Keyed by product color slug, in product file order. */
+  colors: Record<string, ProductColorEquivalents>;
+}
+
 // ---------------------------------------------------------------------------
 // Accessibility. Shape matches assets/accessibility.json.
 
@@ -297,6 +332,19 @@ export function loadProduct(id: string): Product {
     throw new Error(`Unknown product "${id}". Known products: ${known}.`);
   }
   return withoutSchema(readJson<Product>(`products/${id}.json`));
+}
+
+/**
+ * Load a product's committed Wada equivalents. Only IDs listed in the index are
+ * accepted, as for {@link loadProduct}.
+ */
+export function loadProductEquivalents(id: string): ProductEquivalentsFile {
+  const index = loadProductIndex();
+  if (!index.products.some((p) => p.id === id)) {
+    const known = index.products.map((p) => p.id).join(", ");
+    throw new Error(`Unknown product "${id}". Known products: ${known}.`);
+  }
+  return readJson<ProductEquivalentsFile>(`products/${id}.equivalents.json`);
 }
 
 /** Load the default product, Comfort Colors 1717 unless the index says otherwise. */

@@ -1,0 +1,1814 @@
+{
+  "product": "comfort-colors-1717",
+  "colors": {
+    "banana": {
+      "name": "Banana",
+      "hex": "#ffecb9",
+      "oklch": {
+        "l": 0.94603,
+        "c": 0.06865,
+        "h": 90.03
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 39,
+          "name": "Sulphur Yellow",
+          "distance": 2.63
+        },
+        {
+          "index": 40,
+          "name": "Pale Lemon Yellow",
+          "distance": 4.563
+        },
+        {
+          "index": 41,
+          "name": "Naples Yellow",
+          "distance": 5.153
+        }
+      ]
+    },
+    "bay": {
+      "name": "Bay",
+      "hex": "#c3cfc1",
+      "oklch": {
+        "l": 0.84135,
+        "c": 0.02317,
+        "h": 141.22
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 153,
+          "name": "Neutral Gray",
+          "distance": 2.093
+        },
+        {
+          "index": 89,
+          "name": "Dark Greenish Glaucous",
+          "distance": 6.05
+        },
+        {
+          "index": 154,
+          "name": "Mineral Gray",
+          "distance": 6.268
+        }
+      ]
+    },
+    "berry": {
+      "name": "Berry",
+      "hex": "#875570",
+      "oklch": {
+        "l": 0.51398,
+        "c": 0.07582,
+        "h": 346.52
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 6.368
+        },
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 6.833
+        },
+        {
+          "index": 21,
+          "name": "Ochre Red",
+          "distance": 8.699
+        }
+      ]
+    },
+    "black": {
+      "name": "Black",
+      "hex": "#000000",
+      "oklch": {
+        "l": 0,
+        "c": 0,
+        "h": 0
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 157,
+          "name": "Black",
+          "distance": 0
+        },
+        {
+          "index": 130,
+          "name": "Deep Indigo",
+          "distance": 18.397
+        },
+        {
+          "index": 129,
+          "name": "Dull Violet Black",
+          "distance": 23.71
+        }
+      ]
+    },
+    "blossom": {
+      "name": "Blossom",
+      "hex": "#f8d1e2",
+      "oklch": {
+        "l": 0.89857,
+        "c": 0.04877,
+        "h": 350.04
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 43,
+          "name": "Seashell Pink",
+          "distance": 3.976
+        },
+        {
+          "index": 1,
+          "name": "Hermosa Pink",
+          "distance": 8.27
+        },
+        {
+          "index": 44,
+          "name": "Light Pinkish Cinnamon",
+          "distance": 9.088
+        }
+      ]
+    },
+    "blue-jean": {
+      "name": "Blue Jean",
+      "hex": "#636d82",
+      "oklch": {
+        "l": 0.53404,
+        "c": 0.03521,
+        "h": 265.1
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 1.599
+        },
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 5.6
+        },
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 9.76
+        }
+      ]
+    },
+    "blue-spruce": {
+      "name": "Blue Spruce",
+      "hex": "#536758",
+      "oklch": {
+        "l": 0.49261,
+        "c": 0.03383,
+        "h": 152.65
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 5.627
+        },
+        {
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 6.269
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 7.497
+        }
+      ]
+    },
+    "brick": {
+      "name": "Brick",
+      "hex": "#914a4a",
+      "oklch": {
+        "l": 0.49649,
+        "c": 0.09597,
+        "h": 21.11
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 3.256
+        },
+        {
+          "index": 21,
+          "name": "Ochre Red",
+          "distance": 5.364
+        },
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 7.332
+        }
+      ]
+    },
+    "bright-orange": {
+      "name": "Bright Orange",
+      "hex": "#ffad4f",
+      "oklch": {
+        "l": 0.8107,
+        "c": 0.14435,
+        "h": 66.7
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 47,
+          "name": "Cream Yellow",
+          "distance": 2.611
+        },
+        {
+          "index": 61,
+          "name": "Orange Yellow",
+          "distance": 3.332
+        },
+        {
+          "index": 45,
+          "name": "Pinkish Cinnamon",
+          "distance": 4.335
+        }
+      ]
+    },
+    "bright-salmon": {
+      "name": "Bright Salmon",
+      "hex": "#ff6b50",
+      "oklch": {
+        "l": 0.70737,
+        "c": 0.18606,
+        "h": 32.3
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 63,
+          "name": "Apricot Orange",
+          "distance": 2.547
+        },
+        {
+          "index": 8,
+          "name": "Grenadine Pink",
+          "distance": 4.206
+        },
+        {
+          "index": 64,
+          "name": "Orange",
+          "distance": 5.249
+        }
+      ]
+    },
+    "burnt-orange": {
+      "name": "Burnt Orange",
+      "hex": "#e27c4b",
+      "oklch": {
+        "l": 0.69075,
+        "c": 0.1416,
+        "h": 45.19
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 63,
+          "name": "Apricot Orange",
+          "distance": 5.106
+        },
+        {
+          "index": 48,
+          "name": "Golden Yellow",
+          "distance": 7.597
+        },
+        {
+          "index": 52,
+          "name": "Maple",
+          "distance": 7.698
+        }
+      ]
+    },
+    "butter": {
+      "name": "Butter",
+      "hex": "#f5e1a4",
+      "oklch": {
+        "l": 0.91175,
+        "c": 0.08095,
+        "h": 92.06
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 42,
+          "name": "Ivory Buff",
+          "distance": 2.697
+        },
+        {
+          "index": 41,
+          "name": "Naples Yellow",
+          "distance": 4.576
+        },
+        {
+          "index": 39,
+          "name": "Sulphur Yellow",
+          "distance": 4.902
+        }
+      ]
+    },
+    "chalky-mint": {
+      "name": "Chalky Mint",
+      "hex": "#a7dcd4",
+      "oklch": {
+        "l": 0.85552,
+        "c": 0.05568,
+        "h": 184.77
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 111,
+          "name": "Light Glaucous Blue",
+          "distance": 2.568
+        },
+        {
+          "index": 153,
+          "name": "Neutral Gray",
+          "distance": 3.017
+        },
+        {
+          "index": 88,
+          "name": "Glaucous Green",
+          "distance": 4.923
+        }
+      ]
+    },
+    "chambray": {
+      "name": "Chambray",
+      "hex": "#e2f7ff",
+      "oklch": {
+        "l": 0.96312,
+        "c": 0.02456,
+        "h": 222.58
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 152,
+          "name": "White",
+          "distance": 4.431
+        },
+        {
+          "index": 109,
+          "name": "Nile Blue",
+          "distance": 6.262
+        },
+        {
+          "index": 110,
+          "name": "Pale King's Blue",
+          "distance": 7.065
+        }
+      ]
+    },
+    "chili": {
+      "name": "Chili",
+      "hex": "#853f44",
+      "oklch": {
+        "l": 0.45923,
+        "c": 0.09613,
+        "h": 17.18
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 5.24
+        },
+        {
+          "index": 21,
+          "name": "Ochre Red",
+          "distance": 6.809
+        },
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 6.962
+        }
+      ]
+    },
+    "china-blue": {
+      "name": "China Blue",
+      "hex": "#43516e",
+      "oklch": {
+        "l": 0.43528,
+        "c": 0.05141,
+        "h": 264.42
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 8.99
+        },
+        {
+          "index": 127,
+          "name": "Vandar Poel's Blue",
+          "distance": 9.978
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 10.834
+        }
+      ]
+    },
+    "citrus": {
+      "name": "Citrus",
+      "hex": "#ffc86e",
+      "oklch": {
+        "l": 0.86401,
+        "c": 0.12459,
+        "h": 78.2
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 46,
+          "name": "Cinnamon Buff",
+          "distance": 2.252
+        },
+        {
+          "index": 47,
+          "name": "Cream Yellow",
+          "distance": 3.918
+        },
+        {
+          "index": 42,
+          "name": "Ivory Buff",
+          "distance": 5.381
+        }
+      ]
+    },
+    "crimson": {
+      "name": "Crimson",
+      "hex": "#b65858",
+      "oklch": {
+        "l": 0.57532,
+        "c": 0.12232,
+        "h": 21.62
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 5.768
+        },
+        {
+          "index": 67,
+          "name": "Cinnamon Rufous",
+          "distance": 6.419
+        },
+        {
+          "index": 19,
+          "name": "Etruscan Red",
+          "distance": 6.975
+        }
+      ]
+    },
+    "crunchberry": {
+      "name": "Crunchberry",
+      "hex": "#eb7ca2",
+      "oklch": {
+        "l": 0.72101,
+        "c": 0.14201,
+        "h": 359.5
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 6,
+          "name": "Coral Red",
+          "distance": 3.711
+        },
+        {
+          "index": 7,
+          "name": "Fresh Color",
+          "distance": 4.476
+        },
+        {
+          "index": 8,
+          "name": "Grenadine Pink",
+          "distance": 8.004
+        }
+      ]
+    },
+    "cumin": {
+      "name": "Cumin",
+      "hex": "#b06c62",
+      "oklch": {
+        "l": 0.6027,
+        "c": 0.08899,
+        "h": 28.97
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 67,
+          "name": "Cinnamon Rufous",
+          "distance": 6.174
+        },
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 7.778
+        },
+        {
+          "index": 14,
+          "name": "Raw Sienna",
+          "distance": 7.82
+        }
+      ]
+    },
+    "denim": {
+      "name": "Denim",
+      "hex": "#4e5064",
+      "oklch": {
+        "l": 0.43727,
+        "c": 0.03294,
+        "h": 280.46
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 7.451
+        },
+        {
+          "index": 146,
+          "name": "Taupe Brown",
+          "distance": 10.082
+        },
+        {
+          "index": 38,
+          "name": "Vistoris Lake",
+          "distance": 10.159
+        }
+      ]
+    },
+    "espresso": {
+      "name": "Espresso",
+      "hex": "#846b5b",
+      "oklch": {
+        "l": 0.54767,
+        "c": 0.04004,
+        "h": 54.3
+      },
+      "family": "earth",
+      "matches": [
+        {
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 6.423
+        },
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 6.746
+        },
+        {
+          "index": 77,
+          "name": "Orange Citrine",
+          "distance": 7.276
+        }
+      ]
+    },
+    "flo-blue": {
+      "name": "Flo Blue",
+      "hex": "#7682c2",
+      "oklch": {
+        "l": 0.62321,
+        "c": 0.09772,
+        "h": 275.1
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 119,
+          "name": "Olympic Blue",
+          "distance": 6.691
+        },
+        {
+          "index": 139,
+          "name": "Dull Blue Violet",
+          "distance": 8.487
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 10.287
+        }
+      ]
+    },
+    "granite": {
+      "name": "Granite",
+      "hex": "#8a8e90",
+      "oklch": {
+        "l": 0.64402,
+        "c": 0.00558,
+        "h": 228.86
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 5,
+          "name": "Light Brown Drab",
+          "distance": 6.429
+        },
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 7.833
+        },
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 8.621
+        }
+      ]
+    },
+    "grape": {
+      "name": "Grape",
+      "hex": "#645c81",
+      "oklch": {
+        "l": 0.497,
+        "c": 0.0589,
+        "h": 294.07
+      },
+      "family": "purple",
+      "matches": [
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 6.24
+        },
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 7.848
+        },
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 9.496
+        }
+      ]
+    },
+    "graphite": {
+      "name": "Graphite",
+      "hex": "#373231",
+      "oklch": {
+        "l": 0.32201,
+        "c": 0.00739,
+        "h": 31.1
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 156,
+          "name": "Slate Color",
+          "distance": 4.85
+        },
+        {
+          "index": 86,
+          "name": "Vandyke Brown",
+          "distance": 6.823
+        },
+        {
+          "index": 85,
+          "name": "Mars Brown",
+          "distance": 7.885
+        }
+      ]
+    },
+    "grey": {
+      "name": "Grey",
+      "hex": "#909090",
+      "oklch": {
+        "l": 0.65335,
+        "c": 0,
+        "h": 0
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 5,
+          "name": "Light Brown Drab",
+          "distance": 5.872
+        },
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 8.492
+        },
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 8.607
+        }
+      ]
+    },
+    "hemp": {
+      "name": "Hemp",
+      "hex": "#676a4a",
+      "oklch": {
+        "l": 0.51288,
+        "c": 0.04781,
+        "h": 112.44
+      },
+      "family": "earth",
+      "matches": [
+        {
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 2.824
+        },
+        {
+          "index": 77,
+          "name": "Orange Citrine",
+          "distance": 7.227
+        },
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 7.285
+        }
+      ]
+    },
+    "hydrangea": {
+      "name": "Hydrangea",
+      "hex": "#b2daf3",
+      "oklch": {
+        "l": 0.86797,
+        "c": 0.05452,
+        "h": 235.69
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 153,
+          "name": "Neutral Gray",
+          "distance": 5.217
+        },
+        {
+          "index": 111,
+          "name": "Light Glaucous Blue",
+          "distance": 5.579
+        },
+        {
+          "index": 110,
+          "name": "Pale King's Blue",
+          "distance": 7.558
+        }
+      ]
+    },
+    "ice-blue": {
+      "name": "Ice Blue",
+      "hex": "#7b8e95",
+      "oklch": {
+        "l": 0.63398,
+        "c": 0.02427,
+        "h": 222.01
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 6.744
+        },
+        {
+          "index": 5,
+          "name": "Light Brown Drab",
+          "distance": 8.133
+        },
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 8.38
+        }
+      ]
+    },
+    "island-green": {
+      "name": "Island Green",
+      "hex": "#54b188",
+      "oklch": {
+        "l": 0.69216,
+        "c": 0.10861,
+        "h": 162.59
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 3.148
+        },
+        {
+          "index": 118,
+          "name": "Green Blue",
+          "distance": 3.323
+        },
+        {
+          "index": 97,
+          "name": "Pistachio Green",
+          "distance": 4.015
+        }
+      ]
+    },
+    "island-reef": {
+      "name": "Island Reef",
+      "hex": "#a2d8c2",
+      "oklch": {
+        "l": 0.83862,
+        "c": 0.06375,
+        "h": 167.81
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 153,
+          "name": "Neutral Gray",
+          "distance": 3.518
+        },
+        {
+          "index": 111,
+          "name": "Light Glaucous Blue",
+          "distance": 4.375
+        },
+        {
+          "index": 89,
+          "name": "Dark Greenish Glaucous",
+          "distance": 4.435
+        }
+      ]
+    },
+    "ivory": {
+      "name": "Ivory",
+      "hex": "#fff7e7",
+      "oklch": {
+        "l": 0.97807,
+        "c": 0.02272,
+        "h": 84.59
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 152,
+          "name": "White",
+          "distance": 3.158
+        },
+        {
+          "index": 39,
+          "name": "Sulphur Yellow",
+          "distance": 6.211
+        },
+        {
+          "index": 109,
+          "name": "Nile Blue",
+          "distance": 7.879
+        }
+      ]
+    },
+    "khaki": {
+      "name": "Khaki",
+      "hex": "#aea583",
+      "oklch": {
+        "l": 0.72065,
+        "c": 0.0481,
+        "h": 94.97
+      },
+      "family": "earth",
+      "matches": [
+        {
+          "index": 155,
+          "name": "Warm Gray",
+          "distance": 4.414
+        },
+        {
+          "index": 54,
+          "name": "Ecru",
+          "distance": 5.02
+        },
+        {
+          "index": 51,
+          "name": "Isabella Color",
+          "distance": 5.305
+        }
+      ]
+    },
+    "lagoon": {
+      "name": "Lagoon",
+      "hex": "#3ba5b5",
+      "oklch": {
+        "l": 0.66843,
+        "c": 0.09726,
+        "h": 209.25
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 6.645
+        },
+        {
+          "index": 116,
+          "name": "Cerulian Blue",
+          "distance": 7.463
+        },
+        {
+          "index": 121,
+          "name": "Antwarp Blue",
+          "distance": 8.626
+        }
+      ]
+    },
+    "lagoon-blue": {
+      "name": "Lagoon Blue",
+      "hex": "#89e4ed",
+      "oklch": {
+        "l": 0.86517,
+        "c": 0.08794,
+        "h": 203.81
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 111,
+          "name": "Light Glaucous Blue",
+          "distance": 3.765
+        },
+        {
+          "index": 110,
+          "name": "Pale King's Blue",
+          "distance": 6.06
+        },
+        {
+          "index": 153,
+          "name": "Neutral Gray",
+          "distance": 6.566
+        }
+      ]
+    },
+    "light-green": {
+      "name": "Light Green",
+      "hex": "#69826a",
+      "oklch": {
+        "l": 0.57982,
+        "c": 0.04638,
+        "h": 145.99
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 2.52
+        },
+        {
+          "index": 74,
+          "name": "Light Grayish Olive",
+          "distance": 4.21
+        },
+        {
+          "index": 73,
+          "name": "Dark Citrine",
+          "distance": 6.117
+        }
+      ]
+    },
+    "melon": {
+      "name": "Melon",
+      "hex": "#ff9a5f",
+      "oklch": {
+        "l": 0.7796,
+        "c": 0.14215,
+        "h": 49.8
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 48,
+          "name": "Golden Yellow",
+          "distance": 2.809
+        },
+        {
+          "index": 45,
+          "name": "Pinkish Cinnamon",
+          "distance": 4.558
+        },
+        {
+          "index": 62,
+          "name": "Yellow Orange",
+          "distance": 5.26
+        }
+      ]
+    },
+    "midnight": {
+      "name": "Midnight",
+      "hex": "#414a5b",
+      "oklch": {
+        "l": 0.4079,
+        "c": 0.03095,
+        "h": 263.08
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 107,
+          "name": "Blackish Olive",
+          "distance": 9.007
+        },
+        {
+          "index": 38,
+          "name": "Vistoris Lake",
+          "distance": 9.163
+        },
+        {
+          "index": 156,
+          "name": "Slate Color",
+          "distance": 9.236
+        }
+      ]
+    },
+    "moss": {
+      "name": "Moss",
+      "hex": "#747f66",
+      "oklch": {
+        "l": 0.58014,
+        "c": 0.03933,
+        "h": 126.93
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 3.937
+        },
+        {
+          "index": 74,
+          "name": "Light Grayish Olive",
+          "distance": 4.008
+        },
+        {
+          "index": 73,
+          "name": "Dark Citrine",
+          "distance": 5.818
+        }
+      ]
+    },
+    "mustard": {
+      "name": "Mustard",
+      "hex": "#d0ae6e",
+      "oklch": {
+        "l": 0.76678,
+        "c": 0.09128,
+        "h": 82.44
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 51,
+          "name": "Isabella Color",
+          "distance": 3.554
+        },
+        {
+          "index": 54,
+          "name": "Ecru",
+          "distance": 4.217
+        },
+        {
+          "index": 50,
+          "name": "Ochraceous Salmon",
+          "distance": 4.545
+        }
+      ]
+    },
+    "mystic-blue": {
+      "name": "Mystic Blue",
+      "hex": "#647ca3",
+      "oklch": {
+        "l": 0.58282,
+        "c": 0.06657,
+        "h": 259.95
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 4.873
+        },
+        {
+          "index": 121,
+          "name": "Antwarp Blue",
+          "distance": 7.31
+        },
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 8.365
+        }
+      ]
+    },
+    "navy": {
+      "name": "Navy",
+      "hex": "#52525e",
+      "oklch": {
+        "l": 0.44303,
+        "c": 0.01951,
+        "h": 285.58
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 7.368
+        },
+        {
+          "index": 81,
+          "name": "Deep Grayish Olive",
+          "distance": 9.073
+        },
+        {
+          "index": 82,
+          "name": "Pale Raw Umber",
+          "distance": 9.794
+        }
+      ]
+    },
+    "neon-lemon": {
+      "name": "Neon Lemon",
+      "hex": "#c9db78",
+      "oklch": {
+        "l": 0.85647,
+        "c": 0.12594,
+        "h": 117.61
+      },
+      "family": "neon",
+      "matches": [
+        {
+          "index": 53,
+          "name": "Olive Buff",
+          "distance": 3.213
+        },
+        {
+          "index": 89,
+          "name": "Dark Greenish Glaucous",
+          "distance": 5.562
+        },
+        {
+          "index": 42,
+          "name": "Ivory Buff",
+          "distance": 6.556
+        }
+      ]
+    },
+    "neon-pink": {
+      "name": "Neon Pink",
+      "hex": "#f57caf",
+      "oklch": {
+        "l": 0.73792,
+        "c": 0.1574,
+        "h": 355.07
+      },
+      "family": "neon",
+      "matches": [
+        {
+          "index": 6,
+          "name": "Coral Red",
+          "distance": 3.416
+        },
+        {
+          "index": 7,
+          "name": "Fresh Color",
+          "distance": 5.035
+        },
+        {
+          "index": 9,
+          "name": "Eosine Pink",
+          "distance": 7.284
+        }
+      ]
+    },
+    "neon-red-orange": {
+      "name": "Neon Red Orange",
+      "hex": "#ff867b",
+      "oklch": {
+        "l": 0.75231,
+        "c": 0.14888,
+        "h": 26.57
+      },
+      "family": "neon",
+      "matches": [
+        {
+          "index": 7,
+          "name": "Fresh Color",
+          "distance": 4.39
+        },
+        {
+          "index": 49,
+          "name": "Vinaceous Cinnamon",
+          "distance": 4.466
+        },
+        {
+          "index": 63,
+          "name": "Apricot Orange",
+          "distance": 6.232
+        }
+      ]
+    },
+    "neon-violet": {
+      "name": "Neon Violet",
+      "hex": "#e8ace3",
+      "oklch": {
+        "l": 0.81727,
+        "c": 0.10011,
+        "h": 329.27
+      },
+      "family": "neon",
+      "matches": [
+        {
+          "index": 3,
+          "name": "Cameo Pink",
+          "distance": 2.992
+        },
+        {
+          "index": 2,
+          "name": "Corinthian Pink",
+          "distance": 3.821
+        },
+        {
+          "index": 1,
+          "name": "Hermosa Pink",
+          "distance": 4.396
+        }
+      ]
+    },
+    "orchid": {
+      "name": "Orchid",
+      "hex": "#cbb3cc",
+      "oklch": {
+        "l": 0.79493,
+        "c": 0.04372,
+        "h": 324.75
+      },
+      "family": "purple",
+      "matches": [
+        {
+          "index": 133,
+          "name": "Grayish Lavender B",
+          "distance": 2.902
+        },
+        {
+          "index": 4,
+          "name": "Fawn",
+          "distance": 3.411
+        },
+        {
+          "index": 3,
+          "name": "Cameo Pink",
+          "distance": 4.302
+        }
+      ]
+    },
+    "paprika": {
+      "name": "Paprika",
+      "hex": "#ff4645",
+      "oklch": {
+        "l": 0.66544,
+        "c": 0.22142,
+        "h": 25.83
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 65,
+          "name": "Peach Red",
+          "distance": 3.281
+        },
+        {
+          "index": 16,
+          "name": "Jasper Red",
+          "distance": 4.523
+        },
+        {
+          "index": 64,
+          "name": "Orange",
+          "distance": 4.77
+        }
+      ]
+    },
+    "peachy": {
+      "name": "Peachy",
+      "hex": "#f7c3ae",
+      "oklch": {
+        "l": 0.85798,
+        "c": 0.06644,
+        "h": 43.07
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 44,
+          "name": "Light Pinkish Cinnamon",
+          "distance": 2.631
+        },
+        {
+          "index": 43,
+          "name": "Seashell Pink",
+          "distance": 3.804
+        },
+        {
+          "index": 42,
+          "name": "Ivory Buff",
+          "distance": 7.237
+        }
+      ]
+    },
+    "pepper": {
+      "name": "Pepper",
+      "hex": "#5f605b",
+      "oklch": {
+        "l": 0.48653,
+        "c": 0.00793,
+        "h": 115.88
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 7.195
+        },
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 7.273
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 7.339
+        }
+      ]
+    },
+    "periwinkle": {
+      "name": "Periwinkle",
+      "hex": "#6570af",
+      "oklch": {
+        "l": 0.56338,
+        "c": 0.09837,
+        "h": 275.26
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 6.764
+        },
+        {
+          "index": 139,
+          "name": "Dull Blue Violet",
+          "distance": 6.828
+        },
+        {
+          "index": 121,
+          "name": "Antwarp Blue",
+          "distance": 10.314
+        }
+      ]
+    },
+    "red": {
+      "name": "Red",
+      "hex": "#a80d27",
+      "oklch": {
+        "l": 0.46671,
+        "c": 0.18152,
+        "h": 21.77
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 29,
+          "name": "Carmine Red",
+          "distance": 1.665
+        },
+        {
+          "index": 30,
+          "name": "Pompeian Red",
+          "distance": 2.006
+        },
+        {
+          "index": 28,
+          "name": "Brick Red",
+          "distance": 3.778
+        }
+      ]
+    },
+    "royal-caribe": {
+      "name": "Royal Caribe",
+      "hex": "#5d8ac7",
+      "oklch": {
+        "l": 0.62707,
+        "c": 0.10512,
+        "h": 256.29
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 119,
+          "name": "Olympic Blue",
+          "distance": 4.647
+        },
+        {
+          "index": 121,
+          "name": "Antwarp Blue",
+          "distance": 8.578
+        },
+        {
+          "index": 139,
+          "name": "Dull Blue Violet",
+          "distance": 10.048
+        }
+      ]
+    },
+    "sage": {
+      "name": "Sage",
+      "hex": "#6d775c",
+      "oklch": {
+        "l": 0.55311,
+        "c": 0.04209,
+        "h": 124.28
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 74,
+          "name": "Light Grayish Olive",
+          "distance": 5.053
+        },
+        {
+          "index": 80,
+          "name": "Light Brownish Olive",
+          "distance": 5.411
+        },
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 5.549
+        }
+      ]
+    },
+    "sandstone": {
+      "name": "Sandstone",
+      "hex": "#a69f88",
+      "oklch": {
+        "l": 0.70211,
+        "c": 0.0334,
+        "h": 93.04
+      },
+      "family": "earth",
+      "matches": [
+        {
+          "index": 155,
+          "name": "Warm Gray",
+          "distance": 5.079
+        },
+        {
+          "index": 52,
+          "name": "Maple",
+          "distance": 6.322
+        },
+        {
+          "index": 54,
+          "name": "Ecru",
+          "distance": 7.077
+        }
+      ]
+    },
+    "sapphire": {
+      "name": "Sapphire",
+      "hex": "#03b2d3",
+      "oklch": {
+        "l": 0.70454,
+        "c": 0.1258,
+        "h": 217.44
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 116,
+          "name": "Cerulian Blue",
+          "distance": 7.333
+        },
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 9.88
+        },
+        {
+          "index": 118,
+          "name": "Green Blue",
+          "distance": 10.581
+        }
+      ]
+    },
+    "seafoam": {
+      "name": "Seafoam",
+      "hex": "#609a95",
+      "oklch": {
+        "l": 0.64489,
+        "c": 0.06134,
+        "h": 188.81
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 4.881
+        },
+        {
+          "index": 95,
+          "name": "Andover Green",
+          "distance": 5.897
+        },
+        {
+          "index": 121,
+          "name": "Antwarp Blue",
+          "distance": 8.28
+        }
+      ]
+    },
+    "terracotta": {
+      "name": "Terracotta",
+      "hex": "#db8c76",
+      "oklch": {
+        "l": 0.716,
+        "c": 0.10226,
+        "h": 36.31
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 50,
+          "name": "Ochraceous Salmon",
+          "distance": 4.694
+        },
+        {
+          "index": 49,
+          "name": "Vinaceous Cinnamon",
+          "distance": 6.479
+        },
+        {
+          "index": 52,
+          "name": "Maple",
+          "distance": 6.653
+        }
+      ]
+    },
+    "topaz-blue": {
+      "name": "Topaz Blue",
+      "hex": "#1f6171",
+      "oklch": {
+        "l": 0.45872,
+        "c": 0.06946,
+        "h": 217.2
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 7.809
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 9.239
+        },
+        {
+          "index": 124,
+          "name": "Dusky Green",
+          "distance": 10.816
+        }
+      ]
+    },
+    "true-navy": {
+      "name": "True Navy",
+      "hex": "#1c1b32",
+      "oklch": {
+        "l": 0.23566,
+        "c": 0.04366,
+        "h": 284.5
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 131,
+          "name": "Deep Slate Green",
+          "distance": 6.471
+        },
+        {
+          "index": 128,
+          "name": "Dark Tyrian Blue",
+          "distance": 7.162
+        },
+        {
+          "index": 108,
+          "name": "Deep Slate Olive",
+          "distance": 8.354
+        }
+      ]
+    },
+    "violet": {
+      "name": "Violet",
+      "hex": "#a88fd7",
+      "oklch": {
+        "l": 0.6996,
+        "c": 0.1064,
+        "h": 299.61
+      },
+      "family": "purple",
+      "matches": [
+        {
+          "index": 134,
+          "name": "Laelia Pink",
+          "distance": 5.943
+        },
+        {
+          "index": 135,
+          "name": "Lilac",
+          "distance": 7.715
+        },
+        {
+          "index": 5,
+          "name": "Light Brown Drab",
+          "distance": 8.909
+        }
+      ]
+    },
+    "washed-denim": {
+      "name": "Washed Denim",
+      "hex": "#8595b8",
+      "oklch": {
+        "l": 0.66973,
+        "c": 0.05527,
+        "h": 265.67
+      },
+      "family": "blue",
+      "matches": [
+        {
+          "index": 5,
+          "name": "Light Brown Drab",
+          "distance": 7.562
+        },
+        {
+          "index": 119,
+          "name": "Olympic Blue",
+          "distance": 9.487
+        },
+        {
+          "index": 94,
+          "name": "Artemisia Green",
+          "distance": 10.413
+        }
+      ]
+    },
+    "watermelon": {
+      "name": "Watermelon",
+      "hex": "#da665f",
+      "oklch": {
+        "l": 0.64911,
+        "c": 0.14713,
+        "h": 25.47
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 8,
+          "name": "Grenadine Pink",
+          "distance": 6.942
+        },
+        {
+          "index": 67,
+          "name": "Cinnamon Rufous",
+          "distance": 7.222
+        },
+        {
+          "index": 12,
+          "name": "Eugenia Red A",
+          "distance": 7.697
+        }
+      ]
+    },
+    "white": {
+      "name": "White",
+      "hex": "#ffffff",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      },
+      "family": "neutral",
+      "matches": [
+        {
+          "index": 152,
+          "name": "White",
+          "distance": 0
+        },
+        {
+          "index": 109,
+          "name": "Nile Blue",
+          "distance": 8.791
+        },
+        {
+          "index": 39,
+          "name": "Sulphur Yellow",
+          "distance": 8.983
+        }
+      ]
+    },
+    "wine": {
+      "name": "Wine",
+      "hex": "#5e5266",
+      "oklch": {
+        "l": 0.45777,
+        "c": 0.03523,
+        "h": 311.79
+      },
+      "family": "purple",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 5.567
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 9.424
+        },
+        {
+          "index": 146,
+          "name": "Taupe Brown",
+          "distance": 9.584
+        }
+      ]
+    },
+    "yam": {
+      "name": "Yam",
+      "hex": "#c9814f",
+      "oklch": {
+        "l": 0.66802,
+        "c": 0.11082,
+        "h": 54.38
+      },
+      "family": "orange-yellow",
+      "matches": [
+        {
+          "index": 52,
+          "name": "Maple",
+          "distance": 5.355
+        },
+        {
+          "index": 70,
+          "name": "Khaki",
+          "distance": 6.558
+        },
+        {
+          "index": 67,
+          "name": "Cinnamon Rufous",
+          "distance": 7.619
+        }
+      ]
+    }
+  }
+}
