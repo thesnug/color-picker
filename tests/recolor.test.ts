@@ -177,6 +177,14 @@ describe("recolorPlans", () => {
     }
   });
 
+  it("includes chart-only colors with hex but skips colors without hex when unstocked are requested", () => {
+    const plans = recolorPlans(flatMark, everyColor);
+    const chartOnly = product.colors.filter((c) => !c.available && c.hex !== null).map((c) => c.slug);
+    expect(plans.map((p) => p.color.slug)).toEqual(expect.arrayContaining(chartOnly));
+    expect(plans.every((p) => p.color.hex !== null)).toBe(true);
+    expect(plans).toHaveLength(product.colors.filter((c) => c.hex !== null).length);
+  });
+
   it("rejects an empty design and a bad n", () => {
     expect(() => recolorPlans({ palette: [], inkLuminance: 0.5 })).toThrow(RangeError);
     expect(() => recolorPlans(flatMark, { n: 0 })).toThrow(/n must be a positive integer/);

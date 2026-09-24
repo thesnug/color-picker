@@ -29,6 +29,23 @@ describe("product loaders", () => {
     expect(loadProductIndex()).not.toHaveProperty("$schema");
   });
 
+  it("carries the 2026 chart-only colors as unstocked, with their chart", () => {
+    const bySlug = new Map(defaultProduct().colors.map((c) => [c.slug, c]));
+    for (const [slug, hex] of [
+      ["dusk", "#735b6a"],
+      ["emerald", "#00685e"],
+      ["neon-cantaloupe", "#ffbba4"],
+      ["rose-quartz", "#e2acd7"],
+    ]) {
+      expect(bySlug.get(slug!), slug).toMatchObject({
+        hex,
+        available: false,
+        source: expect.stringMatching(/^retail-chart:/),
+        sourceUrl: expect.stringMatching(/^https:\/\//),
+      });
+    }
+  });
+
   it("rejects IDs that are not in the index", () => {
     expect(() => loadProduct("gildan-5000")).toThrow(/Unknown product "gildan-5000"/);
     expect(() => loadProduct("../index")).toThrow(/Unknown product/);
@@ -61,7 +78,16 @@ describe("validateProducts", () => {
           image: { url: "https://example.com/pepper.jpg", sha256: "a".repeat(64) },
           pod: { colorAssetVersionId: "cav_123" },
         },
-        { ...color, name: "Emerald", slug: "emerald", hex: "#2f6b4f", available: false, source: "retail-chart:comfort-colors-2026" },
+        {
+          ...color,
+          name: "Emerald",
+          slug: "emerald",
+          hex: null,
+          available: false,
+          source: "retail-chart:comfort-colors-2026",
+          sourceUrl: "https://example.com/chart",
+          sourceNote: "No chart publishes a hex.",
+        },
         { ...color, name: "Ivory", slug: "ivory", hex: "#efe8d8", source: "reviewed" },
       ],
     });
@@ -87,6 +113,18 @@ describe("validateProducts", () => {
     const { sourceDate: _date, ...undated } = color;
     write({ ...product(), colors: [{ ...undated, source: "reviewed" }] });
     expect(validateProducts(dir)).toContainEqual(expect.stringMatching(/\/colors\/0 is reviewed but has no sourceDate/));
+  });
+
+  it("fails on a null hex for a color that is available", () => {
+    write({ ...product(), colors: [{ ...color, hex: null }] });
+    expect(validateProducts(dir)).toContainEqual(
+      expect.stringMatching(/\/colors\/0 has no hex, so it must be available: false/),
+    );
+  });
+
+  it("fails on a retail chart color without its sourceUrl", () => {
+    write({ ...product(), colors: [{ ...color, available: false, source: "retail-chart:getcustom-store" }] });
+    expect(validateProducts(dir).join("\n")).toMatch(/\/colors\/0 must have required property 'sourceUrl'/);
   });
 
   it("fails when the id does not match the file name", () => {

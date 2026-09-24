@@ -21,8 +21,13 @@
  *     against unchanged upstream data writes no diff.
  *   - A color in the file but not in Printify is set to `available: false` with the
  *     reason logged. It is never deleted.
+ *   - A `retail-chart:<site>` color (the gap fill for colors Printify does not
+ *     stock) is left alone, `sourceUrl` and `sourceNote` included, until Printify returns
+ *     it with a swatch. Then the Printify hex replaces the chart hex, `available`
+ *     flips to true, `source` becomes `printify`, and the chart fields are dropped.
  *   - A Printify color with no swatch in any shop is logged and left as it is.
- *   - `family` is always recomputed from the hex with `colorFamily`.
+ *   - `family` is always recomputed from the hex with `colorFamily`, except for a
+ *     color with no hex, which keeps the family it has.
  *   - With `--color-study`, colors found in the maker-method-picker's
  *     `app/prototype/color-study/colors.json` (matched by name) get its `url` and
  *     `sha256` as `image` and its `colorAssetVersionId` as `pod`. That file's hex
@@ -172,6 +177,9 @@ export function mergeColors(
       if (!current) continue;
       next = current;
     } else {
+      if (current?.source.startsWith("retail-chart:")) {
+        log.push(`${name}: now stocked by Printify; chart hex ${current.hex ?? "(none)"} replaced with ${hex}`);
+      }
       const changed = !current || current.hex !== hex || current.source !== "printify";
       next = {
         name,
@@ -225,13 +233,15 @@ function finish(color: ProductColor): ProductColor {
     slug: color.slug,
     hex: color.hex,
     aliases: color.aliases,
-    family: colorFamily(color.hex, color.name),
+    family: color.hex === null ? color.family : colorFamily(color.hex, color.name),
     available: color.available,
     source: color.source,
     sourceDate: color.sourceDate,
   };
   if (color.image) out.image = { url: color.image.url, sha256: color.image.sha256 };
   if (color.pod) out.pod = { colorAssetVersionId: color.pod.colorAssetVersionId };
+  if (color.sourceUrl) out.sourceUrl = color.sourceUrl;
+  if (color.sourceNote) out.sourceNote = color.sourceNote;
   return out;
 }
 

@@ -8,7 +8,7 @@
  */
 
 import { apcaContrast, contrastRatio } from "../color/contrast.js";
-import { type Swatch, escapeXml, fmt, readableTextColor, swatchHex, wrapText } from "./shared.js";
+import { NOT_STOCKED, type Swatch, escapeXml, fmt, readableTextColor, swatchHex, wrapText } from "./shared.js";
 
 const FONT = "system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
 const MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
@@ -35,7 +35,16 @@ function titleText(title: string): string {
 
 function describe(swatch: Swatch): string {
   const hex = swatchHex(swatch);
-  return swatch.name ? `${swatch.name} ${hex}` : hex;
+  const text = swatch.name ? `${swatch.name} ${hex}` : hex;
+  return swatch.available === false ? `${text} (${NOT_STOCKED})` : text;
+}
+
+/** A dashed inset outline in the tile's text color: the visible marker for an unstocked color. */
+function unstockedOutline(x: number, y: number, width: number, height: number, ink: string, rx = 0): string {
+  return (
+    `<rect x="${x + 3}" y="${y + 3}" width="${width - 6}" height="${height - 6}" rx="${rx}" ` +
+    `fill="none" stroke="${ink}" stroke-width="2" stroke-dasharray="6 4"/>`
+  );
 }
 
 /**
@@ -58,6 +67,8 @@ function tile(x: number, y: number, width: number, height: number, swatch: Swatc
   if (swatch.note) {
     for (const line of wrapText(swatch.note, maxChars, 1)) lines.push({ text: line, size: 11 });
   }
+  const unstocked = swatch.available === false;
+  if (unstocked) lines.push({ text: NOT_STOCKED, size: 11, weight: 600 });
 
   let baseline = y + height - PAD;
   const texts: string[] = [];
@@ -79,6 +90,7 @@ function tile(x: number, y: number, width: number, height: number, swatch: Swatc
   return (
     `<g><title>${escapeXml(describe(swatch))}</title>` +
     `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${hex}"/>` +
+    (unstocked ? unstockedOutline(x, y, width, height, ink) : "") +
     `${texts.join("")}</g>`
   );
 }
@@ -275,8 +287,6 @@ export function renderSwatchStripSvg(
 export interface ProductCardColor extends Swatch {
   /** Public garment photo. Drawn over the tile when present. */
   image?: { url: string };
-  /** False marks the color as unstocked on the card. */
-  available?: boolean;
 }
 
 export interface ProductCardOptions {
@@ -345,8 +355,12 @@ export function renderProductCard(
     );
   }
 
+  if (productColor.available === false) {
+    parts.push(unstockedOutline(0, top, size, size, readableTextColor(hex), 6));
+  }
+
   // Caption under the garment.
-  const status = productColor.available === false ? " · not stocked" : "";
+  const status = productColor.available === false ? ` · ${NOT_STOCKED}` : "";
   parts.push(
     `<text x="0" y="${top + size + 20}" font-size="13" font-weight="600" fill="currentColor">` +
       `${escapeXml(name)}</text>` +
