@@ -13,6 +13,7 @@
 import { readFileSync } from "node:fs";
 
 import type { Oklab, Oklch } from "../color/convert.js";
+import type { Deficiency } from "../color/cvd.js";
 
 // ---------------------------------------------------------------------------
 // Source
@@ -173,6 +174,55 @@ export interface ProductIndex {
 }
 
 // ---------------------------------------------------------------------------
+// Accessibility. Shape matches assets/accessibility.json.
+
+/** A threshold group from WCAG 2.2. `AAA` is null where WCAG defines no AAA level. */
+export interface WcagThresholds {
+  AA: number;
+  AAA: number | null;
+  source: string;
+  definition?: string;
+  note?: string;
+}
+
+export interface ApcaLevel {
+  minimum: number;
+  preferred?: number;
+  note: string;
+}
+
+export interface Accessibility {
+  wcag: {
+    version: string;
+    source: string;
+    body: WcagThresholds;
+    large: WcagThresholds;
+    nonText: WcagThresholds;
+  };
+  apca: {
+    version: string;
+    source: string;
+    body: ApcaLevel;
+    content: ApcaLevel;
+    large: ApcaLevel;
+    nonText: ApcaLevel;
+    invisible: { maximum: number; note: string };
+  };
+  print: {
+    /** Minimum `distance()` between two colors printed together. */
+    minimumDistance: { value: number; units: string; note: string; source: string };
+    /** Garments at or below this WCAG relative luminance are dark: dark ink is not recommended. */
+    darkInkGarmentLuminance: { value: number; units: string; note: string; source: string };
+    underbase: { note: string; source: string };
+  };
+  cvd: {
+    simulations: Deficiency[];
+    note: string;
+    source: string;
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Loaders
 
 /** URL of the assets directory. Resolves correctly from both `src/` and `dist/`. */
@@ -230,4 +280,10 @@ export function loadProduct(id: string): Product {
 /** Load the default product, Comfort Colors 1717 unless the index says otherwise. */
 export function defaultProduct(): Product {
   return loadProduct(loadProductIndex().default);
+}
+
+/** Load the accessibility and print thresholds, `assets/accessibility.json`. */
+export function loadAccessibility(): Accessibility {
+  const { $comment: _comment, ...rest } = readJson<Accessibility & { $comment?: string }>("accessibility.json");
+  return rest;
 }

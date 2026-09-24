@@ -1,0 +1,72 @@
+{
+  "$comment": "Accessibility and print thresholds. Numbers live here, math lives in src/accessibility.ts. See docs/DESIGN.md, \"Accessibility\".",
+  "wcag": {
+    "version": "2.2",
+    "source": "https://www.w3.org/TR/WCAG22/",
+    "body": {
+      "AA": 4.5,
+      "AAA": 7,
+      "source": "https://www.w3.org/TR/WCAG22/#contrast-minimum"
+    },
+    "large": {
+      "AA": 3,
+      "AAA": 4.5,
+      "definition": "At least 18 point, or 14 point bold.",
+      "source": "https://www.w3.org/TR/WCAG22/#dfn-large-scale"
+    },
+    "nonText": {
+      "AA": 3,
+      "AAA": null,
+      "note": "SC 1.4.11 Non-text Contrast is Level AA only; WCAG 2.2 defines no AAA level for user interface components or graphical objects.",
+      "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast"
+    }
+  },
+  "apca": {
+    "version": "0.0.98G-4g, bronze simple mode",
+    "source": "https://git.apcacontrast.com/documentation/APCA_in_a_Nutshell.html",
+    "body": {
+      "minimum": 75,
+      "preferred": 90,
+      "note": "Lc 75 is the minimum for columns of body text; Lc 90 is preferred for fluent reading."
+    },
+    "content": {
+      "minimum": 60,
+      "note": "Content text that is not body, column, or block text."
+    },
+    "large": {
+      "minimum": 45,
+      "note": "Larger, heavier text such as headlines: 36px normal weight or 24px bold."
+    },
+    "nonText": {
+      "minimum": 30,
+      "note": "Spot-readable text and non-text elements such as icons and control outlines."
+    },
+    "invisible": {
+      "maximum": 15,
+      "note": "Below Lc 15, treat an element as invisible."
+    }
+  },
+  "print": {
+    "minimumDistance": {
+      "value": 10,
+      "units": "OKLab distance scaled by 100 (black to white is 100), as returned by distance()",
+      "note": "House rule. Two print colors closer than this read as one color on fabric. It sits just above the median disagreement between two retail charts for the same garment colors (about 9), so a smaller gap is within measurement noise. About 3% of color pairs in the book's combinations fall below it.",
+      "source": "https://github.com/thesnug/color-picker/blob/main/docs/DESIGN.md#accessibility-assetsaccessibilityjson"
+    },
+    "darkInkGarmentLuminance": {
+      "value": 0.3,
+      "units": "WCAG relative luminance, 0 to 1",
+      "note": "Dark ink is recommended only on garments with a relative luminance above this cutoff. Matches isLight() in maker-method-picker's color-study palette.ts so both tools agree on light and dark garments.",
+      "source": "https://github.com/thesnug/color-picker/blob/main/docs/DESIGN.md#architecture"
+    },
+    "underbase": {
+      "note": "Light ink on a dark garment needs a white underbase in DTG printing, or the ink sinks into the fabric and reads darker and duller than its hex.",
+      "source": "https://github.com/thesnug/color-picker/blob/main/docs/DESIGN.md#accessibility-assetsaccessibilityjson"
+    }
+  },
+  "cvd": {
+    "simulations": ["protan", "deutan", "tritan"],
+    "note": "Full dichromacy. Protanopia and deuteranopia use Viénot, Brettel & Mollon (1999); tritanopia uses Brettel, Viénot & Mollon (1997). See src/color/cvd.ts.",
+    "source": "https://github.com/DaltonLens/libDaltonLens"
+  }
+}

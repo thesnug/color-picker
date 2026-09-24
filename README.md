@@ -67,6 +67,24 @@ npx color-picker-mcp
 The server speaks MCP over stdio. Register it with a client as the command
 `color-picker-mcp`.
 
+## Accessibility
+
+`check` tests a combination against the thresholds in
+[`assets/accessibility.json`](assets/accessibility.json): WCAG 2.2 and APCA
+contrast for every ordered pair, the minimum distance between colors printed
+together, and whether any pair collapses under protanopia, deuteranopia, or
+tritanopia. `roles` picks a legible background, text, and accent for a web page,
+or says why none exists. Every result carries plain-language `reasons`.
+
+```ts
+import { check, roles } from "@thesnug/color-picker";
+
+check(["#1c1c1c", "#fbf7ef", "#c8102e"], { context: "web-text" }); // or "web-ui", "print"
+roles(combination, { mode: "dark" }); // a book combination or a list of colors
+```
+
+The numbers live in the JSON, each with its source; the code only applies them.
+
 ## Development
 
 ```bash
