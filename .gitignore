@@ -3,3 +3,7 @@ node_modules/
 .env
 .env.*
 .claude/worktrees/
+
+# Build output. The release script commits dist/ at tag time; see docs/DESIGN.md.
+dist/
+coverage/
