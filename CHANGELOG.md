@@ -7,9 +7,19 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
-- The release script reports a failed tag push with the commands to push or
-  delete the local tag, and `tag X.Y.Z --push-existing` pushes a tag left by a
-  failed push without rebuilding it.
+### Library
+
+- `describeToColor` in `@thesnug/color-picker/jev` resolves a free-text color
+  description ("the brick shirt", "something autumnal for a coffee brand") to a
+  Wada color or a product color. The name lookup runs first; Jev is asked only
+  when it misses. Name matches return nearest colors with distances; Jev matches
+  return up to three colors with probabilities.
+
+### Release tooling
+
+- The release script reports a failed tag push with the commands to recover or
+  delete the local tag. `tag X.Y.Z --push-existing` validates its version and
+  built release tree before pushing without rebuilding it.
 
 ## [0.1.0] - 2026-09-24
 
