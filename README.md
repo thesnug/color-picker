@@ -430,11 +430,14 @@ To add a product:
    `assets/products/index.json`.
 3. Add colors. Each carries `source` (`printify`, `retail-chart:<name>`, or
    `reviewed`) and a `sourceDate`. Colors the provider does not stock get
-   `"available": false`. Garment images are referenced by `image.url` and
+   `"available": false`. A `retail-chart` color also carries the chart page as
+   `sourceUrl`, and a `sourceNote` when the value is uncertain. `hex` may be `null`
+   only on an unstocked color that no chart publishes a hex for. Garment images are referenced by `image.url` and
    `image.sha256`, never stored in the repo. Never overwrite a `reviewed` color
    from an import.
 4. Run `npm run products:check`. It fails on schema errors, duplicate slugs, a
-   `reviewed` color without a date, or a file missing from the index. CI runs it
+   `reviewed` color without a date, a `null` hex on a stocked color, a
+   `retail-chart` color without its `sourceUrl`, or a file missing from the index. CI runs it
    too.
 5. Run `npm run products:equivalents` and commit the `<id>.equivalents.json` it
    writes.
@@ -491,6 +494,10 @@ npm run products:equivalents
   prints both values so the drift is visible.
 - A color that Printify no longer lists is set to `"available": false`, never
   deleted, and the script says so.
+- `retail-chart` colors (chart-only colors Printify does not stock) are left
+  alone until Printify returns them with a swatch. Then the Printify hex replaces
+  the chart hex, `available` becomes true, `source` becomes `printify`, and the
+  chart `sourceUrl` and `sourceNote` are dropped.
 - `--color-study` takes the path to the maker-method-picker's color study. For
   each color found there by name, its garment image `url` and `sha256` become
   `image` and its `colorAssetVersionId` becomes `pod`. Its hex values are not used.

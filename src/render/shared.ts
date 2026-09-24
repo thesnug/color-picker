@@ -17,7 +17,12 @@ export interface Swatch {
   index?: number;
   /** An extra line under the hex, for example a nearest-match distance. */
   note?: string;
+  /** False marks a product color the print provider does not stock. */
+  available?: boolean;
 }
+
+/** The label every renderer shows on a color with `available: false`. */
+export const NOT_STOCKED = "not stocked";
 
 /** Escape text for use in XML or HTML content and attribute values. */
 export function escapeXml(value: string): string {

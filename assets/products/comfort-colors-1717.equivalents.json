@@ -568,6 +568,60 @@
         }
       ]
     },
+    "dusk": {
+      "name": "Dusk",
+      "hex": "#735b6a",
+      "oklch": {
+        "l": 0.50036,
+        "c": 0.03837,
+        "h": 340.68
+      },
+      "family": "red-pink",
+      "matches": [
+        {
+          "index": 142,
+          "name": "Purple Drab",
+          "distance": 6.589
+        },
+        {
+          "index": 143,
+          "name": "Deep Violet",
+          "distance": 7.202
+        },
+        {
+          "index": 78,
+          "name": "Sudan Brown",
+          "distance": 8.234
+        }
+      ]
+    },
+    "emerald": {
+      "name": "Emerald",
+      "hex": "#00685e",
+      "oklch": {
+        "l": 0.46462,
+        "c": 0.08253,
+        "h": 183.46
+      },
+      "family": "green",
+      "matches": [
+        {
+          "index": 123,
+          "name": "Dark Medici Blue",
+          "distance": 7.347
+        },
+        {
+          "index": 124,
+          "name": "Dusky Green",
+          "distance": 7.72
+        },
+        {
+          "index": 107,
+          "name": "Blackish Olive",
+          "distance": 9.377
+        }
+      ]
+    },
     "espresso": {
       "name": "Espresso",
       "hex": "#846b5b",
@@ -1162,6 +1216,33 @@
         }
       ]
     },
+    "neon-cantaloupe": {
+      "name": "Neon Cantaloupe",
+      "hex": "#ffbba4",
+      "oklch": {
+        "l": 0.84916,
+        "c": 0.08537,
+        "h": 39.48
+      },
+      "family": "neon",
+      "matches": [
+        {
+          "index": 44,
+          "name": "Light Pinkish Cinnamon",
+          "distance": 1.996
+        },
+        {
+          "index": 43,
+          "name": "Seashell Pink",
+          "distance": 5.311
+        },
+        {
+          "index": 45,
+          "name": "Pinkish Cinnamon",
+          "distance": 6.04
+        }
+      ]
+    },
     "neon-lemon": {
       "name": "Neon Lemon",
       "hex": "#c9db78",
@@ -1429,6 +1510,33 @@
           "index": 28,
           "name": "Brick Red",
           "distance": 3.778
+        }
+      ]
+    },
+    "rose-quartz": {
+      "name": "Rose Quartz",
+      "hex": "#e2acd7",
+      "oklch": {
+        "l": 0.80712,
+        "c": 0.08439,
+        "h": 333.63
+      },
+      "family": "purple",
+      "matches": [
+        {
+          "index": 3,
+          "name": "Cameo Pink",
+          "distance": 1.392
+        },
+        {
+          "index": 2,
+          "name": "Corinthian Pink",
+          "distance": 4.695
+        },
+        {
+          "index": 133,
+          "name": "Grayish Lavender B",
+          "distance": 5.625
         }
       ]
     },

@@ -3,7 +3,7 @@
  */
 
 import { hexToRgb } from "../color/convert.js";
-import { type Swatch, swatchHex } from "./shared.js";
+import { NOT_STOCKED, type Swatch, swatchHex } from "./shared.js";
 
 export interface AnsiOptions {
   /** Width of each block in characters. Default 6. */
@@ -25,7 +25,8 @@ export function renderAnsi(colors: readonly Swatch[], options: AnsiOptions = {})
   return colors
     .map((swatch) => {
       const hex = swatchHex(swatch);
-      const text = [hex, swatch.name, swatch.note].filter(Boolean).join("  ");
+      const status = swatch.available === false ? `(${NOT_STOCKED})` : undefined;
+      const text = [hex, swatch.name, swatch.note, status].filter(Boolean).join("  ");
       if (!color) return text;
       const [r, g, b] = hexToRgb(hex);
       return `\u001b[48;2;${r};${g};${b}m${" ".repeat(blockWidth)}${RESET}  ${text}`;
