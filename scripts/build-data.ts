@@ -55,6 +55,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { rgbToOklab } from "../src/color/convert.js";
 import type {
   Combination,
   CombinationsFile,
@@ -106,29 +107,6 @@ export const HARMONY = {
   splitMin: 30,
   splitMax: 70,
 } as const;
-
-// ---------------------------------------------------------------------------
-// Color math. A local copy so the data build does not depend on the library
-// module INT-2249 introduces; that issue swaps this for the shared one.
-
-function linearize(c: number): number {
-  const v = c / 255;
-  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-}
-
-export function srgbToOklab([r8, g8, b8]: readonly [number, number, number]): [number, number, number] {
-  const r = linearize(r8);
-  const g = linearize(g8);
-  const b = linearize(b8);
-  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
-  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
-  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-  return [
-    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
-    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
-    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
-  ];
-}
 
 function round(value: number, places: number): number {
   const f = 10 ** places;
@@ -245,7 +223,7 @@ export function buildDerived(source: WadaDataset): {
 
     // Chroma and hue come from the rounded a and b so the stored OKLCH agrees
     // with the stored OKLab, and so neutrals get an exact zero instead of noise.
-    const [L, rawA, rawB] = srgbToOklab(c.rgb_array);
+    const { l: L, a: rawA, b: rawB } = rgbToOklab(c.rgb_array);
     const a = round(rawA, 5);
     const b = round(rawB, 5);
     const chroma = Math.hypot(a, b);

@@ -5,7 +5,6 @@ import {
   classifyHarmony,
   hueArc,
   serialize,
-  srgbToOklab,
 } from "../scripts/build-data.js";
 import { loadColors, loadCombinations, loadWadaDataset } from "../src/data/index.js";
 
@@ -96,18 +95,6 @@ describe("derived colors", () => {
       expect(c.oklch.h).toBeLessThan(360);
       expect(c.oklch.c).toBeCloseTo(Math.hypot(c.oklab.a, c.oklab.b), 4);
     }
-  });
-
-  it("matches published OKLab reference values", () => {
-    // Reference values from the OKLab specification for sRGB primaries.
-    const [l, a, b] = srgbToOklab([255, 0, 0]);
-    expect(l).toBeCloseTo(0.62796, 4);
-    expect(a).toBeCloseTo(0.22486, 4);
-    expect(b).toBeCloseTo(0.12585, 4);
-    const [gl, ga, gb] = srgbToOklab([0, 255, 0]);
-    expect(gl).toBeCloseTo(0.86644, 4);
-    expect(ga).toBeCloseTo(-0.23389, 4);
-    expect(gb).toBeCloseTo(0.1795, 4);
   });
 
   it("marks the named grays, white, and black as neutral", () => {

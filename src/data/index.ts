@@ -12,6 +12,8 @@
 
 import { readFileSync } from "node:fs";
 
+import type { Oklab, Oklch } from "../color/convert.js";
+
 // ---------------------------------------------------------------------------
 // Source
 
@@ -42,21 +44,7 @@ export interface WadaDataset {
 // ---------------------------------------------------------------------------
 // Derived
 
-export interface Oklab {
-  /** Lightness, 0 to 1. */
-  l: number;
-  a: number;
-  b: number;
-}
-
-export interface Oklch {
-  /** Lightness, 0 to 1. */
-  l: number;
-  /** Chroma. 0 for neutrals; sRGB colors reach about 0.32. */
-  c: number;
-  /** Hue in degrees, 0 to 360. 0 when chroma is 0. */
-  h: number;
-}
+export type { Oklab, Oklch };
 
 /** A Wada color after cleanup, with color-space conversions precomputed. */
 export interface DerivedColor {
