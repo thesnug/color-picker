@@ -26,5 +26,6 @@ jobs:
       - run: npm run typecheck
       - run: npm run data:check
       - run: npm run products:check
+      - run: npm run products:equivalents:check
       - run: npm test
       - run: npm run build
