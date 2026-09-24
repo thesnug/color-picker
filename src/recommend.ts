@@ -32,8 +32,8 @@ export interface DesignColor {
   share: number;
   /**
    * What the color paints ("strawberry body"), from a vision description of the
-   * design. Absent until the Jev milestone fills it; recolor prompts name it
-   * when present.
+   * design (`describeDesign` in the fingerprint entry point); recolor prompts
+   * name it when present.
    */
   element?: string;
 }

@@ -155,6 +155,37 @@ package, or pass `decoder` with your own:
 ```bash
 npm install sharp
 ```
+
+#### Vision description
+
+`describeDesign` adds what the design depicts, so Jev (which is text-only) can
+judge palettes and recolors against it: its subject and mood in a line each,
+and its named elements, each tied to the palette color that paints it. Palette
+colors gain `element`, which recolor plans and prompts name.
+
+```ts
+import { describeDesign, fingerprint } from "@thesnug/color-picker/fingerprint";
+
+const design = await describeDesign(await fingerprint("art/flat-mark.png"), "art/flat-mark.png");
+// design.description: {
+//   subject: "A cream circle inside a coral ring.",
+//   mood: "Warm, minimal, and retro.",
+//   elements: [{ name: "outer ring", color: "coral", hex: "#e8836b" }, …],
+//   provider: "codex",
+//   model: "gpt-6-sol",
+// }
+// design.palette[0].element: "outer ring"
+```
+
+- Providers, tried in order: the Codex CLI (`codex exec`, on the machine's
+  existing login, in a scratch directory with a read-only sandbox and without
+  the user's `config.toml`), then OpenRouter when `OPENROUTER_API_KEY` is set.
+  Both default to the same model (`gpt-6-sol`); set `OPENROUTER_MODEL` to change
+  OpenRouter's. Pass `providers` to choose your own.
+- One call per design: descriptions are cached next to the fingerprints, keyed by
+  file hash and palette. A cached description needs no provider.
+- With no Codex login and no `OPENROUTER_API_KEY`, it throws
+  `VisionUnavailableError`, naming each provider's failure and how to enable one.
 ### Jev client
 
 Jev (TypeSafe System One) is used only for judgments code cannot make. Every Jev
