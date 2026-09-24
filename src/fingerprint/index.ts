@@ -22,7 +22,43 @@ import {
   type PaletteOptions,
   type RgbaPixels,
 } from "./quantize.js";
+import {
+  askVision,
+  type DesignDescription,
+  defaultVisionProviders,
+  describePrompt,
+  descriptionCachePath,
+  descriptionSchema,
+  labelPalette,
+  readDescriptionCache,
+  sniffMediaType,
+  type VisionProvider,
+  writeDescriptionCache,
+} from "./describe.js";
 import { type ApplyRecolorOptions, RECOLOR_DEFAULTS, type RecolorSwap, recolorPixels } from "./recolor.js";
+
+export {
+  codexProvider,
+  type CodexProviderOptions,
+  CODEX_DEFAULT_MODEL,
+  type DescribedElement,
+  type DescriptionAnswer,
+  DESCRIPTION_VERSION,
+  type DesignDescription,
+  defaultVisionProviders,
+  describePrompt,
+  descriptionSchema,
+  labelPalette,
+  OPENROUTER_DEFAULT_MODEL,
+  openRouterProvider,
+  type OpenRouterProviderOptions,
+  validateAnswer,
+  type VisionImage,
+  type VisionProvider,
+  type VisionProviderName,
+  type VisionRequest,
+  VisionUnavailableError,
+} from "./describe.js";
 
 export {
   type ApplyRecolorOptions,
@@ -48,8 +84,11 @@ export {
 export interface Fingerprint {
   /** SHA-256 of the file bytes, lowercase hex. */
   hash: string;
-  /** Top colors of the opaque pixels by coverage, largest first. */
-  palette: PaletteEntry[];
+  /**
+   * Top colors of the opaque pixels by coverage, largest first. After
+   * `describeDesign`, each color names the elements it paints in `element`.
+   */
+  palette: (PaletteEntry & { element?: string })[];
   /** Alpha-weighted mean WCAG relative luminance of the visible pixels, 0 to 1. */
   inkLuminance: number;
   /** True when any pixel is less than fully opaque. */
@@ -57,8 +96,8 @@ export interface Fingerprint {
   /** Pixel size of the file, after EXIF orientation. */
   width: number;
   height: number;
-  /** A two-line subject-and-mood description. Filled by the Jev milestone; absent here. */
-  description?: string;
+  /** What the design depicts, from `describeDesign`. Absent from `fingerprint` itself. */
+  description?: DesignDescription;
 }
 
 /** What a decoder returns: the file's size and its pixels, possibly downscaled. */
@@ -230,6 +269,62 @@ export async function fingerprint(
     await writeCache(dir, path, { version: FINGERPRINT_VERSION, settings, fingerprint: result });
   }
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Describe
+
+export interface DescribeOptions {
+  /**
+   * Directory for cached descriptions, or `false` to skip the cache. Defaults
+   * to the fingerprint cache directory.
+   */
+  cache?: string | false;
+  /** Providers to try, in order. Default: Codex CLI, then OpenRouter when `OPENROUTER_API_KEY` is set. */
+  providers?: readonly VisionProvider[];
+  signal?: AbortSignal;
+}
+
+/**
+ * Add a vision description to a fingerprint: the design's subject and mood in
+ * a line each, and its named elements, each tied to the palette color that
+ * paints it. Palette colors gain `element`, which recolor plans and prompts
+ * name. `file` is the file the fingerprint was made from.
+ *
+ * One model call per design: the answer is cached by file hash and palette in
+ * the fingerprint cache directory, and a cache hit needs no provider.
+ *
+ * @throws {VisionUnavailableError} on a cache miss when every provider fails
+ *   or none is set up; the message says how to enable one.
+ * @throws {Error} when `file` does not match the fingerprint's hash.
+ */
+export async function describeDesign(
+  print: Fingerprint,
+  file: string | URL | Uint8Array,
+  options: DescribeOptions = {},
+): Promise<Fingerprint> {
+  const bytes = file instanceof Uint8Array ? file : await readFile(file);
+  if (createHash("sha256").update(bytes).digest("hex") !== print.hash) {
+    throw new Error("The file does not match the fingerprint's hash; fingerprint this file first.");
+  }
+  const prompt = describePrompt(print.palette);
+  const dir = options.cache === undefined ? defaultCacheDir() : options.cache;
+  const path = dir === false ? undefined : descriptionCachePath(dir, print.hash, prompt);
+  let description = path ? await readDescriptionCache(path, prompt) : undefined;
+
+  if (!description) {
+    const image = { bytes, mediaType: sniffMediaType(bytes) };
+    const request = {
+      image,
+      prompt,
+      schema: descriptionSchema(print.palette),
+      ...(options.signal ? { signal: options.signal } : {}),
+    };
+    description = await askVision(options.providers ?? defaultVisionProviders(), request, print.palette);
+    if (dir !== false && path) await writeDescriptionCache(dir, path, prompt, description);
+  }
+
+  return { ...print, palette: labelPalette(print.palette, description), description };
 }
 
 // ---------------------------------------------------------------------------
