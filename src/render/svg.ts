@@ -292,6 +292,11 @@ export interface ProductCardColor extends Swatch {
 export interface ProductCardOptions {
   /** The design's colors, drawn as chips beside the garment. */
   designColors?: readonly Swatch[];
+  /**
+   * A recolor's swaps, drawn as a before chip, an arrow, and an after chip per
+   * row beside the garment. Replaces `designColors` when given.
+   */
+  recolor?: readonly { from: Swatch; to: Swatch }[];
   /** Product display name, shown as the heading. */
   productName?: string;
   /** Side of the square garment tile in pixels. Default 200. */
@@ -313,7 +318,8 @@ function hashId(value: string): string {
 /**
  * Render a product color as a card: the garment tile, with the garment photo
  * over it when the color has an `image.url`, and the design's colors as chips
- * beside it. Without an image the tile is plain.
+ * beside it, or a recolor's before and after chips. Without an image the tile
+ * is plain.
  */
 export function renderProductCard(
   productColor: ProductCardColor,
@@ -321,7 +327,12 @@ export function renderProductCard(
 ): string {
   const size = options.garmentSize ?? 200;
   const chipSize = options.chipSize ?? 40;
-  const chips = options.designColors ?? [];
+  const swaps = options.recolor;
+  // Each row: the chip that is labeled, and for a recolor the chip it replaces.
+  const rows: { chip: Swatch; before?: Swatch }[] = swaps
+    ? swaps.map((s) => ({ chip: s.to, before: s.from }))
+    : (options.designColors ?? []).map((chip) => ({ chip }));
+  const chips = rows.map((r) => r.chip);
   const hex = swatchHex(productColor);
   const name = productColor.name ?? hex;
   const title = options.productName ?? "";
@@ -357,16 +368,26 @@ export function renderProductCard(
       `fill="currentColor">${hex}${escapeXml(status)}</text>`,
   );
 
-  // Design chips in a column to the right.
-  const chipX = size + 24;
+  // Design chips in a column to the right; for a recolor, the before chip and
+  // an arrow come first.
+  const beforeWidth = swaps ? chipSize + 24 : 0;
+  const chipX = size + 24 + beforeWidth;
   const rowHeight = chipSize + 8;
-  chips.forEach((chip, i) => {
+  rows.forEach(({ chip, before }, i) => {
     const chipHex = swatchHex(chip);
     const y = top + i * rowHeight;
     const textX = chipX + chipSize + 10;
     const mid = y + chipSize / 2;
+    const beforeHex = before && swatchHex(before);
+    const tooltip = before ? `${describe(before)} becomes ${describe(chip)}` : describe(chip);
     parts.push(
-      `<g><title>${escapeXml(describe(chip))}</title>` +
+      `<g><title>${escapeXml(tooltip)}</title>` +
+        (before
+          ? `<rect x="${size + 24}" y="${y}" width="${chipSize}" height="${chipSize}" rx="6" ` +
+            `fill="${beforeHex}" stroke="#00000022"/>` +
+            `<text x="${chipX - 12}" y="${mid + 5}" font-size="14" text-anchor="middle" ` +
+            `fill="currentColor">→</text>`
+          : "") +
         `<rect x="${chipX}" y="${y}" width="${chipSize}" height="${chipSize}" rx="6" ` +
         `fill="${chipHex}" stroke="#00000022"/>` +
         (chip.name
@@ -381,14 +402,16 @@ export function renderProductCard(
   });
 
   const longest = Math.max(0, ...chips.map((c) => (c.name ?? "").length), 7);
-  const chipsWidth = chips.length ? 24 + chipSize + 10 + Math.ceil(longest * 12 * CHAR_WIDTH) : 0;
+  const chipsWidth = chips.length ? 24 + beforeWidth + chipSize + 10 + Math.ceil(longest * 12 * CHAR_WIDTH) : 0;
   const titleWidth = Math.ceil(title.length * 15 * CHAR_WIDTH);
   const width = Math.max(size + chipsWidth, titleWidth);
   const height = top + Math.max(size + 44, chips.length * rowHeight);
 
-  const onColors = chips.length
-    ? ` with ${chips.map((c) => c.name ?? swatchHex(c)).join(", ")}`
-    : "";
+  const onColors = swaps?.length
+    ? `, recolored: ${swaps.map((s) => `${describe(s.from)} to ${describe(s.to)}`).join(", ")}`
+    : chips.length
+      ? ` with ${chips.map((c) => c.name ?? swatchHex(c)).join(", ")}`
+      : "";
   const label = `${title ? `${title}, ` : ""}${name} ${hex}${status}${onColors}`;
   return svgDocument(width, height, label, parts.join(""));
 }

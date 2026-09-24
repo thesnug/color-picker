@@ -30,6 +30,12 @@ export interface DesignColor {
   hex: string;
   /** Fraction of the design's opaque coverage, 0 to 1. */
   share: number;
+  /**
+   * What the color paints ("strawberry body"), from a vision description of the
+   * design. Absent until the Jev milestone fills it; recolor prompts name it
+   * when present.
+   */
+  element?: string;
 }
 
 /**

@@ -16,10 +16,12 @@ import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
 import {
   combosView,
+  DEFAULT_RECOLOR_N,
   DEFAULT_RECOMMEND_N,
   InputError,
   nearestView,
   palettesView,
+  recolorView,
   recommendView,
   showView,
   type ThemeFormat,
@@ -67,6 +69,9 @@ Commands:
                               the garment first, then the ink colors
   recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
                               printed as is
+  recolor <design>            Garment colors for a design with recoloring:
+                              a Wada combination per garment, the from-to
+                              color mapping, and a prompt for the recolor
   theme <hex|name|id>         A web theme: background, surface, text, muted
                               text, accent, and text on the accent, each pair
                               checked against WCAG AA. A bare number is a
@@ -76,9 +81,11 @@ Command options:
   -k <n>                      nearest: number of matches (default ${DEFAULT_NEAREST_K})
   --size <n>                  combos, palettes: only palettes with n colors
   --limit <n>                 combos, palettes: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
-  -n <n>                      recommend: number of picks (default ${DEFAULT_RECOMMEND_N})
-  --product <id>              recommend, palettes: garment product (default
-                              Comfort Colors 1717)
+  -n <n>                      recommend, recolor: number of picks (default ${DEFAULT_RECOMMEND_N})
+  --product <id>              recommend, recolor, palettes: garment product
+                              (default Comfort Colors 1717)
+  --apply <dir>               recolor: write each recolored design as a PNG in
+                              dir; flat-color art only
   --format <css|tailwind|tokens>
                               theme: print CSS custom properties, a Tailwind v4
                               @theme block, or W3C design tokens (JSON)
@@ -106,7 +113,7 @@ an unreadable design file, or a theme with no legible text and background,
 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show", "palettes", "recommend", "theme"] as const;
+const COMMANDS = ["nearest", "combos", "show", "palettes", "recommend", "recolor", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const RESERVED = ["check"] as const;
@@ -135,6 +142,7 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         svg: { type: "string" },
         html: { type: "string" },
         product: { type: "string" },
+        apply: { type: "string" },
         check: { type: "boolean" },
       },
       allowPositionals: true,
@@ -211,19 +219,25 @@ async function buildView(
     product?: string;
     format?: string;
     mode?: string;
+    apply?: string;
   },
 ): Promise<View> {
-  const only = (flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode", ...allowed: Command[]) => {
+  const only = (
+    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply",
+    ...allowed: Command[]
+  ) => {
     if (values[flag] !== undefined && !allowed.includes(command)) {
       const name = flag.length === 1 ? `-${flag}` : `--${flag}`;
-      throw new UsageError(`${name} applies only to ${allowed.join(" and ")}`);
+      const list = allowed.length <= 2 ? allowed.join(" and ") : `${allowed.slice(0, -1).join(", ")}, and ${allowed.at(-1)}`;
+      throw new UsageError(`${name} applies only to ${list}`);
     }
   };
   only("k", "nearest");
   only("size", "combos", "palettes");
   only("limit", "combos", "palettes");
-  only("n", "recommend");
-  only("product", "recommend", "palettes");
+  only("n", "recommend", "recolor");
+  only("product", "recommend", "recolor", "palettes");
+  only("apply", "recolor");
   only("format", "theme");
   only("mode", "theme");
 
@@ -238,6 +252,16 @@ async function buildView(
       file: args[0]!,
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
       ...(values.product !== undefined && { product: values.product }),
+    });
+  }
+
+  if (command === "recolor") {
+    if (args.length !== 1) throw new UsageError("recolor takes one design file");
+    return recolorView({
+      file: args[0]!,
+      n: optionalInt(values.n, "-n") ?? DEFAULT_RECOLOR_N,
+      ...(values.product !== undefined && { product: values.product }),
+      ...(values.apply !== undefined && { apply: values.apply }),
     });
   }
 

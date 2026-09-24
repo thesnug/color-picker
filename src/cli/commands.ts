@@ -3,13 +3,17 @@
  * text, and SVG sections, so every command supports every output flag.
  */
 
+import { mkdir } from "node:fs/promises";
+import { basename, extname, join } from "node:path";
+
 import { combinations, type Palette } from "../combinations.js";
 import { contrastRatio } from "../color/contrast.js";
 import { isHex } from "../color/convert.js";
 import { hasHex, loadColors, loadCombinations, loadProduct, loadProductIndex, type Product } from "../data/index.js";
-import { fingerprint } from "../fingerprint/index.js";
+import { type AppliedRecolor, applyRecolor, fingerprint } from "../fingerprint/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
 import { palettesForProductColor, type ProductPalette } from "../palettes.js";
+import { recolorPlans } from "../recolor.js";
 import { recommendProductColors } from "../recommend.js";
 import {
   type HtmlSection,
@@ -272,6 +276,98 @@ export async function recommendView({ file, n, product: productId }: RecommendAr
       title: heading(i),
       svg: renderProductCard(pick.color, { designColors: chips }),
       caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
+    })),
+  };
+}
+
+/** Default `-n` for `recolor`. */
+export const DEFAULT_RECOLOR_N = 5;
+
+export interface RecolorArgs {
+  file: string;
+  n: number;
+  product?: string;
+  /** Directory to write each recolored PNG to. */
+  apply?: string;
+}
+
+export async function recolorView({ file, n, product: productId, apply }: RecolorArgs): Promise<View> {
+  let product: Product;
+  try {
+    product = loadProduct(productId ?? loadProductIndex().default);
+  } catch (error) {
+    throw new InputError((error as Error).message);
+  }
+
+  let design;
+  try {
+    design = await fingerprint(file);
+  } catch (error) {
+    const { code, message } = error as NodeJS.ErrnoException;
+    throw new InputError(
+      code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`,
+    );
+  }
+
+  const plans = recolorPlans(design, { product, n });
+  const applied: (AppliedRecolor | undefined)[] = [];
+  if (apply !== undefined) {
+    await mkdir(apply, { recursive: true });
+    const stem = basename(file, extname(file));
+    for (const plan of plans) {
+      const out = join(apply, `${stem}-${plan.color.slug}.png`);
+      applied.push(await applyRecolor(file, plan.mapping, { out, fingerprint: design }));
+    }
+  }
+
+  const title = `${product.brand} ${product.model} colors for ${file}, recolored`;
+  const heading = (i: number) => {
+    const plan = plans[i]!;
+    const via = plan.combination.source === "book" ? `combination ${plan.combination.id}` : `${plan.combination.harmony} harmony`;
+    return `${i + 1}. ${plan.color.name} · ${via} · score ${fmt(plan.score, 3)}${plan.flagged ? " · flagged" : ""}`;
+  };
+  const appliedLine = (result: AppliedRecolor | undefined) =>
+    result === undefined ? [] : [result.applicable ? `Wrote ${result.out}` : `Not applied: ${result.reason}`];
+
+  return {
+    title,
+    json: {
+      product: { id: product.id, name: product.name },
+      design,
+      plans: plans.map((plan, i) => (applied[i] ? { ...plan, applied: applied[i] } : plan)),
+    },
+    text: (color) =>
+      [
+        `${title}\n`,
+        ...plans.map((plan, i) =>
+          [
+            heading(i),
+            renderAnsi([plan.color], { color }).trimEnd(),
+            ...plan.mapping.map(
+              (m) => `  ${m.from.hex} (${Math.round(m.from.share * 100)}%) -> ${m.to.name} ${m.to.hex}`,
+            ),
+            `  Prompt: ${plan.prompt}`,
+            ...plan.reasons.map((r) => `  ${r}`),
+            ...plan.warnings.map((w) => `  Warning: ${w}`),
+            ...appliedLine(applied[i]).map((line) => `  ${line}`),
+          ].join("\n") + "\n",
+        ),
+      ].join("\n"),
+    // Each garment card with the design's colors before and after.
+    sections: plans.map((plan, i) => ({
+      title: heading(i),
+      svg: renderProductCard(plan.color, {
+        recolor: plan.mapping.map((m) => ({
+          from: { hex: m.from.hex, name: m.from.element ?? `${Math.round(m.from.share * 100)}%` },
+          to: { hex: m.to.hex, name: m.to.name },
+        })),
+      }),
+      caption: [
+        plan.prompt,
+        ...plan.reasons,
+        ...plan.warnings.map((w) => `Warning: ${w}`),
+        ...appliedLine(applied[i]),
+      ].join(" "),
     })),
   };
 }

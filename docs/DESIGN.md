@@ -197,6 +197,21 @@ a near match of the garment with enough other members; map the design's colors o
 them preserving lightness order so hierarchy survives; Jev checks each swap's
 plausibility. Output per shirt: a from-to mapping table and a prompt. Flat-color art
 is recolored deterministically from the table; the prompt is for painterly art only.
+Candidates are the book combinations containing one of the garment's stored
+equivalents, then harmonies generated from it. A combination with more members
+than the design has colors tries every subset of the right size. One with fewer
+merges: the lightness-sorted design colors split into contiguous runs, one per
+ink, so neighbors in lightness share an ink. Within a garment, book beats harmony
+and enough members beats merging (then the most members wins); a plan whose new
+ink is within the print minimum distance of the garment is flagged and used only
+when nothing else exists. The score is contrast and vanish as for the unchanged
+recommendation, plus fidelity, 1 minus the coverage-weighted distance from each
+design color to its ink over 100, so the least disruptive recolor wins ties. The
+prompt is a template over the mapping, naming each design element when a vision
+description supplies one. Flat art is detected from the fingerprint (its palette
+covers at least 90% of the design) and then from the pixels (at most 5% farther
+than the print minimum from every mapped color); recoloring snaps each visible
+pixel to its nearest mapped color and keeps its alpha.
 
 **Web outputs.** From any chosen combination, assign roles by contrast rules
 (background, text, accent, through the accessibility checker's `roles`) and derive
