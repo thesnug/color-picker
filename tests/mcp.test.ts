@@ -6,6 +6,8 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { fingerprint } from "../src/fingerprint/index.js";
+import { descriptionCachePath, describePrompt, writeDescriptionCache } from "../src/fingerprint/describe.js";
 import { createServer, SERVER_NAME } from "../src/mcp/index.js";
 import { jevStatus, RESULT_HISTORY, ResultStore } from "../src/mcp/tools.js";
 
@@ -49,8 +51,8 @@ describe("mcp", () => {
       expect(jevStatus("mood")).toMatchObject({ requested: true, applied: false });
       expect(jevStatus("mood").reason).toMatch(/TYPESAFE_API_KEY is not set/);
       process.env.TYPESAFE_API_KEY = "secret-value";
-      expect(jevStatus("vet").reason).toMatch(/not available in this version/);
-      expect(jevStatus("vet").reason).not.toContain("secret-value");
+      expect(jevStatus("mood").reason).toMatch(/not available in this version/);
+      expect(jevStatus("mood").reason).not.toContain("secret-value");
     } finally {
       if (saved === undefined) delete process.env.TYPESAFE_API_KEY;
       else process.env.TYPESAFE_API_KEY = saved;
@@ -151,14 +153,35 @@ describe("mcp over stdio", () => {
   });
 
   it("recolor_plans, writing PNGs and reporting skipped vetting", async () => {
+    // A cached description, so vetting reaches Jev without running a vision provider.
+    const print = await fingerprint(FLAT_MARK, { cache: false });
+    const prompt = describePrompt(print.palette);
+    const dir = join(scratch, "cache", "color-picker", "fingerprints");
+    await writeDescriptionCache(dir, descriptionCachePath(dir, print.hash, prompt), prompt, {
+      subject: "a mark",
+      mood: "plain",
+      elements: print.palette.map((c, i) => ({ name: `shape ${i}`, color: "a color", hex: c.hex })),
+      provider: "codex",
+      model: "vision-test",
+    });
+
     const outDir = join(scratch, "recolored");
     const reply = (await call("recolor_plans", { designPath: FLAT_MARK, n: 2, outDir, vet: true })).json();
     expect(reply.plans).toHaveLength(2);
     expect(reply.plans[0].prompt).toEqual(expect.any(String));
     expect(reply.plans[0].applied.applicable).toBe(true);
     expect(readdirSync(outDir)).toHaveLength(2);
-    expect(reply.vet).toMatchObject({ requested: true, applied: false });
+    expect(reply.design.description.subject).toBe("a mark");
+    expect(reply.vet).toMatchObject({ requested: true, applied: false, vetted: 0, dropped: [] });
+    expect(reply.vet.reason).toMatch(/TYPESAFE_API_KEY/);
+    expect(reply.plans[0].plausibility).toBeNull();
     expectSvg(reply);
+  });
+
+  it("recolor_plans refuses includeImplausible without vet", async () => {
+    const result = await call("recolor_plans", { designPath: FLAT_MARK, includeImplausible: true });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("includeImplausible applies only with vet");
   });
 
   it("theme, with CSS, Tailwind, and tokens", async () => {

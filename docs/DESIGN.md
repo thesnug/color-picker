@@ -287,6 +287,16 @@ option lets Jev decline text that is not a color. It returns the top three with
 their probabilities, the confidence, and the probability of `none`, and leaves the
 cutoff to the caller until the threshold evaluation sets one.
 
+Recolor plausibility (`vetRecolorPlans`) asks one Noul per changed swap, with the
+design's vision description (subject, mood, and each element's name and color
+in words) as the state. A swap names its element and the color it had in words,
+and the target by Wada name, family, and lightness word; a color no element
+names is asked about the design as a whole. A plan's plausibility is its lowest
+swap's; below the threshold (0.4 until the evaluation) the plan is implausible
+and dropped, and the next garment takes its place. One cached request per plan,
+so a mapping judged once for a design is free after. Without Jev or a
+description, plans pass unvetted and the result says why.
+
 Hex-to-nearest is never sent to Jev. Thresholds are evaluated on labeled examples
 before they gate anything; cookbook numbers are starting points, not rules.
 

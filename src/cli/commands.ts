@@ -10,10 +10,19 @@ import { combinations, type Palette } from "../combinations.js";
 import { contrastRatio } from "../color/contrast.js";
 import { isHex } from "../color/convert.js";
 import { hasHex, loadColors, loadCombinations, loadProduct, loadProductIndex, type Product } from "../data/index.js";
-import { type AppliedRecolor, applyRecolor, fingerprint } from "../fingerprint/index.js";
+import {
+  type AppliedRecolor,
+  applyRecolor,
+  type DescribeOptions,
+  describeDesign,
+  type Fingerprint,
+  fingerprint,
+  VisionUnavailableError,
+} from "../fingerprint/index.js";
+import { type VetOptions, type VettedPlan, vettedRecolorPlans } from "../jev/vet.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
 import { palettesForProductColor, type ProductPalette } from "../palettes.js";
-import { recolorPlans } from "../recolor.js";
+import { type RecolorPlan, recolorPlans } from "../recolor.js";
 import { recommendProductColors } from "../recommend.js";
 import {
   type HtmlSection,
@@ -280,6 +289,14 @@ export async function recommendView({ file, bytes, n, product: productId }: Reco
   };
 }
 
+/** ` · plausibility 0.83` or ` · implausible (0.12)` for a vetted plan; empty otherwise. */
+function plausibilityNote(plan: RecolorPlan | VettedPlan): string {
+  if (!("plausibility" in plan) || plan.plausibility === null) return "";
+  return plan.implausible
+    ? ` · implausible (${fmt(plan.plausibility, 2)})`
+    : ` · plausibility ${fmt(plan.plausibility, 2)}`;
+}
+
 /** Default `-n` for `recolor`. */
 export const DEFAULT_RECOLOR_N = 5;
 
@@ -292,9 +309,56 @@ export interface RecolorArgs {
   product?: string;
   /** Directory to write each recolored PNG to. */
   apply?: string;
+  /** Describe the design and check each swap's plausibility with Jev. */
+  vet?: boolean;
+  /** With `vet`, keep implausible plans, marked, instead of dropping them. */
+  includeImplausible?: boolean;
+  /** With `vet`: replaces the vision providers and cache, as tests do. */
+  describe?: DescribeOptions;
+  /** With `vet`: replaces the Jev client, cache, and threshold, as tests do. */
+  jev?: VetOptions;
 }
 
-export async function recolorView({ file, bytes, n, product: productId, apply }: RecolorArgs): Promise<View> {
+/** What swap vetting did, in the `vet` field of `recolor`'s JSON. */
+export interface VetStatus {
+  requested: true;
+  /** True when at least one plan was judged by Jev. */
+  applied: boolean;
+  /** Plans judged. */
+  vetted: number;
+  /** Implausible plans left out, as garment and the reasons naming the swap. */
+  dropped: { garment: string; plausibility: number; reasons: string[] }[];
+  /** Why some or all plans went unvetted. */
+  reason?: string;
+  model?: string;
+}
+
+/** Describe the design for vetting; a missing vision provider leaves it undescribed with a note. */
+async function describeForVet(
+  design: Fingerprint,
+  file: string,
+  bytes: Uint8Array | undefined,
+  options: DescribeOptions | undefined,
+): Promise<{ design: Fingerprint; note?: string }> {
+  try {
+    return { design: await describeDesign(design, bytes ?? file, options) };
+  } catch (error) {
+    if (!(error instanceof VisionUnavailableError)) throw error;
+    return { design, note: `Swaps were not vetted: ${error.message}` };
+  }
+}
+
+export async function recolorView({
+  file,
+  bytes,
+  n,
+  product: productId,
+  apply,
+  vet,
+  includeImplausible,
+  describe,
+  jev,
+}: RecolorArgs): Promise<View> {
   let product: Product;
   try {
     product = loadProduct(productId ?? loadProductIndex().default);
@@ -302,9 +366,31 @@ export async function recolorView({ file, bytes, n, product: productId, apply }:
     throw new InputError((error as Error).message);
   }
 
-  const design = await fingerprintDesign(file, bytes);
+  let design = await fingerprintDesign(file, bytes);
 
-  const plans = recolorPlans(design, { product, n });
+  let plans: (RecolorPlan | VettedPlan)[];
+  let vetStatus: VetStatus | undefined;
+  if (vet) {
+    const described = await describeForVet(design, file, bytes, describe);
+    design = described.design;
+    const result = await vettedRecolorPlans(design, { ...jev, product, n, includeImplausible: includeImplausible ?? false });
+    plans = result.plans;
+    vetStatus = {
+      requested: true,
+      applied: result.vetted > 0,
+      vetted: result.vetted,
+      dropped: result.dropped.map((p) => ({
+        garment: p.color.name,
+        plausibility: p.plausibility!,
+        reasons: p.reasons.filter((r) => r.startsWith("Implausible:")),
+      })),
+    };
+    const reason = described.note ?? result.skipped?.note;
+    if (reason) vetStatus.reason = reason;
+    if (result.model) vetStatus.model = result.model;
+  } else {
+    plans = recolorPlans(design, { product, n });
+  }
   const applied: (AppliedRecolor | undefined)[] = [];
   if (apply !== undefined) {
     await mkdir(apply, { recursive: true });
@@ -319,8 +405,15 @@ export async function recolorView({ file, bytes, n, product: productId, apply }:
   const heading = (i: number) => {
     const plan = plans[i]!;
     const via = plan.combination.source === "book" ? `combination ${plan.combination.id}` : `${plan.combination.harmony} harmony`;
-    return `${i + 1}. ${plan.color.name} · ${via} · score ${fmt(plan.score, 3)}${plan.flagged ? " · flagged" : ""}`;
+    return `${i + 1}. ${plan.color.name} · ${via} · score ${fmt(plan.score, 3)}${plan.flagged ? " · flagged" : ""}${plausibilityNote(plan)}`;
   };
+  const vetLines = vetStatus
+    ? [
+        ...(vetStatus.reason ? [vetStatus.reason] : []),
+        ...vetStatus.dropped.map((d) => `Dropped ${d.garment}: ${d.reasons.join(" ")}`),
+        ...(plans.length === 0 ? ["Every plan was implausible; pass --include-implausible to see them."] : []),
+      ]
+    : [];
   const appliedLine = (result: AppliedRecolor | undefined) =>
     result === undefined ? [] : [result.applicable ? `Wrote ${result.out}` : `Not applied: ${result.reason}`];
 
@@ -330,16 +423,20 @@ export async function recolorView({ file, bytes, n, product: productId, apply }:
       product: { id: product.id, name: product.name },
       design,
       plans: plans.map((plan, i) => (applied[i] ? { ...plan, applied: applied[i] } : plan)),
+      ...(vetStatus && { vet: vetStatus }),
     },
     text: (color) =>
       [
         `${title}\n`,
+        ...(vetLines.length ? [`${vetLines.join("\n")}\n`] : []),
         ...plans.map((plan, i) =>
           [
             heading(i),
             renderAnsi([plan.color], { color }).trimEnd(),
             ...plan.mapping.map(
-              (m) => `  ${m.from.hex} (${Math.round(m.from.share * 100)}%) -> ${m.to.name} ${m.to.hex}`,
+              (m) =>
+                `  ${m.from.hex} (${Math.round(m.from.share * 100)}%) -> ${m.to.name} ${m.to.hex}` +
+                ("plausibility" in m && m.plausibility !== null ? ` · plausibility ${fmt(m.plausibility, 2)}` : ""),
             ),
             `  Prompt: ${plan.prompt}`,
             ...plan.reasons.map((r) => `  ${r}`),

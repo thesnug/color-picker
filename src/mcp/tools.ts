@@ -209,17 +209,28 @@ export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDef
         vet: z
           .boolean()
           .optional()
-          .describe("Check with Jev that each swap keeps the subject recognizable, such as a strawberry staying red."),
+          .describe(
+            "Describe the design and check with Jev that each swap keeps the subject recognizable, such as a " +
+              "strawberry staying red. Implausible plans are dropped and replaced by the next garments; the " +
+              "result's vet field lists them.",
+          ),
+        includeImplausible: z
+          .boolean()
+          .optional()
+          .describe("With vet, keep implausible plans, marked implausible, instead of dropping them."),
       },
-      handler: async ({ designPath: path, designBase64: base64, n, product: productId, outDir, vet }) => {
+      handler: async ({ designPath: path, designBase64: base64, n, product: productId, outDir, vet, includeImplausible }) => {
+        if (includeImplausible && !vet) throw new InputError("includeImplausible applies only with vet");
         const design = designInput(path, base64);
         const view = await recolorView({
           ...design,
           n: (n as number | undefined) ?? DEFAULT_RECOLOR_N,
           ...(productId !== undefined && { product: productId as string }),
           ...(outDir !== undefined && { apply: outDir as string }),
+          ...(vet === true && { vet: true }),
+          ...(includeImplausible === true && { includeImplausible: true }),
         });
-        return reply(view, vet ? { vet: jevStatus("vet") } : {});
+        return reply(view);
       },
     },
     {
@@ -450,12 +461,12 @@ function designInput(path: unknown, base64: unknown): { file: string; bytes?: Ui
 }
 
 /**
- * Jev judgments arrive in later issues (INT-2268 for mood, INT-2270 for
- * vetting). Until then a tool asked for one returns its deterministic result
- * and says why the judgment was skipped. The key is checked for presence only.
+ * Mood re-ranking arrives in a later issue (INT-2268). Until then a tool asked
+ * for it returns its deterministic result and says why the judgment was
+ * skipped. The key is checked for presence only.
  */
-export function jevStatus(option: "mood" | "vet"): JevStatus {
-  const what = option === "mood" ? "Mood re-ranking" : "Swap vetting";
+export function jevStatus(_option: "mood"): JevStatus {
+  const what = "Mood re-ranking";
   const reason = process.env.TYPESAFE_API_KEY
     ? `${what} with Jev is not available in this version, so the result uses the deterministic ranking only.`
     : `${what} needs Jev and TYPESAFE_API_KEY is not set, so the result uses the deterministic ranking only.`;
