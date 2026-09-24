@@ -79,9 +79,14 @@ export function combosView({ query, size, limit }: CombosArgs): View {
   const resolved = requireResolved(query, result.resolved, result.reason);
   const title = `Combinations for ${describeQuery(query, resolved)}`;
   const anchor = result.anchor!;
-  const anchorLine =
-    `Anchor: ${anchor.color.name} ${anchor.color.hex} ` +
-    `(${anchor.via === "nearest-neutral" ? "nearest neutral, " : ""}distance ${fmt(anchor.distance)})`;
+  const anchorNotes = [
+    ...(anchor.via === "nearest-neutral" ? ["nearest neutral"] : []),
+    `distance ${fmt(anchor.distance)}`,
+    ...(anchor.rejected
+      ? [`over ${anchor.rejected.name} at ${fmt(anchor.rejected.distance)}`]
+      : []),
+  ];
+  const anchorLine = `Anchor: ${anchor.color.name} ${anchor.color.hex} (${anchorNotes.join(", ")})`;
 
   if (result.palettes.length === 0) {
     return {
