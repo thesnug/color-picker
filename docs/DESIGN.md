@@ -123,6 +123,7 @@ any combination against these and returns pass/fail with reasons.
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
 | `@thesnug/color-picker/fingerprint` | Design fingerprints from image files, cached on disk |
+| `@thesnug/color-picker/jev` | The TypeSafe client wrapper with its answer cache |
 | `bin: color-picker` | CLI |
 | `bin: color-picker-mcp` | MCP server |
 
@@ -236,6 +237,14 @@ version and state hash, under `assets/cache/` or a local cache directory.
 | Words to color ("dusty rose", "the brick shirt") | Choice over Wada or product names, hex and family in each description | Choice allows up to 255 options; both lists fit in one question |
 | Palette re-rank for a design | Score per candidate, fan-out in one request | Code produces the shortlist first |
 | Recolor plausibility ("does the strawberry still read as a strawberry?") | Noul per proposed swap | The one part only a semantic model can do |
+
+Every call goes through `ask` in the `jev` entry point, which sends a feature's
+questions about one state in one request. The cache key is the SHA-256 of the
+feature's question version, the question definitions, and the state, with object
+keys sorted so key order does not matter. A cache hit needs neither the SDK nor a
+key, so committed answers work in every install. `@typesafe-ai/sdk` is an
+optional peer, like `sharp` and the MCP SDK, and the API key comes only from
+`TYPESAFE_API_KEY`.
 
 Hex-to-nearest is never sent to Jev. Thresholds are evaluated on labeled examples
 before they gate anything; cookbook numbers are starting points, not rules.
