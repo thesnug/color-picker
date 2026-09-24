@@ -358,6 +358,29 @@
       }
     },
     {
+      "name": "Dusk",
+      "slug": "dusk",
+      "hex": "#735b6a",
+      "aliases": [],
+      "family": "red-pink",
+      "available": false,
+      "source": "retail-chart:getcustom-store",
+      "sourceDate": "2026-09-24",
+      "sourceUrl": "https://getcustom.store/blog/comfort-colors-1717-all-67-colors-2026-color-chart-guide"
+    },
+    {
+      "name": "Emerald",
+      "slug": "emerald",
+      "hex": "#00685e",
+      "aliases": [],
+      "family": "green",
+      "available": false,
+      "source": "retail-chart:transfersuperstars",
+      "sourceDate": "2026-09-24",
+      "sourceUrl": "https://www.transfersuperstars.com/blogs/color-swatches/comfort-colors-apparel-color-swatch-hex-pantone",
+      "sourceNote": "Listed without a hex on the 2026 getcustom.store chart and absent from the dtlaprint.com chart. Hex from the transfersuperstars.com Comfort Colors chart (published 2024-04-09, Pantone 329 C), which predates the 2026 range."
+    },
+    {
       "name": "Espresso",
       "slug": "espresso",
       "hex": "#846b5b",
@@ -734,6 +757,17 @@
       }
     },
     {
+      "name": "Neon Cantaloupe",
+      "slug": "neon-cantaloupe",
+      "hex": "#ffbba4",
+      "aliases": [],
+      "family": "neon",
+      "available": false,
+      "source": "retail-chart:getcustom-store",
+      "sourceDate": "2026-09-24",
+      "sourceUrl": "https://getcustom.store/blog/comfort-colors-1717-all-67-colors-2026-color-chart-guide"
+    },
+    {
       "name": "Neon Lemon",
       "slug": "neon-lemon",
       "hex": "#c9db78",
@@ -902,6 +936,17 @@
       "pod": {
         "colorAssetVersionId": "58c1ab16-1877-4eb1-a326-929c20d43332"
       }
+    },
+    {
+      "name": "Rose Quartz",
+      "slug": "rose-quartz",
+      "hex": "#e2acd7",
+      "aliases": [],
+      "family": "purple",
+      "available": false,
+      "source": "retail-chart:getcustom-store",
+      "sourceDate": "2026-09-24",
+      "sourceUrl": "https://getcustom.store/blog/comfort-colors-1717-all-67-colors-2026-color-chart-guide"
     },
     {
       "name": "Royal Caribe",

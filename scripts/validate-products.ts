@@ -14,6 +14,8 @@
  *   - Every `reviewed` color carries a `sourceDate`. The schema already requires a
  *     date on every color; this check names the rule that matters most, because a
  *     reviewed value is never overwritten and must say when it was reviewed.
+ *   - `hex: null` appears only on a color with `available: false`. The schema
+ *     enforces this too; the named message says which rule was broken.
  */
 
 import { readdirSync, readFileSync } from "node:fs";
@@ -42,7 +44,7 @@ interface IndexShape {
 
 interface ProductShape {
   id: string;
-  colors: { slug: string; source: string; sourceDate?: string }[];
+  colors: { slug: string; hex: string | null; available: boolean; source: string; sourceDate?: string }[];
 }
 
 /** Validate a products directory. Returns one message per problem; empty means valid. */
@@ -97,6 +99,9 @@ export function validateProducts(dir: string = PRODUCTS_DIR): string[] {
       colors.forEach((c, i) => {
         if (c?.source === "reviewed" && !c.sourceDate) {
           problems.push(`${file}: /colors/${i} is reviewed but has no sourceDate`);
+        }
+        if (c?.hex === null && c.available !== false) {
+          problems.push(`${file}: /colors/${i} has no hex, so it must be available: false`);
         }
       });
     }

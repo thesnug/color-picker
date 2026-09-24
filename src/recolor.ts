@@ -16,12 +16,13 @@ import { distance, type Hex, normalizeHex, toOklab } from "./color/convert.js";
 import {
   type Accessibility,
   type DerivedColor,
+  hasHex,
   loadAccessibility,
   loadColors,
   loadProduct,
   loadProductIndex,
   type Product,
-  type ProductColor,
+  type ProductColorWithHex,
 } from "./data/index.js";
 import { equivalentsFor } from "./equivalents.js";
 import { nearest } from "./nearest.js";
@@ -129,7 +130,7 @@ export interface RecolorComponents {
 }
 
 export interface RecolorPlan {
-  color: ProductColor;
+  color: ProductColorWithHex;
   combination: RecolorCombination;
   /** One entry per design color, in the design's palette order. */
   mapping: RecolorMapping[];
@@ -179,7 +180,7 @@ function resolveProduct(product: RecolorOptions["product"]): Product {
  * The garment's equivalents: the committed ones when the product is indexed,
  * else a live nearest match, as `recommendProductColors` falls back.
  */
-function garmentEquivalents(product: Product, color: ProductColor, within: number): RecolorEquivalent[] {
+function garmentEquivalents(product: Product, color: ProductColorWithHex, within: number): RecolorEquivalent[] {
   let stored: { index: number; name: string; distance: number }[] | undefined;
   try {
     stored = equivalentsFor(product, color.slug)?.matches;
@@ -393,7 +394,7 @@ export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}
   const cache = new Map<number, Candidate[]>();
   const best: Scored[] = [];
   for (const color of product.colors) {
-    if (!color.hex || (availableOnly && !color.available)) continue;
+    if (!hasHex(color) || (availableOnly && !color.available)) continue;
     let chosen: Scored | undefined;
     for (const equivalent of garmentEquivalents(product, color, within)) {
       for (const candidate of candidatesFor(equivalent, cache)) {
@@ -423,7 +424,7 @@ export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}
 }
 
 function buildPlan(
-  color: ProductColor,
+  color: ProductColorWithHex,
   combination: RecolorCombination,
   entries: readonly DesignEntry[],
   inks: readonly DerivedColor[],

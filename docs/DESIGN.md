@@ -95,7 +95,11 @@ Three rules follow:
 
 1. **Gap fill.** Colors on the 2026 retail chart that Printify does not stock
    (Emerald, Dusk, Rose Quartz, Neon Cantaloupe at the time of writing) enter with a
-   chart hex, `available: false`, and `source` naming the chart.
+   chart hex, `available: false`, `source` naming the chart, and the chart page as
+   `sourceUrl`. A color no chart publishes a hex for enters with `hex: null`. Emerald
+   is listed without a hex on the 2026 chart; its value comes from an older
+   Comfort Colors chart and says so in `sourceNote`. Renderers mark unstocked
+   colors "not stocked" with a dashed outline.
 2. **Review pass.** The first swatch card renders each hex tile beside its garment
    image so mismatches are corrected once. A corrected value gets `source: reviewed`
    and the import script never overwrites it. Regenerating a mockup is cheaper than
@@ -165,9 +169,17 @@ too few, generate Wada-snapped harmonies: complementary, split-complementary,
 triadic, and analogous computed in OKLCH and snapped to the nearest Wada color.
 Rank by contrast against the anchor: book palettes first, grouped by which match
 they came from, then harmonies, each by a score weighting contrast three to one over
-hue spread. A neutral input (OKLab chroma at or below 0.045) anchors on the nearest
-neutral Wada color rather than the overall nearest, which for a mid-gray is a tinted
-color; `nearest` itself stays pure distance.
+hue spread. The anchor is the plain nearest match, with one exception: a gray input
+(OKLab chroma at or below 0.015, the same cutoff as the neutral color family)
+anchors on the nearest neutral Wada color when that neutral is no farther than 1.5
+times the plain nearest distance. The chroma cutoff keeps muted hues such as Navy,
+Moss, and Sage on their plain nearest match; the margin keeps a gray on its plain
+nearest match when the web edition's tinted neutrals are all far from it (Grey and
+Granite, until INT-2277 corrects the neutral hex values). When the rule is
+considered, the anchor records the losing candidate and its distance. Callers that
+already know the anchor, such as palettes for a garment built on its stored
+equivalents, pass it by Wada index or slug and skip resolution, reported as
+`via: "anchor"`. `nearest` itself stays pure distance.
 
 **Design fingerprint.** Quantize a design's opaque pixels to its top five colors
 with coverage percentages; measure ink luminance; note transparency; hash the file.

@@ -103,7 +103,7 @@ describe("cli", () => {
     it("notes a neutral anchor", async () => {
       const c = capture();
       await run(["combos", "#808080", "--limit", "1"], c.io);
-      expect(c.out()).toContain("(nearest neutral, distance");
+      expect(c.out()).toMatch(/\(nearest neutral, distance [\d.]+, over Andover Green at [\d.]+\)/);
     });
 
     it("reports when no palette matches the options", async () => {
@@ -355,7 +355,7 @@ describe("cli", () => {
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
       [["recolor", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recolor", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
-      [["palettes", "Emerald"], 'has no color named "Emerald". Colors: Banana, Bay,'],
+      [["palettes", "Chartreuse"], 'has no color named "Chartreuse". Colors: Banana, Bay,'],
       [["palettes", "Blue Spruce", "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
       const c = capture();

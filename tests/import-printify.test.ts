@@ -105,6 +105,58 @@ describe("mergeColors", () => {
     });
   });
 
+  it("drops the chart URL and note once Printify stocks a chart color, and logs it", () => {
+    const chart = color({
+      available: false,
+      source: "retail-chart:getcustom-store",
+      hex: "#505050",
+      sourceUrl: "https://example.com/chart",
+      sourceNote: "Chart value.",
+    });
+    const { colors, log } = mergeColors([chart], upstream, { today: TODAY });
+    const pepper = colors.find((c) => c.slug === "pepper")!;
+    expect(pepper).not.toHaveProperty("sourceUrl");
+    expect(pepper).not.toHaveProperty("sourceNote");
+    expect(log).toContain("Pepper: now stocked by Printify; chart hex #505050 replaced with #4f4b48");
+  });
+
+  it("leaves a chart color Printify does not stock alone, chart fields included", () => {
+    const chart = color({
+      name: "Dusk",
+      slug: "dusk",
+      hex: "#735b6a",
+      family: "red-pink",
+      available: false,
+      source: "retail-chart:getcustom-store",
+      sourceUrl: "https://example.com/chart",
+    });
+    const noHex = color({
+      name: "Emerald",
+      slug: "emerald",
+      hex: null,
+      family: "green",
+      available: false,
+      source: "retail-chart:getcustom-store",
+      sourceUrl: "https://example.com/chart",
+      sourceNote: "No chart publishes a hex.",
+    });
+    const { colors, log } = mergeColors([chart, noHex], upstream, { today: LATER });
+    expect(colors.find((c) => c.slug === "dusk")).toEqual(chart);
+    expect(colors.find((c) => c.slug === "emerald")).toEqual(noHex);
+    expect(log).toEqual([]);
+  });
+
+  it("leaves a chart color alone when Printify lists it without a swatch", () => {
+    const chart = color({
+      available: false,
+      source: "retail-chart:getcustom-store",
+      hex: "#505050",
+      sourceUrl: "https://example.com/chart",
+    });
+    const { colors } = mergeColors([chart], [{ name: "Pepper" }], { today: LATER });
+    expect(colors).toEqual([chart]);
+  });
+
   it("is idempotent, and --touch changes only sourceDate", () => {
     const first = mergeColors([], upstream, { today: TODAY, colorStudy: study }).colors;
     const again = mergeColors(first, upstream, { today: LATER, colorStudy: study }).colors;

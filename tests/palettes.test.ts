@@ -20,7 +20,7 @@ describe("findProductColor", () => {
   });
 
   it("returns undefined for unknown and empty names", () => {
-    expect(findProductColor(product, "Emerald")).toBeUndefined();
+    expect(findProductColor(product, "Chartreuse")).toBeUndefined();
     expect(findProductColor(product, "  ")).toBeUndefined();
   });
 });
@@ -102,10 +102,10 @@ describe("palettesForProductColor", () => {
   });
 
   it("returns a reason instead of throwing for an unknown color", () => {
-    const r = palettesForProductColor("Emerald");
+    const r = palettesForProductColor("Chartreuse");
     expect(r.color).toBeUndefined();
     expect(r.palettes).toEqual([]);
-    expect(r.reason).toContain('no color named "Emerald"');
+    expect(r.reason).toContain('no color named "Chartreuse"');
   });
 
   it("throws for an unknown product or a bad limit", () => {

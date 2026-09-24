@@ -6,14 +6,7 @@
 
 import { contrastRatio } from "./color/contrast.js";
 import { toHex, toOklch, type ColorInput, type Oklch } from "./color/convert.js";
-import {
-  analogous,
-  complementary,
-  hueArc,
-  NEUTRAL_CHROMA,
-  splitComplementary,
-  triadic,
-} from "./color/harmony.js";
+import { analogous, complementary, hueArc, splitComplementary, triadic } from "./color/harmony.js";
 import {
   loadColors,
   loadCombinations,
@@ -32,6 +25,18 @@ export const COMBINATION_DEFAULTS = {
   secondaryWithin: 6,
   /** A harmony is skipped when any generated color snaps farther than this. */
   snapWithin: 8,
+  /**
+   * OKLab chroma at or below which the input counts as gray and the
+   * neutral-anchor rule is considered. The same cutoff as the neutral color
+   * family. Among Comfort Colors 1717 it catches Black, White, Grey, Granite,
+   * Graphite, and Pepper; Navy (0.0195) is the first color above it.
+   */
+  neutralChroma: 0.015,
+  /**
+   * The nearest Wada neutral replaces the plain nearest match only when it is
+   * no farther than this multiple of the plain distance.
+   */
+  neutralMargin: 1.5,
 } as const;
 
 export type GeneratedHarmony = "complementary" | "split-complementary" | "triadic" | "analogous";
@@ -63,10 +68,22 @@ export interface CombinationsOptions {
   /** Skip a harmony when any of its colors snaps farther than this. Default 8. */
   snapWithin?: number;
   /**
-   * OKLab chroma at or below which the input counts as neutral and anchors on
-   * the nearest neutral Wada color. Default `NEUTRAL_CHROMA`, 0.045.
+   * OKLab chroma at or below which the input counts as gray and may anchor on
+   * the nearest neutral Wada color. Default 0.015.
    */
   neutralChroma?: number;
+  /**
+   * A gray input anchors on the nearest neutral Wada color only when it is no
+   * farther than this multiple of the plain nearest distance. Default 1.5.
+   */
+  neutralMargin?: number;
+  /**
+   * Build palettes around this Wada color, given by index or slug, instead of
+   * resolving an anchor from the input. For callers that already know the
+   * color, such as a garment's stored equivalent. The input still resolves,
+   * for `resolved`, the anchor distance, and the second and third matches.
+   */
+  anchor?: number | string;
 }
 
 export interface CombinationAnchor {
@@ -76,11 +93,19 @@ export interface CombinationAnchor {
   distance: number;
   /**
    * `nearest` for the plain nearest match; `nearest-neutral` when the input is
-   * neutral and the anchor is the nearest neutral Wada color instead.
+   * gray and the nearest neutral Wada color is close enough to win; `anchor`
+   * when the caller passed the anchor.
    */
-  via: "nearest" | "nearest-neutral";
+  via: "nearest" | "nearest-neutral" | "anchor";
   /** The plain nearest matches by pure distance, reported alongside. */
   nearest: NearestMatch[];
+  /**
+   * When the input was gray and the neutral-anchor rule was considered, the
+   * candidate that lost: the nearest neutral when `via` is `nearest`, the
+   * plain nearest when `via` is `nearest-neutral`. Absent when the rule was
+   * not considered or both candidates are the same color.
+   */
+  rejected?: { name: string; index: number; distance: number };
 }
 
 interface PaletteBase {
@@ -137,7 +162,8 @@ export interface CombinationsResult {
  * Ranked palettes for a hex code, a color name, or any other color input.
  * Unknown names return no palettes and a `reason`; they never throw.
  *
- * @throws {RangeError} for a non-integer or out-of-range `size`, `limit`, or `min`.
+ * @throws {RangeError} for a non-integer or out-of-range `size`, `limit`, or
+ * `min`, or an `anchor` that names no Wada color.
  */
 export function combinations(
   input: ColorInput,
@@ -149,7 +175,8 @@ export function combinations(
     min = COMBINATION_DEFAULTS.min,
     secondaryWithin = COMBINATION_DEFAULTS.secondaryWithin,
     snapWithin = COMBINATION_DEFAULTS.snapWithin,
-    neutralChroma = NEUTRAL_CHROMA,
+    neutralChroma = COMBINATION_DEFAULTS.neutralChroma,
+    neutralMargin = COMBINATION_DEFAULTS.neutralMargin,
   } = options;
   if (!(Number.isInteger(limit) && limit > 0)) {
     throw new RangeError(`limit must be a positive integer, got ${limit}`);
@@ -164,6 +191,10 @@ export function combinations(
     }
   }
   const sizeOk = (n: number) => (sizes ? sizes.includes(n) : n >= 2);
+  const given = options.anchor === undefined ? undefined : findWadaColor(options.anchor);
+  if (options.anchor !== undefined && !given) {
+    throw new RangeError(`anchor must be a Wada index or slug, got ${JSON.stringify(options.anchor)}`);
+  }
 
   const plain = nearest(input);
   const { resolved } = plain;
@@ -171,17 +202,10 @@ export function combinations(
     return { ...(resolved && { resolved }), palettes: [], reason: plain.reason ?? "No match." };
   }
 
-  const neutralInput = toOklch(resolved.hex).c <= neutralChroma;
-  const first = neutralInput
-    ? nearest(resolved.hex, { k: 1, colors: wadaNeutrals(neutralChroma) }).matches[0]
-    : undefined;
-  const anchorMatch = first ?? plain.matches[0]!;
-  const anchor: CombinationAnchor = {
-    color: anchorMatch.color,
-    distance: anchorMatch.distance,
-    via: first ? "nearest-neutral" : "nearest",
-    nearest: plain.matches,
-  };
+  const anchor = given
+    ? givenAnchor(given, resolved.hex, plain.matches)
+    : resolveAnchor(resolved.hex, plain.matches, neutralChroma, neutralMargin);
+  const anchorMatch: NearestMatch = { color: anchor.color, distance: anchor.distance };
 
   const keep = (colors: DerivedColor[], ref: DerivedColor) =>
     sizeOk(colors.length) &&
@@ -251,6 +275,52 @@ export function combinations(
 }
 
 // ---------------------------------------------------------------------------
+// Anchor
+
+function givenAnchor(color: DerivedColor, hex: string, plain: NearestMatch[]): CombinationAnchor {
+  const match = nearest(hex, { k: 1, colors: [color] }).matches[0]!;
+  return { color, distance: match.distance, via: "anchor", nearest: plain };
+}
+
+/**
+ * The plain nearest match, unless the input is gray and the nearest Wada
+ * neutral is within `margin` times the plain distance. Muted hues such as
+ * Navy or Moss stay on their plain nearest match, and a gray whose nearest
+ * neutral is far (the web edition's neutrals are tinted) does too.
+ */
+function resolveAnchor(
+  hex: string,
+  plain: NearestMatch[],
+  neutralChroma: number,
+  margin: number,
+): CombinationAnchor {
+  const closest = plain[0]!;
+  const base = { nearest: plain };
+  if (toOklch(hex).c > neutralChroma) {
+    return { ...base, color: closest.color, distance: closest.distance, via: "nearest" };
+  }
+  const neutral = nearest(hex, { k: 1, colors: wadaNeutrals() }).matches[0]!;
+  const same = neutral.color.index === closest.color.index;
+  const wins = !same && neutral.distance <= margin * closest.distance;
+  const [chosen, other] = wins ? [neutral, closest] : [closest, neutral];
+  return {
+    ...base,
+    color: chosen.color,
+    distance: chosen.distance,
+    via: wins ? "nearest-neutral" : "nearest",
+    ...(!same && {
+      rejected: { name: other.color.name, index: other.color.index, distance: other.distance },
+    }),
+  };
+}
+
+function findWadaColor(ref: number | string): DerivedColor | undefined {
+  if (typeof ref === "number") return colorsByIndex().get(ref);
+  const slug = ref.trim().toLowerCase();
+  return [...colorsByIndex().values()].find((c) => c.slug === slug);
+}
+
+// ---------------------------------------------------------------------------
 // Scoring
 
 const LOG_MAX_CONTRAST = Math.log(21);
@@ -294,8 +364,9 @@ function combinationsById(): Map<number, Combination> {
   return (combinationsCache ??= new Map(loadCombinations().map((c) => [c.id, c])));
 }
 
-function wadaNeutrals(neutralChroma: number): DerivedColor[] {
-  return [...colorsByIndex().values()].filter((c) => c.oklch.c <= neutralChroma);
+/** The Wada colors flagged neutral in the derived data (chroma at or below 0.045). */
+function wadaNeutrals(): DerivedColor[] {
+  return [...colorsByIndex().values()].filter((c) => c.neutral);
 }
 
 function setKey(members: DerivedColor[]): string {

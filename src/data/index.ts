@@ -157,8 +157,11 @@ export type ProductColorSource = "printify" | "reviewed" | `retail-chart:${strin
 export interface ProductColor {
   name: string;
   slug: string;
-  /** Lowercase `#rrggbb`. */
-  hex: string;
+  /**
+   * Lowercase `#rrggbb`. Null only for an unstocked color (`available: false`)
+   * that no chart publishes a hex for.
+   */
+  hex: string | null;
   aliases: string[];
   /** Broad color family used for grouping, lowercase. */
   family: string;
@@ -171,6 +174,18 @@ export interface ProductColor {
   image?: { url: string; sha256: string };
   /** A pointer for the picker. Never authority over which render version is current. */
   pod?: { colorAssetVersionId: string };
+  /** The chart page a `retail-chart:<site>` hex came from. */
+  sourceUrl?: string;
+  /** Free-text provenance note, for example why a chart value is uncertain. */
+  sourceNote?: string;
+}
+
+/** A product color that has a hex. Every stocked color does. */
+export type ProductColorWithHex = ProductColor & { hex: string };
+
+/** True when the color has a hex to match, render, or print against. */
+export function hasHex(color: ProductColor): color is ProductColorWithHex {
+  return color.hex !== null;
 }
 
 /** One garment product. This repo owns these facts; see docs/DESIGN.md, "Products". */
