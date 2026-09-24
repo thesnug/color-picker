@@ -31,6 +31,8 @@ decisions; this file holds the working method.
   X.Y.Z` on `main` runs every CI check, builds, and pushes an annotated tag on a
   "Release vX.Y.Z" commit that is `main` plus `dist/`. That commit lives only on
   the tag, so `main` never tracks `dist/` and never takes a direct commit.
+  If the tag push fails, the tag stays local; once the remote or credentials
+  are fixed, `npm run release -- tag X.Y.Z --push-existing` pushes it as built.
 
 ## Linear: adding and maintaining issues
 

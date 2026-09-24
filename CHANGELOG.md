@@ -27,6 +27,12 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
   the `recommend_product_colors` and `palettes_for_product_color` tools. HTML
   cards show the mood level as a badge.
 
+### Release tooling
+
+- The release script reports a failed tag push with the commands to recover or
+  delete the local tag. `tag X.Y.Z --push-existing` validates its version and
+  built release tree before pushing without rebuilding it.
+
 ## [0.1.0] - 2026-09-24
 
 The first release.
