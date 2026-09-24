@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderAnsi > matches the snapshot 1`] = `
+"[48;2;230;173;207m    [0m  #e6adcf  Cameo Pink
+[48;2;209;176;179m    [0m  #d1b0b3  Fawn
+[48;2;41;189;173m    [0m  #29bdad  Cerulian Blue
+[48;2;32;45;133m    [0m  #202d85  Violet Blue
+"
+`;
+
+exports[`renderCombination > matches the snapshot 1`] = `"<svg xmlns="http://www.w3.org/2000/svg" width="512" height="174" viewBox="0 0 512 174" role="img" aria-label="Combination 125: Cameo Pink, Fawn, Cerulian Blue, Violet Blue" font-family="system-ui, -apple-system, &#39;Segoe UI&#39;, Helvetica, Arial, sans-serif"><title>Combination 125: Cameo Pink, Fawn, Cerulian Blue, Violet Blue</title><text x="0" y="18" font-size="15" font-weight="600" fill="currentColor">Combination 125</text><g><title>Cameo Pink #e6adcf</title><rect x="0" y="28" width="128" height="112" fill="#e6adcf"/><text x="8" y="118" font-size="12" font-weight="600" fill="#000000">Cameo Pink</text><text x="8" y="132" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#e6adcf</text></g><g><title>Fawn #d1b0b3</title><rect x="128" y="28" width="128" height="112" fill="#d1b0b3"/><text x="136" y="118" font-size="12" font-weight="600" fill="#000000">Fawn</text><text x="136" y="132" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#d1b0b3</text></g><g><title>Cerulian Blue #29bdad</title><rect x="256" y="28" width="128" height="112" fill="#29bdad"/><text x="264" y="118" font-size="12" font-weight="600" fill="#000000">Cerulian Blue</text><text x="264" y="132" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#29bdad</text></g><g><title>Violet Blue #202d85</title><rect x="384" y="28" width="128" height="112" fill="#202d85"/><text x="392" y="118" font-size="12" font-weight="600" fill="#ffffff">Violet Blue</text><text x="392" y="132" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#ffffff">#202d85</text></g><g><title>Cameo Pink #e6adcf and Fawn #d1b0b3: WCAG 1.06:1, APCA Lc 0 (left as text on right)</title><rect x="77" y="146" width="102" height="22" rx="11" fill="#ffffff" stroke="#00000033"/><text x="128" y="161" font-size="11" text-anchor="middle" fill="#1a1a1a">1.06:1 · Lc 0</text></g><g><title>Fawn #d1b0b3 and Cerulian Blue #29bdad: WCAG 1.18:1, APCA Lc 0 (left as text on right)</title><rect x="205" y="146" width="102" height="22" rx="11" fill="#ffffff" stroke="#00000033"/><text x="256" y="161" font-size="11" text-anchor="middle" fill="#1a1a1a">1.18:1 · Lc 0</text></g><g><title>Cerulian Blue #29bdad and Violet Blue #202d85: WCAG 5.06:1, APCA Lc -48.7 (left as text on right)</title><rect x="326.5" y="146" width="115" height="22" rx="11" fill="#ffffff" stroke="#00000033"/><text x="384" y="161" font-size="11" text-anchor="middle" fill="#1a1a1a">5.06:1 · Lc -49</text></g></svg>"`;
+
+exports[`renderHtml > matches the snapshot 1`] = `
+"<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color review</title>
+<style>
+:root { color-scheme: light dark; --bg: #ffffff; --fg: #1a1a1a; --muted: #5c5c5c; --rule: #e2e2e2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #141414; --fg: #f0f0f0; --muted: #a8a8a8; --rule: #2e2e2e; }
+}
+:root[data-theme="dark"] { --bg: #141414; --fg: #f0f0f0; --muted: #a8a8a8; --rule: #2e2e2e; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  max-width: 1100px; margin: 0 auto 24px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+main { max-width: 1100px; margin: 0 auto; display: grid; gap: 32px; }
+section { border-top: 1px solid var(--rule); padding-top: 16px; }
+.svg { overflow-x: auto; }
+.svg svg { display: block; max-width: none; }
+p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.toggle { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.toggle button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent;
+  color: var(--fg); cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+</style>
+</head>
+<body>
+<header>
+<h1>Color review</h1>
+<div class="toggle" role="group" aria-label="Background">
+<button type="button" value="light">Light</button><button type="button" value="dark">Dark</button>
+</div>
+</header>
+<main>
+<section><div class="svg"><svg xmlns="http://www.w3.org/2000/svg" width="192" height="64" viewBox="0 0 192 64" role="img" aria-label="Color swatches"><rect x="0" y="0" width="96" height="64" fill="#ffb3f0"><title>#ffb3f0</title></rect><rect x="96" y="0" width="96" height="64" fill="#000000"><title>#000000</title></rect></svg></div></section>
+</main>
+<script>
+(function () {
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll(".toggle button");
+  function current() {
+    var set = root.getAttribute("data-theme");
+    if (set) return set;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function sync() {
+    var theme = current();
+    buttons.forEach(function (b) { b.setAttribute("aria-pressed", String(b.value === theme)); });
+  }
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { root.setAttribute("data-theme", b.value); sync(); });
+  });
+  sync();
+})();
+</script>
+</body>
+</html>
+"
+`;
+
+exports[`renderProductCard > matches the snapshot 1`] = `"<svg xmlns="http://www.w3.org/2000/svg" width="361" height="272" viewBox="0 0 361 272" role="img" aria-label="Comfort Colors 1717, Pepper #5f605b with Hermosa Pink, Cameo Pink" font-family="system-ui, -apple-system, &#39;Segoe UI&#39;, Helvetica, Arial, sans-serif"><title>Comfort Colors 1717, Pepper #5f605b with Hermosa Pink, Cameo Pink</title><text x="0" y="18" font-size="15" font-weight="600" fill="currentColor">Comfort Colors 1717</text><rect x="0" y="28" width="200" height="200" rx="8" fill="#5f605b" stroke="#00000022"/><clipPath id="garment-1c2j6o6"><rect x="0" y="28" width="200" height="200" rx="8"/></clipPath><image href="https://example.com/pepper.jpg?w=400&amp;h=400" x="0" y="28" width="200" height="200" preserveAspectRatio="xMidYMid slice" clip-path="url(#garment-1c2j6o6)"/><text x="0" y="248" font-size="13" font-weight="600" fill="currentColor">Pepper</text><text x="0" y="264" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="currentColor">#5f605b</text><g><title>Hermosa Pink #ffb3f0</title><rect x="224" y="28" width="40" height="40" rx="6" fill="#ffb3f0" stroke="#00000022"/><text x="274" y="46" font-size="12" font-weight="600" fill="currentColor">Hermosa Pink</text><text x="274" y="60" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="currentColor">#ffb3f0</text></g><g><title>Cameo Pink #e6adcf</title><rect x="224" y="76" width="40" height="40" rx="6" fill="#e6adcf" stroke="#00000022"/><text x="274" y="94" font-size="12" font-weight="600" fill="currentColor">Cameo Pink</text><text x="274" y="108" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="currentColor">#e6adcf</text></g></svg>"`;
+
+exports[`renderSwatchGrid > matches the snapshot 1`] = `"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="124" viewBox="0 0 400 124" role="img" aria-label="Nearest to #f0b0e0: Hermosa Pink, Corinthian Pink, Cameo Pink" font-family="system-ui, -apple-system, &#39;Segoe UI&#39;, Helvetica, Arial, sans-serif"><title>Nearest to #f0b0e0: Hermosa Pink, Corinthian Pink, Cameo Pink</title><text x="0" y="18" font-size="15" font-weight="600" fill="currentColor">Nearest to #f0b0e0</text><g><title>Hermosa Pink #ffb3f0</title><rect x="0" y="28" width="128" height="96" fill="#ffb3f0"/><text x="8" y="88" font-size="12" font-weight="600" fill="#000000">Hermosa Pink</text><text x="8" y="102" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#ffb3f0</text><text x="8" y="116" font-size="11" fill="#000000">ΔE 0</text></g><g><title>Corinthian Pink #ffa6d9</title><rect x="136" y="28" width="128" height="96" fill="#ffa6d9"/><text x="144" y="88" font-size="12" font-weight="600" fill="#000000">Corinthian Pink</text><text x="144" y="102" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#ffa6d9</text><text x="144" y="116" font-size="11" fill="#000000">ΔE 1.5</text></g><g><title>Cameo Pink #e6adcf</title><rect x="272" y="28" width="128" height="96" fill="#e6adcf"/><text x="280" y="88" font-size="12" font-weight="600" fill="#000000">Cameo Pink</text><text x="280" y="102" font-size="11" font-family="ui-monospace, &#39;SF Mono&#39;, Menlo, Consolas, monospace" fill="#000000">#e6adcf</text><text x="280" y="116" font-size="11" fill="#000000">ΔE 3</text></g></svg>"`;
