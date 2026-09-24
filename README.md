@@ -47,6 +47,23 @@ import { loadWadaColors } from "@thesnug/color-picker/data";
 import { renderSwatchStripSvg } from "@thesnug/color-picker/render";
 ```
 
+### Nearest match
+
+`nearest` finds the closest Wada colors to a hex code or a color name by OKLab
+distance (scaled by 100; about 2 is a just-noticeable difference):
+
+```ts
+import { nearest } from "@thesnug/color-picker";
+
+nearest("#c0737a");                  // top 3, sorted by distance
+nearest("dusty rose", { within: 8 }); // every match within 8
+nearest("not a color");               // { matches: [], reason: "Unknown color name ..." }
+```
+
+Names are matched ignoring case, spacing, and punctuation, with "grey" read as
+"gray". Wada names and aliases come first, then CSS named colors, then the xkcd
+color survey.
+
 ### CLI
 
 ```bash
@@ -94,6 +111,11 @@ the top of the script. Both files are committed; CI fails when they are stale.
 npm run data:build  # regenerate assets/derived/
 npm run data:check  # fail if assets/derived/ is out of date
 ```
+
+`assets/names/css.json` (CSS named colors) and `assets/names/xkcd.json` (the xkcd
+color survey, CC0) are the name dictionaries `nearest` falls back to. Each file
+records its source, license, and retrieval date. The xkcd names keep their
+published UK spellings ("grey"); lookup treats "grey" as "gray".
 
 ### Products
 
