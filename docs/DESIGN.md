@@ -137,6 +137,8 @@ any combination against these and returns pass/fail with reasons.
 
 Consumers: this session via the CLI and rendered cards; Claude Code, Codex, and POD
 agents via the MCP server; the maker-method-picker and POD by direct import.
+Agents in other projects learn when and how to call the server from the skill in
+`skills/color-picker/`, which pins the same tag as the README.
 
 Decisions and their reasons:
 

@@ -9,8 +9,8 @@
  *
  * `prepare` branches `release/vX.Y.Z` from main, bumps package.json and
  * package-lock.json, turns the CHANGELOG.md "Unreleased" section into the
- * version's entry, points the README install lines at the new tag, commits,
- * pushes, and opens a PR. Write the changelog entry under "## Unreleased"
+ * version's entry, points the install lines in the README and the skill at the
+ * new tag, commits, pushes, and opens a PR. Write the changelog entry under "## Unreleased"
  * before running it; an empty entry is refused.
  *
  * `tag` runs on main once the release PR has merged. It checks the version in
@@ -119,9 +119,12 @@ export function dateUnreleased(changelog: string, version: string, date: string)
   return `${changelog.slice(0, at)}\n## [${version}] - ${date}\n${changelog.slice(at)}`;
 }
 
-/** Point every `github:thesnug/color-picker#vX.Y.Z` in the README at the new tag. */
-export function pointReadme(readme: string, version: string): string {
-  return readme.replace(/(github:thesnug\/color-picker#)v(?:\d+\.\d+\.\d+|X\.Y\.Z)/g, `$1v${version}`);
+/** Files whose install lines pin a tag, moved to the new tag by `prepare`. */
+export const PINNED_FILES = ["README.md", "skills/color-picker/SKILL.md"];
+
+/** Point every `github:thesnug/color-picker#vX.Y.Z` in a file's text at the new tag. */
+export function pointInstallLines(text: string, version: string): string {
+  return text.replace(/(github:thesnug\/color-picker#)v(?:\d+\.\d+\.\d+|X\.Y\.Z)/g, `$1v${version}`);
 }
 
 /** Parse the command line; throws ReleaseError on anything unexpected. */
@@ -253,9 +256,9 @@ function prepare(version: string, { push }: Options): void {
   lock.packages[""] = { ...lock.packages[""], version };
   writeJson("package-lock.json", lock);
   writeText("CHANGELOG.md", changelog);
-  writeText("README.md", pointReadme(readText("README.md"), version));
+  for (const file of PINNED_FILES) writeText(file, pointInstallLines(readText(file), version));
 
-  git(["add", "package.json", "package-lock.json", "CHANGELOG.md", "README.md"]);
+  git(["add", "package.json", "package-lock.json", "CHANGELOG.md", ...PINNED_FILES]);
   git(["commit", "--quiet", "-m", `Prepare ${tag}`]);
   log(`Committed "Prepare ${tag}" on ${branch}.`);
   if (!push) {

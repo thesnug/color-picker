@@ -36,6 +36,14 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
 
+### Agents
+
+- `skills/color-picker/SKILL.md`, a skill for Claude Code and Codex agents in
+  other projects: when to use each MCP tool, how to register the server from a tag
+  with `npx` in either host, and how to present results as swatch
+  cards with Wada names. `release prepare` moves its pinned tag with the
+  README's.
+
 ### Release tooling
 
 - The release script reports a failed tag push with the commands to recover or

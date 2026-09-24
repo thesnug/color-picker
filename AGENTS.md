@@ -27,12 +27,20 @@ decisions; this file holds the working method.
   "Unreleased" in `CHANGELOG.md` with each user-visible change.
 - To release: on an up-to-date `main`, `npm run release -- prepare X.Y.Z` opens a
   release PR that bumps the version, dates the changelog entry, and moves the
-  README install lines to the new tag. After it merges, `npm run release -- tag
+  install lines in the README and the skill to the new tag. After it merges, `npm run release -- tag
   X.Y.Z` on `main` runs every CI check, builds, and pushes an annotated tag on a
   "Release vX.Y.Z" commit that is `main` plus `dist/`. That commit lives only on
   the tag, so `main` never tracks `dist/` and never takes a direct commit.
   If the tag push fails, the tag stays local; once the remote or credentials
   are fixed, `npm run release -- tag X.Y.Z --push-existing` pushes it as built.
+
+## Using the tool from other projects
+
+`skills/color-picker/SKILL.md` is the guidance for Claude Code and Codex agents
+in other projects: when to reach for the tools, how to register the MCP server,
+and how to show results as swatch cards. Install it by symlinking the folder
+into `~/.claude/skills/` for Claude Code and `~/.agents/skills/` for Codex.
+Change it in the same PR as any change to the MCP tools it names.
 
 ## Linear: adding and maintaining issues
 

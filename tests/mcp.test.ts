@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fingerprint } from "../src/fingerprint/index.js";
 import { descriptionCachePath, describePrompt, writeDescriptionCache } from "../src/fingerprint/describe.js";
 import { createServer, SERVER_NAME } from "../src/mcp/index.js";
-import { RESULT_HISTORY, ResultStore } from "../src/mcp/tools.js";
+import { RESULT_HISTORY, ResultStore, toolDefinitions } from "../src/mcp/tools.js";
 
 const ROOT = join(import.meta.dirname, "..");
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
@@ -44,6 +44,12 @@ describe("mcp", () => {
     expect(RESULT_HISTORY).toBeGreaterThan(2);
   });
 
+  it("names every tool in the skill", () => {
+    const skill = readFileSync(join(ROOT, "skills", "color-picker", "SKILL.md"), "utf8");
+    for (const name of toolDefinitions().map((tool) => tool.name)) {
+      expect(skill, name).toContain(`\`${name}\``);
+    }
+  });
 });
 
 describe("mcp over stdio", () => {

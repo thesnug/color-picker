@@ -569,6 +569,18 @@ or a vision provider, and without a key no vision call is made.
 Input the tool cannot use, such as an unknown color or a missing design file,
 comes back as a tool error with a message saying what to fix.
 
+For agents in other projects, [`skills/color-picker/SKILL.md`](skills/color-picker/SKILL.md)
+says when to use each tool and how to show the cards. It works in Claude Code
+and Codex. Symlink it into each agent's skills folder:
+
+```bash
+ln -s "$PWD/skills/color-picker" ~/.claude/skills/color-picker
+```
+
+```bash
+ln -s "$PWD/skills/color-picker" ~/.agents/skills/color-picker
+```
+
 ## Accessibility
 
 `check` tests a combination against the thresholds in
