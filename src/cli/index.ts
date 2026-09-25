@@ -29,7 +29,7 @@ import {
   themeView,
   type View,
 } from "./commands.js";
-import { embedImages } from "./embed.js";
+import { type EmbedResult, embedImages, embedWarning } from "./embed.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -39,7 +39,7 @@ export interface CliIo {
   /** Write an output file. Defaults to `fs.writeFileSync`. */
   writeFile?: (path: string, contents: string) => void;
   /** Inline the garment photos in a written card. Defaults to `embedImages`. */
-  embedImages?: (markup: string) => Promise<string>;
+  embedImages?: (markup: string) => Promise<EmbedResult>;
 }
 
 const defaultIo: CliIo = {
@@ -209,7 +209,14 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
   }
 
   const write = io.writeFile ?? defaultIo.writeFile!;
-  const embed = io.embedImages ?? defaultIo.embedImages!;
+  const embedImagesIn = io.embedImages ?? defaultIo.embedImages!;
+  /** Inline a card's photos, warning on stderr about any that keep their URLs. */
+  const embed = async (markup: string) => {
+    const result = await embedImagesIn(markup);
+    const warning = embedWarning(result);
+    if (warning) io.stderr(`color-picker: ${warning}\n`);
+    return result.markup;
+  };
   try {
     if (values.svg !== undefined) {
       const svgs = view.sections.flatMap((s) => (s.svg ? [s.svg] : []));

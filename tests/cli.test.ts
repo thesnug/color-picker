@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import type { EmbedResult } from "../src/cli/embed.js";
 import { HELP, packageVersion, run, stackSvg } from "../src/cli/index.js";
 
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
@@ -34,7 +35,10 @@ function capture(color = false) {
       color,
       writeFile: (path: string, contents: string) => files.set(path, contents),
       // Mark embedding rather than fetch garment photos from the network.
-      embedImages: async (markup: string) => markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
+      embedImages: async (markup: string) => ({
+        markup: markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
+        notEmbedded: [] as EmbedResult["notEmbedded"],
+      }),
     },
     out: () => out.join(""),
     err: () => err.join(""),
@@ -343,6 +347,18 @@ describe("cli", () => {
       expect(html).toMatch(/Red Orange · [\d.]+:1/);
       expect(c.files.get("p.svg")).toContain('<image href="data:embedded"');
       expect(c.files.get("p.svg")).not.toContain("https:");
+      expect(c.err()).not.toContain("could not be embedded");
+    });
+
+    it("warns on stderr when a written card's photos keep their URLs", async () => {
+      const c = capture();
+      c.io.embedImages = async (markup: string) => ({
+        markup,
+        notEmbedded: [{ url: "https://x.test/a.png", reason: "sharp is not installed" }],
+      });
+      expect(await run(["palettes", "Blue Spruce", "--limit", "1", "--svg", "p.svg"], c.io)).toBe(0);
+      expect(c.err()).toMatch(/^color-picker: 1 garment photo could not be embedded \(sharp is not installed\)/m);
+      expect(c.files.get("p.svg")).toContain('<image href="https:');
     });
   });
 
