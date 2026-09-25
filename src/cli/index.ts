@@ -29,6 +29,7 @@ import {
   themeView,
   type View,
 } from "./commands.js";
+import { embedImages } from "./embed.js";
 
 export interface CliIo {
   stdout: (text: string) => void;
@@ -37,6 +38,8 @@ export interface CliIo {
   color?: boolean;
   /** Write an output file. Defaults to `fs.writeFileSync`. */
   writeFile?: (path: string, contents: string) => void;
+  /** Inline the garment photos in a written card. Defaults to `embedImages`. */
+  embedImages?: (markup: string) => Promise<string>;
 }
 
 const defaultIo: CliIo = {
@@ -44,6 +47,7 @@ const defaultIo: CliIo = {
   stderr: (text) => process.stderr.write(text),
   color: Boolean(process.stdout.isTTY) && !process.env.NO_COLOR,
   writeFile: (path, contents) => writeFileSync(path, contents),
+  embedImages: (markup) => embedImages(markup),
 };
 
 /** The package version, read from package.json at runtime. */
@@ -205,14 +209,15 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
   }
 
   const write = io.writeFile ?? defaultIo.writeFile!;
+  const embed = io.embedImages ?? defaultIo.embedImages!;
   try {
     if (values.svg !== undefined) {
       const svgs = view.sections.flatMap((s) => (s.svg ? [s.svg] : []));
-      write(values.svg, stackSvg(svgs, view.title));
+      write(values.svg, await embed(stackSvg(svgs, view.title)));
       io.stderr(`Wrote ${values.svg}\n`);
     }
     if (values.html !== undefined) {
-      write(values.html, renderHtml(view.sections, { title: view.title }));
+      write(values.html, await embed(renderHtml(view.sections, { title: view.title })));
       io.stderr(`Wrote ${values.html}\n`);
     }
   } catch (error) {

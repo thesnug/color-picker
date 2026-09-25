@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -44,6 +44,37 @@ describe("mcp", () => {
     expect(RESULT_HISTORY).toBeGreaterThan(2);
   });
 
+  it("writes each card to a file with its garment photos inlined", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "mcp-cards-"));
+    const savedCacheHome = process.env.XDG_CACHE_HOME;
+    process.env.XDG_CACHE_HOME = join(dir, "cache");
+    try {
+      const tools = toolDefinitions(new ResultStore(), {
+        cardDir: dir,
+        embedImages: async (markup) => markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
+      });
+      const call = async (name: string, args: Record<string, unknown>) =>
+        JSON.parse((await tools.find((t) => t.name === name)!.handler(args)).content[0]!.text) as Record<string, any>;
+
+      const reply = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 2 });
+      expect(reply.svg).toContain('<image href="https:');
+      const card = readFileSync(reply.cardFile, "utf8");
+      expect(card.match(/<image href="data:embedded"/g)).toHaveLength(2);
+      expect(card).not.toContain("https:");
+
+      const svgAgain = await call("render_card", { resultId: reply.resultId });
+      const html = await call("render_card", { resultId: reply.resultId, format: "html" });
+      expect(html.cardFile).toMatch(/\.html$/);
+      expect(readFileSync(html.cardFile, "utf8")).toContain('<image href="data:embedded"');
+      expect(new Set([reply.cardFile, svgAgain.cardFile, html.cardFile]).size).toBe(3);
+      expect([reply.cardFile, svgAgain.cardFile, html.cardFile].every((f) => existsSync(f))).toBe(true);
+    } finally {
+      if (savedCacheHome === undefined) delete process.env.XDG_CACHE_HOME;
+      else process.env.XDG_CACHE_HOME = savedCacheHome;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("names every tool in the skill", () => {
     const skill = readFileSync(join(ROOT, "skills", "color-picker", "SKILL.md"), "utf8");
     for (const name of toolDefinitions().map((tool) => tool.name)) {
@@ -68,7 +99,13 @@ describe("mcp over stdio", () => {
       args: ["--import", "tsx", join(ROOT, "src", "mcp", "main.ts")],
       cwd: ROOT,
       // Fingerprints are cached; keep them out of the real cache directory.
-      env: { ...env, XDG_CACHE_HOME: join(scratch, "cache") },
+      // Card files go to scratch, with photo URLs kept rather than fetched.
+      env: {
+        ...env,
+        XDG_CACHE_HOME: join(scratch, "cache"),
+        COLOR_PICKER_CARD_DIR: scratch,
+        COLOR_PICKER_EMBED_IMAGES: "0",
+      },
       stderr: "pipe",
     });
     client = new Client({ name: "color-picker-test", version: "0.0.0" });
@@ -93,6 +130,8 @@ describe("mcp over stdio", () => {
   function expectSvg(reply: Record<string, any>) {
     expect(reply.svg).toMatch(/^<svg /);
     expect(reply.resultId).toMatch(/^r\d+$/);
+    expect(reply.cardFile.startsWith(scratch)).toBe(true);
+    expect(readFileSync(reply.cardFile, "utf8")).toBe(reply.svg);
   }
 
   it("lists every tool with a JSON schema and a description", async () => {

@@ -329,6 +329,14 @@ Wada name, hex, and contrast badges. A product card shows the garment photo with
 design's colors as chips beside it. HTML wraps SVG for in-session review; the CLI
 prints truecolor blocks.
 
+Rendered markup links the garment photo by URL, but a card written to a file
+carries it inline as a downscaled JPEG data URI. Hosts show an SVG file as an
+image, and a browser blocks every external fetch from an SVG shown as an image,
+so a linked photo shows as a broken-image icon. The CLI's `--svg` and `--html`
+files and the MCP server's `cardFile` are all embedded (`src/cli/embed.ts`,
+using the optional `sharp`). Photos are fetched at render time and never stored
+in the repo.
+
 ## Phasing
 
 1. **Foundation.** Package scaffold, Wada cleanup and combinations, color math,

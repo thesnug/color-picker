@@ -83,15 +83,20 @@ Defaults:
 
 ## Present the result
 
-Every reply is JSON with a `resultId` and, for tools that return colors, an
-`svg` swatch card. The card is the answer; the JSON is its evidence.
+Every reply is JSON with a `resultId` and, for tools that return colors, a
+swatch card: `svg` as markup and `cardFile`, the absolute path of the same card
+written to disk with its garment photos inlined. The card is the answer; the
+JSON is its evidence.
 
-1. **Show the card.** Write the reply's `svg` to a file named for the question
-   (`pepper-palettes.svg`) and show it: as an artifact or a sent file where the
-   host offers one, otherwise as a Markdown link to the file. For side-by-side
-   review, call `render_card` with `format: "html"`, write the page, and show it
-   the same way. Size the card with the call's `n` or `limit`, set to the
-   number of picks you will show, and show the card as returned.
+1. **Show the card.** Copy the file at `cardFile` to one named for the
+   question (`pepper-palettes.svg`) and show it: as an artifact or a sent file
+   where the host offers one, otherwise as a Markdown link to the file. Never
+   write `svg` into a file yourself: it links garment photos by URL, and hosts
+   that show an SVG file as an image block those links, so the shirt shows as
+   a broken-image icon. For side-by-side review, call `render_card` with
+   `format: "html"` and show its `cardFile` the same way. Size the card with
+   the call's `n` or `limit`, set to the number of picks you will show, and
+   show the card as returned.
 2. **Name the colors.** Under the card, say what it shows in Wada's names,
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name
