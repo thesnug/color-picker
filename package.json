@@ -1,6 +1,6 @@
 {
   "name": "@thesnug/color-picker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Color palettes from Sanzo Wada's A Dictionary of Color Combinations, with garment color recommendations for print-on-demand designs.",
   "license": "MIT",
   "repository": {

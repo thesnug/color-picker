@@ -7,6 +7,8 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.2.0] - 2026-09-25
+
 ### Library
 
 - `describeToColor` in `@thesnug/color-picker/jev` resolves a free-text color
