@@ -136,7 +136,8 @@ any combination against these and returns pass/fail with reasons.
 | `bin: color-picker-mcp` | MCP server |
 
 Consumers: this session via the CLI and rendered cards; Claude Code, Codex, and POD
-agents via the MCP server; the maker-method-picker and POD by direct import.
+agents via the MCP server; POD by direct import, including the Placement picker
+that replaced the standalone maker-method-picker.
 Agents in other projects learn when and how to call the server from the skill in
 `skills/color-picker/`, which pins the same tag as the README.
 
@@ -157,8 +158,9 @@ Decisions and their reasons:
 - **Not an agent.** Agents call the tools. A deterministic core is cheap, testable,
   and fast enough to run on every keystroke in the picker.
 - **OKLab/OKLCH for all color math.** Distance, harmonies, ramps, and family
-  grouping. The picker's existing HSL grouping and WCAG luminance in `palette.ts`
-  move into this library and the picker consumes them, so both tools agree.
+  grouping. POD's Placement picker keeps its own eight hue families for browsing,
+  which Jill reviewed, but takes light versus dark from `allowsDarkInk` so its
+  filters agree with the suggestions (INT-2275).
 - **Fingerprinting is its own entry point, decoding through `sharp`.** It reads
   files and writes a cache, which the core does not do. `sharp` is an optional peer
   like the MCP SDK: it decodes PNG, WebP, and JPEG and applies EXIF orientation,
@@ -346,15 +348,24 @@ in the repo.
    web outputs.
 3. **Jev.** Client and cache, words to color, design description, palette re-rank,
    recolor plausibility, threshold evaluation.
-4. **Integration.** MCP server, Claude skill, picker consumption, POD consumption,
-   tagged releases.
+4. **Integration.** MCP server, Claude skill, POD consumption (suggestions in the
+   Placement picker, then recolor plans in Artwork), tagged releases.
 
 ## Related work outside this repo
 
-- `thesnug/maker-method-picker`: consumes this package; its `palette.ts` logic moves
-  here; its `colors.json` remains the render-pipeline record.
-- `thesnug/print-on-demand`: fix `resolveColorHex` precedence so provider swatches
-  win over the generic map; later consume this package for recommendations.
+- `thesnug/maker-method-picker`: the hosted shirt picker. As of 2026-09-25 its core
+  lives in POD as the Placement picker (POD #632), and the standalone repo is being
+  retired, so it no longer consumes this package directly (INT-2272 canceled).
+- `thesnug/print-on-demand`: provider swatches win over the generic color-name map
+  (INT-2247, POD #624). POD then consumes this package in-process, on the server:
+  - INT-2287: upgrade POD's `sharp` to 0.35.4 or newer, the package's peer minimum.
+  - INT-2275: suggestions in the Placement picker for every in-stock catalog color.
+    A Suggested rail filter, one reason or vanish warning under the shirt, and vanish
+    warnings in the Compare summary. No new marks on rail swatches. The Light/Dark
+    filters use `allowsDarkInk`. POD keeps its own eight Maker Method color families.
+    Deterministic scores; no Jev mood re-rank.
+  - INT-2288: recolor plans as advice in POD's Artwork stage, since a recolor
+    changes the artwork. Nothing generates or publishes on its own.
 
 ## Sources
 
