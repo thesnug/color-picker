@@ -13,7 +13,7 @@ The package is consumed as a git dependency pinned to a release tag. Releases
 commit `dist/`, so installs need no compiler.
 
 ```bash
-npm install github:thesnug/color-picker#v0.1.0
+npm install github:thesnug/color-picker#v0.2.0
 ```
 
 Or in `package.json`:
@@ -21,7 +21,7 @@ Or in `package.json`:
 ```json
 {
   "dependencies": {
-    "@thesnug/color-picker": "github:thesnug/color-picker#v0.1.0"
+    "@thesnug/color-picker": "github:thesnug/color-picker#v0.2.0"
   }
 }
 ```

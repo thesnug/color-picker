@@ -23,7 +23,7 @@ session, since servers load at startup.
 Claude Code:
 
 ```bash
-claude mcp add --scope user color-picker -- npx -y -p github:thesnug/color-picker#v0.1.0 -p @modelcontextprotocol/sdk -p zod color-picker-mcp
+claude mcp add --scope user color-picker -- npx -y -p github:thesnug/color-picker#v0.2.0 -p @modelcontextprotocol/sdk -p zod color-picker-mcp
 ```
 
 Codex, in `~/.codex/config.toml`:
@@ -31,7 +31,7 @@ Codex, in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.color-picker]
 command = "npx"
-args = ["-y", "-p", "github:thesnug/color-picker#v0.1.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
+args = ["-y", "-p", "github:thesnug/color-picker#v0.2.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
 startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
