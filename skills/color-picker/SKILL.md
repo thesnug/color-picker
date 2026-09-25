@@ -23,7 +23,7 @@ session, since servers load at startup.
 Claude Code:
 
 ```bash
-claude mcp add --scope user color-picker -- npx -y -p github:thesnug/color-picker#v0.2.0 -p @modelcontextprotocol/sdk -p zod color-picker-mcp
+claude mcp add --scope user color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx -y -p github:thesnug/color-picker#v0.2.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp
 ```
 
 Codex, in `~/.codex/config.toml`:
@@ -31,7 +31,7 @@ Codex, in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.color-picker]
 command = "npx"
-args = ["-y", "-p", "github:thesnug/color-picker#v0.2.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
+args = ["-y", "-p", "github:thesnug/color-picker#v0.2.0", "-p", "sharp@^0.35.4", "-p", "@typesafe-ai/sdk@^0.6.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
 startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
@@ -45,11 +45,18 @@ and overwrite output PNGs there. Do not approve these calls by default.
 The first start downloads the package, so it can take a minute; later starts
 use npm's cache.
 
+Keep every `-p` in the command. `sharp` reads designs and embeds the garment
+photos in card files, and `@typesafe-ai/sdk` runs Jev. Both are optional
+dependencies of the package, so `npx` installs them only when named here.
+
 The Jev judgments (mood re-rank, recolor vetting) run when the server's
 environment has `TYPESAFE_API_KEY` and a vision provider (a Codex CLI login, or
-`OPENROUTER_API_KEY`). Claude Code passes its own environment to the server;
-Codex passes the variables listed in `env_vars`. Without them the tools still
-answer, deterministically, and say why.
+`OPENROUTER_API_KEY`). The server reads no `.env` file. For Claude Code, the
+`-e` above copies the key from the shell you register from into the server's
+config, so run it where `TYPESAFE_API_KEY` is set; if it is not, `-e` stores an
+empty key. Codex passes only the variables listed in `env_vars`, and only when
+they are set in Codex's own environment. Without a key the tools still answer,
+deterministically, and the reply's `mood` or `vet` field says why.
 
 ## Choose the tool
 
@@ -85,7 +92,8 @@ Defaults:
 
 Every reply is JSON with a `resultId` and, for tools that return colors, a
 swatch card: `svg` as markup and `cardFile`, the absolute path of the same card
-written to disk with its garment photos inlined. The card is the answer; the
+written to disk with its garment photos inlined, and `cardWarnings` when any
+photo could not be inlined. The card is the answer; the
 JSON is its evidence.
 
 1. **Show the card.** Copy the file at `cardFile` to one named for the
@@ -96,7 +104,9 @@ JSON is its evidence.
    a broken-image icon. For side-by-side review, call `render_card` with
    `format: "html"` and show its `cardFile` the same way. Size the card with
    the call's `n` or `limit`, set to the number of picks you will show, and
-   show the card as returned.
+   show the card as returned. When the reply has `cardWarnings`, the card's
+   garment photos are links that may show as broken images: tell the user the
+   warning and its fix (usually installing `sharp`, per Setup) with the card.
 2. **Name the colors.** Under the card, say what it shows in Wada's names,
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name

@@ -1,7 +1,7 @@
 import sharp from "sharp";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { EMBED_ENV, EMBED_SIZE, embedImages } from "../src/cli/embed.js";
+import { EMBED_ENV, EMBED_SIZE, embedImages, embedWarning } from "../src/cli/embed.js";
 
 const URL_A = "https://example.test/garments/a.png";
 const URL_B = "https://example.test/garments/b.png";
@@ -34,7 +34,10 @@ describe("embedImages", () => {
 
   it("inlines each remote photo as a downscaled JPEG data URI, fetching each URL once", async () => {
     const { impl, calls } = fakeFetch({ [URL_A]: await png(1600, 1200), [URL_B]: await png(300, 300) });
-    const out = await embedImages(card(URL_A, URL_B, URL_A), { fetch: impl });
+    const result = await embedImages(card(URL_A, URL_B, URL_A), { fetch: impl });
+    expect(result.notEmbedded).toEqual([]);
+    expect(embedWarning(result)).toBeUndefined();
+    const out = result.markup;
     expect(out).not.toContain("https://");
     const uris = [...out.matchAll(/href="data:image\/jpeg;base64,([^"]+)"/g)].map((m) => m[1]!);
     expect(uris).toHaveLength(3);
@@ -47,24 +50,51 @@ describe("embedImages", () => {
     expect(small.width).toBe(300);
   });
 
-  it("keeps the URL when a photo cannot be fetched or decoded", async () => {
+  it("keeps the URL when a photo cannot be fetched or decoded, and says why", async () => {
     const { impl } = fakeFetch({ [URL_B]: Buffer.from("not an image") });
     const markup = card(URL_A, URL_B);
-    expect(await embedImages(markup, { fetch: impl })).toBe(markup);
+    const result = await embedImages(markup, { fetch: impl });
+    expect(result.markup).toBe(markup);
+    expect(result.notEmbedded.map((n) => n.url)).toEqual([URL_A, URL_B]);
+    expect(result.notEmbedded[0]!.reason).toBe("fetching the photo returned HTTP 404");
+    expect(result.notEmbedded[1]!.reason).toMatch(/could not be fetched or decoded/);
+    expect(embedWarning(result)).toMatch(/^2 garment photos could not be embedded \(.*HTTP 404.*\).*broken-image icon\.$/);
 
     const throwing = (async () => {
       throw new Error("offline");
     }) as typeof fetch;
-    expect(await embedImages(markup, { fetch: throwing })).toBe(markup);
+    const offline = await embedImages(card(URL_A), { fetch: throwing });
+    expect(offline.markup).toBe(card(URL_A));
+    expect(embedWarning(offline)).toMatch(/^1 garment photo could not be embedded \(.*offline.*\), so the card links it by URL/);
+  });
+
+  it("says sharp is missing when it cannot be loaded", async () => {
+    vi.resetModules();
+    vi.doMock("sharp", () => {
+      throw new Error("Cannot find package 'sharp'");
+    });
+    try {
+      const fresh = await import("../src/cli/embed.js");
+      const { impl, calls } = fakeFetch({ [URL_A]: await png(10, 10) });
+      const result = await fresh.embedImages(card(URL_A), { fetch: impl });
+      expect(result.markup).toBe(card(URL_A));
+      expect(result.notEmbedded[0]!.reason).toMatch(/^sharp is not installed/);
+      expect(calls).toEqual([]);
+    } finally {
+      vi.doUnmock("sharp");
+      vi.resetModules();
+    }
   });
 
   it("leaves markup without remote photos alone, and skips embedding when turned off", async () => {
     const { impl, calls } = fakeFetch({ [URL_A]: await png(10, 10) });
     const plain = '<svg><rect width="1" height="1"/></svg>';
-    expect(await embedImages(plain, { fetch: impl })).toBe(plain);
+    expect(await embedImages(plain, { fetch: impl })).toEqual({ markup: plain, notEmbedded: [] });
 
     process.env[EMBED_ENV] = "0";
-    expect(await embedImages(card(URL_A), { fetch: impl })).toBe(card(URL_A));
+    const off = await embedImages(card(URL_A), { fetch: impl });
+    expect(off.markup).toBe(card(URL_A));
+    expect(off.notEmbedded).toEqual([{ url: URL_A, reason: `${EMBED_ENV}=0` }]);
     expect(calls).toEqual([]);
   });
 });

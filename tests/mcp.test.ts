@@ -51,13 +51,17 @@ describe("mcp", () => {
     try {
       const tools = toolDefinitions(new ResultStore(), {
         cardDir: dir,
-        embedImages: async (markup) => markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
+        embedImages: async (markup) => ({
+          markup: markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
+          notEmbedded: [],
+        }),
       });
       const call = async (name: string, args: Record<string, unknown>) =>
         JSON.parse((await tools.find((t) => t.name === name)!.handler(args)).content[0]!.text) as Record<string, any>;
 
       const reply = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 2 });
       expect(reply.svg).toContain('<image href="https:');
+      expect(reply.cardWarnings).toBeUndefined();
       const card = readFileSync(reply.cardFile, "utf8");
       expect(card.match(/<image href="data:embedded"/g)).toHaveLength(2);
       expect(card).not.toContain("https:");
@@ -71,6 +75,22 @@ describe("mcp", () => {
     } finally {
       if (savedCacheHome === undefined) delete process.env.XDG_CACHE_HOME;
       else process.env.XDG_CACHE_HOME = savedCacheHome;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("warns in the reply when a card's photos keep their URLs", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "mcp-cards-"));
+    try {
+      const tools = toolDefinitions(new ResultStore(), {
+        cardDir: dir,
+        embedImages: async (markup) => ({ markup, notEmbedded: [{ url: "https://x.test/a.png", reason: "sharp is not installed" }] }),
+      });
+      const handler = tools.find((t) => t.name === "palettes_for_product_color")!.handler;
+      const reply = JSON.parse((await handler({ name: "Pepper", limit: 1 })).content[0]!.text) as Record<string, any>;
+      expect(reply.cardWarnings).toEqual([expect.stringMatching(/^1 garment photo could not be embedded \(sharp is not installed\)/)]);
+      expect(readFileSync(reply.cardFile, "utf8")).toContain('<image href="https:');
+    } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   });

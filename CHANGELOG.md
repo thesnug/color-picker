@@ -7,6 +7,21 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+### CLI and MCP
+
+- The tools now say when a garment photo cannot be embedded in a card file,
+  rather than falling back to its URL silently. MCP replies carry `cardWarnings` saying how many photos kept their
+  URL and why, most often that `sharp` is not installed, and the CLI prints the
+  same warning on stderr. In 0.2.0 the documented `npx` setup left `sharp` out,
+  so cards still showed broken images in Claude and Codex with no sign why.
+
+### Agents
+
+- The skill's and README's MCP registration installs `sharp` and
+  `@typesafe-ai/sdk` with the server, so photos embed and Jev runs, and says
+  how the server gets `TYPESAFE_API_KEY`: it reads no `.env` file. The skill
+  tells agents to pass on `cardWarnings`.
+
 ## [0.2.0] - 2026-09-25
 
 ### Library

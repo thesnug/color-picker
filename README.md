@@ -517,28 +517,37 @@ missing argument or a reserved flag.
 ### MCP server
 
 `color-picker-mcp` exposes the library as MCP tools over stdio, for Claude Code,
-Codex, and other agents. It depends on `@modelcontextprotocol/sdk` and its `zod`
-peer, both declared as optional peer dependencies so consumers that import only
-the core never install them. Add them next to this package to run the server:
+Codex, and other agents. It needs four optional peer dependencies, declared
+optional so consumers that import only the core never install them:
+`@modelcontextprotocol/sdk` and its `zod` peer to run at all, `sharp` to read
+designs and embed garment photos in card files, and `@typesafe-ai/sdk` for the
+Jev judgments. Add them next to this package to run the server:
 
 ```bash
-npm install @modelcontextprotocol/sdk zod
+npm install @modelcontextprotocol/sdk zod sharp @typesafe-ai/sdk
 npx color-picker-mcp
 ```
 
-Register it with Claude Code:
+Register it with Claude Code. `-e` copies `TYPESAFE_API_KEY` from your shell
+into the server's config; the server reads no `.env` file:
 
 ```bash
-claude mcp add color-picker -- npx color-picker-mcp
+claude mcp add color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx color-picker-mcp
 ```
 
-Or with Codex, in `~/.codex/config.toml`:
+Or with Codex, in `~/.codex/config.toml`. Codex passes the variables in
+`env_vars` when they are set in its own environment:
 
 ```toml
 [mcp_servers.color-picker]
 command = "npx"
 args = ["color-picker-mcp"]
+env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
+
+To run it without installing it in a project, as the
+[skill](skills/color-picker/SKILL.md) does, name every peer for `npx`:
+`npx -y -p github:thesnug/color-picker#v0.2.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp`.
 
 | Tool | Use it to |
 | --- | --- |
@@ -554,7 +563,10 @@ args = ["color-picker-mcp"]
 
 Every tool replies with one JSON text block: the same result the CLI prints with
 `--json`, a `resultId`, and, for tools that return colors, an `svg` field holding
-the rendered swatch card. Pass the `resultId` to `render_card` with
+the rendered swatch card. The same card is written to `cardFile` with its garment
+photos inlined, so it shows its photos wherever it is opened; `cardWarnings` says
+when a photo kept its URL instead, and why (most often, `sharp` is not installed).
+Card files go to a new temporary directory, or to `COLOR_PICKER_CARD_DIR`. Pass the `resultId` to `render_card` with
 `format: "html"` for a review page, or a theme's sample UI in light and dark mode.
 The server keeps the last 50 results.
 
