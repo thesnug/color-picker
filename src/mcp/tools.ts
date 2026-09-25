@@ -2,10 +2,16 @@
  * The MCP tools. Each wraps the CLI command of the same job, so the server and
  * the CLI return the same results: the command's JSON, plus the rendered card
  * as `svg` and a `resultId` that `render_card` can render again as SVG or HTML.
+ * The card is also written to `cardFile` with its garment photos inlined, since
+ * a host that shows an SVG file as an image cannot fetch the photo URLs.
  *
  * Loaded only by `createServer`, after the MCP SDK, so its `zod` import (a peer
  * dependency of the SDK) is never reached by consumers of the core.
  */
+
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { z } from "zod";
 
@@ -21,6 +27,7 @@ import {
   themeView,
   type View,
 } from "../cli/commands.js";
+import { embedImages } from "../cli/embed.js";
 import { DEFAULT_COMBOS_LIMIT, stackSvg } from "../cli/index.js";
 import { check, type CheckResult, type SwatchInput } from "../accessibility.js";
 import { hasHex, loadCombinations, loadProduct, loadProductIndex } from "../data/index.js";
@@ -93,10 +100,36 @@ const count = (fallback: number, what: string) =>
 // ---------------------------------------------------------------------------
 // Tools
 
+/** Environment variable naming the directory card files are written to. */
+export const CARD_DIR_ENV = "COLOR_PICKER_CARD_DIR";
+
+export interface ToolOptions {
+  /** Directory for card files. Defaults to `$COLOR_PICKER_CARD_DIR`, else a new temporary directory. */
+  cardDir?: string;
+  /** Inline the garment photos in a card. Defaults to `embedImages`. */
+  embedImages?: (markup: string) => Promise<string>;
+}
+
 /** Every tool the server exposes, bound to one result store. */
-export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDefinition[] {
-  const reply = (view: View, extra: Record<string, unknown> = {}): ToolReply =>
-    json({ resultId: store.add(view), ...(view.json as object), ...extra, svg: viewSvg(view) });
+export function toolDefinitions(store: ResultStore = new ResultStore(), options: ToolOptions = {}): ToolDefinition[] {
+  const embed = options.embedImages ?? ((markup: string) => embedImages(markup));
+  let cardDir = options.cardDir ?? process.env[CARD_DIR_ENV];
+  let cards = 0;
+  /** Write a card with its photos inlined, and return the file's absolute path. */
+  const writeCard = async (resultId: string, title: string, ext: "svg" | "html", markup: string) => {
+    cardDir ??= mkdtempSync(join(tmpdir(), "color-picker-cards-"));
+    // render_card writes the same result in several formats; the count keeps each file.
+    const path = join(cardDir, `${resultId}-${++cards}-${slug(title)}.${ext}`);
+    writeFileSync(path, await embed(markup));
+    return path;
+  };
+
+  const reply = async (view: View, extra: Record<string, unknown> = {}): Promise<ToolReply> => {
+    const resultId = store.add(view);
+    const svg = viewSvg(view);
+    const cardFile = svg === undefined ? undefined : await writeCard(resultId, view.title, "svg", svg);
+    return json({ resultId, ...(view.json as object), ...extra, svg, cardFile });
+  };
 
   const tools: ToolDefinition[] = [
     {
@@ -318,10 +351,13 @@ export function toolDefinitions(store: ResultStore = new ResultStore()): ToolDef
       },
       handler: async ({ resultId, colors, format, title }) => {
         const view = cardView(store, resultId as string | undefined, colors as string[] | undefined, title as string | undefined);
+        const id = (resultId as string | undefined) ?? "colors";
         if ((format ?? "svg") === "html") {
-          return json({ format: "html", html: renderHtml(view.sections, { title: view.title }) });
+          const html = renderHtml(view.sections, { title: view.title });
+          return json({ format: "html", html, cardFile: await writeCard(id, view.title, "html", html) });
         }
-        return json({ format: "svg", svg: viewSvg(view) });
+        const svg = viewSvg(view);
+        return json({ format: "svg", svg, cardFile: svg === undefined ? undefined : await writeCard(id, view.title, "svg", svg) });
       },
     },
   ];
@@ -450,6 +486,17 @@ function guard(handler: ToolDefinition["handler"]): ToolDefinition["handler"] {
 function viewSvg(view: View): string | undefined {
   const svgs = view.sections.flatMap((s) => (s.svg ? [s.svg] : []));
   return svgs.length === 0 ? undefined : stackSvg(svgs, view.title);
+}
+
+/** A file-name-safe form of a card title. */
+function slug(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "card"
+  );
 }
 
 function resolveSwatch(query: string): Swatch & { hex: string } {

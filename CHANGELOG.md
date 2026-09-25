@@ -47,6 +47,13 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 - `color-picker recolor --vet` and `recolor_plans` with `vet` describe the
   design and drop implausible plans; `--include-implausible` and
   `includeImplausible` keep them, marked.
+- Garment photos now show in card files. `--svg` and `--html` files, and every
+  MCP tool's new `cardFile`, carry each photo inline as a downscaled JPEG. Before,
+  the card linked to the photo's URL, and a host that shows an SVG file as an
+  image (Claude, Codex, a file preview) blocks that fetch, so the garment tile
+  showed a broken-image icon. Needs `sharp`; without it, or offline, the URL is
+  kept. `COLOR_PICKER_EMBED_IMAGES=0` turns embedding off, and
+  `COLOR_PICKER_CARD_DIR` sets where the MCP server writes card files.
 
 ### Agents
 
@@ -55,6 +62,8 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
   with `npx` in either host, and how to present results as swatch
   cards with Wada names. `release prepare` moves its pinned tag with the
   README's.
+- The skill shows the reply's `cardFile` rather than rewriting `svg` into a
+  file, so garment photos appear.
 
 ### Packaging
 

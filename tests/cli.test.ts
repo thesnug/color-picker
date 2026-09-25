@@ -33,6 +33,8 @@ function capture(color = false) {
       stderr: (t: string) => err.push(t),
       color,
       writeFile: (path: string, contents: string) => files.set(path, contents),
+      // Mark embedding rather than fetch garment photos from the network.
+      embedImages: async (markup: string) => markup.replace(/<image href="https:[^"]+"/g, '<image href="data:embedded"'),
     },
     out: () => out.join(""),
     err: () => err.join(""),
@@ -337,9 +339,10 @@ describe("cli", () => {
       await run(["palettes", "Blue Spruce", "--limit", "2", "--html", "p.html", "--svg", "p.svg"], c.io);
       const html = c.files.get("p.html")!;
       expect(html.match(/<h2>Combination \d+<\/h2>/g)).toHaveLength(2);
-      expect(html.match(/<image href=/g)).toHaveLength(2);
+      expect(html.match(/<image href="data:embedded"/g)).toHaveLength(2);
       expect(html).toMatch(/Red Orange · [\d.]+:1/);
-      expect(c.files.get("p.svg")).toContain("<image href=");
+      expect(c.files.get("p.svg")).toContain('<image href="data:embedded"');
+      expect(c.files.get("p.svg")).not.toContain("https:");
     });
   });
 
