@@ -94,7 +94,8 @@ For eight-color apparel selection, repeated garment recommendations, or original
 artwork plus alternate inks, read [Batch selection and production approval](references/batch-approval.md).
 Use `batch_product_colors` after visual review, `batch_repetition_report` for
 current/recent usage, and `verify_print_rendition` before authorized publication.
-The batch swatch card requires separate composition proofs and provider checks.
+Gather provider S–3XL availability before batch selection; the batch swatch card
+requires separate composition proofs and placement checks.
 
 ## Present the result
 

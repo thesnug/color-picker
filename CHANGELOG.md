@@ -7,6 +7,10 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+- Select eight-color Comfort Colors 1717 batches across requested garment groups,
+  with a preference for Chili or Crimson over comparable pure Red, and require
+  provider-confirmed S–3XL availability before selection.
+
 ## [0.3.0] - 2026-09-27
 
 - Add reviewed-alternate batch selection, current/recent garment repetition reports,

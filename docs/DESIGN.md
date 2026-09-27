@@ -387,6 +387,20 @@ assignments. Repetition of exact garments, near shades and families provides a
 soft preference alongside existing design scores. Selection is sequential in
 caller-supplied design order and deterministic, not a global optimum. Recent
 proposal history is caller supplied and never inferred from live inventory.
+
+For Comfort Colors 1717, seven distinct slots cover Ivory, True Navy/Navy,
+Black/Pepper/Graphite, green/earth, red/pink, orange/yellow, and a second
+blue/purple beyond Navy. The eighth is selected for the artwork; an approved
+default fills a slot when possible. This is a desired eight-color assortment
+subject to legibility and subject recognition. If any slot has no viable
+candidate, selection fails explicitly instead of silently claiming coverage.
+Pure Red has a small selection penalty so Chili or Crimson wins when similarly
+suited, while a clearly stronger Red can still win. Every candidate must carry
+current provider evidence for S, M, L, XL, 2XL and 3XL before selection. The
+catalog `available` flag cannot prove size availability. Jev remains limited to
+semantic mood and recolor plausibility; deterministic size and group checks do
+not need Jev.
+
 `repetitionReport` / `batch_repetition_report` show exact names by product/slug,
 family, OKLCH lightness/chroma bins, and near shades in current/recent/combined
 usage. Similarity is OKLab distance below 10; the threshold is a reporting aid.
@@ -401,8 +415,9 @@ This improves visibility; model recognition still requires visual review.
 and visible RGB of approved/provider files; fully transparent RGB is irrelevant.
 Provider files must be downloaded by the caller. Opaque source preparation must
 resolve to the exact approved transparent rendition. POD owns availability by
-size, placement, proofs and publication; the skill gates approval on those facts
-and requires regenerated mockups after a rendition change. Color Picker does not
+size, placement, proofs and publication; callers supply size evidence before
+selection, and the skill gates approval on placement and proofs and requires
+regenerated mockups after a rendition change. Color Picker does not
 publish products or decide which POD rendition is current.
 
 Acceptance: `tests/batch.test.ts` uses synthetic butter fill/blue outlines, black

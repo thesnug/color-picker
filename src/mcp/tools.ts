@@ -149,10 +149,14 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     },
     {
       name: "batch_product_colors",
-      description: "Select exactly eight distinct garment colors per design from original and reviewed ink alternates. Preserves the reviewed default, assigns an exact artwork/rendition to every color, and reports current/recent repetition. Use this for batch apparel selection. Visual approval is required per alternate/color; provider fulfillment checks and composition proofs remain external approval gates.",
+      description: "Select eight visually approved garment colors per design with Comfort Colors 1717 family coverage and provider-confirmed S–3XL availability. Use this for batch apparel selection after visual and size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
       inputSchema: {
         designs: z.array(z.object({
           id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
+          sizeAvailability: z.array(z.object({
+            slug: z.string().min(1), sizes: z.array(z.enum(["S", "M", "L", "XL", "2XL", "3XL"])),
+            checkedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), source: z.string().min(1),
+          })).describe("Current provider variant evidence per color; every required size must be available before selection."),
           artworks: z.array(z.object({
             artworkId: z.string().min(1), renditionId: z.string().min(1), designPath: z.string().min(1),
             approvedSlugs: z.array(z.string()).describe("Colors reviewed for legibility and subject recognition with this exact rendition."),
@@ -161,18 +165,22 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         recent: z.array(garmentUse).optional().describe("Recent proposal usage, not stock."),
       },
       handler: async ({ designs, recent }) => {
-        const inputs = designs as { id: string; product?: string; defaultSlug: string; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
+        const inputs = designs as { id: string; product?: string; defaultSlug: string; sizeAvailability: { slug: string; sizes: string[]; checkedAt: string; source: string }[]; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
         const batch: BatchDesign[] = [];
         for (const input of inputs) {
           const productId = input.product ?? loadProductIndex().default;
+          const sizeBySlug = new Map(input.sizeAvailability.map(item => [item.slug, item]));
+          if (sizeBySlug.size !== input.sizeAvailability.length) throw new InputError(`${input.id}: duplicate size availability slug.`);
           const candidates = [];
           for (const art of input.artworks) {
             const view = await recommendView({ file: art.designPath, product: productId, n: loadProduct(productId).colors.length });
             const picks = (view.json as { picks: ProductColorRecommendation[] }).picks;
             for (const slug of art.approvedSlugs) {
+              const sizeEvidence = sizeBySlug.get(slug);
+              if (!sizeEvidence) throw new InputError(`${input.id}: no provider size evidence for ${slug}.`);
               const pick = picks.find(p => p.color.slug === slug);
               if (!pick) throw new InputError(`${input.id}: approved color ${slug} is unavailable or unknown.`);
-              candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true });
+              candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true, availableSizes: sizeEvidence.sizes, sizeEvidence: { checkedAt: sizeEvidence.checkedAt, source: sizeEvidence.source } });
             }
           }
           batch.push({ id: input.id, product: productId, defaultSlug: input.defaultSlug, candidates });
@@ -573,4 +581,3 @@ function designInput(path: unknown, base64: unknown): { file: string; bytes?: Ui
   }
   return { file: "design", bytes: Buffer.from(data, "base64") };
 }
-

@@ -166,10 +166,10 @@ describe("mcp over stdio", () => {
   });
 
   it("selects a reviewed batch with mappings and reports its repetition", async () => {
-    const recommendations = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 12 });
-    const approvedSlugs = recommendations.json().picks.map((p: any) => p.color.slug);
+    const recommendations = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 50 });
+    const approvedSlugs = [...new Set([...recommendations.json().picks.map((p: any) => p.color.slug), "ivory", "true-navy", "pepper", "sage", "crimson", "butter", "lagoon-blue"])];
     const batchReply = await call("batch_product_colors", {
-      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
+      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], sizeAvailability: approvedSlugs.map((slug: string) => ({ slug, sizes: ["S", "M", "L", "XL", "2XL", "3XL"], checkedAt: "2026-09-27", source: "fixture provider catalog" })), artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
       recent: [],
     });
     expect(batchReply.isError, batchReply.text).toBe(false);
@@ -177,6 +177,7 @@ describe("mcp over stdio", () => {
     expect(batch.selections[0].picks).toHaveLength(8);
     expect(batch.selections[0].picks.every((p: any) => p.renditionId === "prepared-fixture")).toBe(true);
     expect(batch.repetition.current.total).toBe(8);
+    expect(batch.selections[0].picks.every((p: any) => p.availableSizes.includes("3XL") && p.sizeEvidence.source === "fixture provider catalog")).toBe(true);
     expect(batch.cardFile).toBeTruthy();
     const report = await call("batch_repetition_report", { current: batch.repetition.current.garments.map(({ count, ...garment }: any) => garment) });
     expect(report.json().current.distinct).toBe(8);
