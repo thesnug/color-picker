@@ -7,6 +7,8 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.3.0] - 2026-09-27
+
 - Add reviewed-alternate batch selection, current/recent garment repetition reports,
   and approved/provider print-pixel verification in the core/fingerprint APIs and MCP.
 - Make transparent artwork visible to vision with an ink-aware preview backdrop;
