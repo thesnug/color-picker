@@ -19,3 +19,5 @@ export * from "./palettes.js";
 export * from "./recommend.js";
 export * from "./recolor.js";
 export * from "./theme.js";
+
+export * from "./batch.js";

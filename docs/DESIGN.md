@@ -375,3 +375,37 @@ in the repo.
   https://www.dtlaprint.com/blog/comfort-colors-color-chart/,
   https://www.transfersuperstars.com/blogs/color-swatches/comfort-colors-apparel-color-swatch-hex-pantone
 - TypeSafe docs: https://docs.typesafe.ai/
+
+## Batch apparel review (INT-2291)
+
+Original and approved alternate inks compete in one candidate pool. A candidate
+must be visually reviewed for legibility and subject recognition before batch
+selection; deterministic contrast alone cannot understand outlined fills.
+`selectBatchColors` and MCP `batch_product_colors` preserve the reviewed default,
+select eight distinct colors per design, and retain artwork/prepared-rendition
+assignments. Repetition of exact garments, near shades and families provides a
+soft preference alongside existing design scores. Selection is sequential in
+caller-supplied design order and deterministic, not a global optimum. Recent
+proposal history is caller supplied and never inferred from live inventory.
+`repetitionReport` / `batch_repetition_report` show exact names by product/slug,
+family, OKLCH lightness/chroma bins, and near shades in current/recent/combined
+usage. Similarity is OKLab distance below 10; the threshold is a reporting aid.
+
+Vision previews flatten transparent designs against white for dark ink or dark
+neutral for light ink. Pixel analysis and hash identity retain the original;
+versioned description caches invalidate the old preview behavior. The prompt
+excludes the backdrop from ink and asks for uncertain recognition to be disclosed.
+This improves visibility; model recognition still requires visual review.
+
+`comparePrintFiles` / `verify_print_rendition` compare decoded dimensions, alpha
+and visible RGB of approved/provider files; fully transparent RGB is irrelevant.
+Provider files must be downloaded by the caller. Opaque source preparation must
+resolve to the exact approved transparent rendition. POD owns availability by
+size, placement, proofs and publication; the skill gates approval on those facts
+and requires regenerated mockups after a rendition change. Color Picker does not
+publish products or decide which POD rendition is current.
+
+Acceptance: `tests/batch.test.ts` uses synthetic butter fill/blue outlines, black
+line art, alternate white typography, and opaque-source/transparent-production
+pixels. These are deterministic regression fixtures, not production artwork
+approval or live semantic-provider evaluation.

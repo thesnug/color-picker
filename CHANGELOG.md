@@ -7,6 +7,14 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+- Add reviewed-alternate batch selection, current/recent garment repetition reports,
+  and approved/provider print-pixel verification in the core/fingerprint APIs and MCP.
+- Make transparent artwork visible to vision with an ink-aware preview backdrop;
+  preserve original alpha analysis and invalidate prior description caches.
+- Add the eight-color batch approval workflow, contextual contrast review, provider
+  six-size/placement checks, composition proofs, and exact production-rendition gates.
+
+
 ### CLI and MCP
 
 - The tools now say when a garment photo cannot be embedded in a card file,

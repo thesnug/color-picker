@@ -16,6 +16,7 @@ import {
   OPENROUTER_DEFAULT_MODEL,
   openRouterProvider,
   validateAnswer,
+  visionPreview,
   type VisionProvider,
   VisionUnavailableError,
 } from "../src/fingerprint/index.js";
@@ -276,7 +277,7 @@ describe("codexProvider", () => {
     expect(call.args[call.args.indexOf("--model") + 1]).toBe("gpt-6-sol");
     expect(call.args[call.args.indexOf("--image") + 1]).toMatch(/design\.png$/);
     expect(call.args.at(-1)).toContain(ring);
-    expect(call.imageSize).toBe(readFileSync(FLAT_MARK).length);
+    expect(call.imageSize).toBe((await visionPreview(readFileSync(FLAT_MARK), print)).bytes.length);
     expect(call.schema).toEqual(descriptionSchema(print.palette));
     // Runs in its own scratch directory, which is removed afterward.
     expect(call.cwd).toContain("color-picker-describe-");

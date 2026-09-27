@@ -88,6 +88,14 @@ Defaults:
 - **Designs:** `designPath` as an absolute path on this machine. Use
   `designBase64` only when the file exists nowhere on disk.
 
+## Batch apparel and publication
+
+For eight-color apparel selection, repeated garment recommendations, or original
+artwork plus alternate inks, read [Batch selection and production approval](references/batch-approval.md).
+Use `batch_product_colors` after visual review, `batch_repetition_report` for
+current/recent usage, and `verify_print_rendition` before authorized publication.
+The batch swatch card requires separate composition proofs and provider checks.
+
 ## Present the result
 
 Every reply is JSON with a `resultId` and, for tools that return colors, a
