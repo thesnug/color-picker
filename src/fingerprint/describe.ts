@@ -68,7 +68,7 @@ export interface VisionProvider {
 }
 
 /** Bump when the prompt or schema changes, to invalidate cached descriptions. */
-export const DESCRIPTION_VERSION = 1;
+export const DESCRIPTION_VERSION = 2;
 
 /** Default model for both providers, so a description reads the same whichever answered. */
 export const CODEX_DEFAULT_MODEL = "gpt-6-sol";
@@ -85,6 +85,8 @@ export function describePrompt(palette: readonly { hex: string; share: number }[
   return [
     "You are describing a design that will be printed on a garment. Look at the image and answer in JSON.",
     "",
+    "The preview backdrop is only for visibility; it is not printed ink. Use the measured palette for ink colors.",
+    "If lettering or the subject cannot be recognized, say uncertain rather than inventing a description.",
     "- subject: what the design depicts, in one line.",
     "- mood: its mood and style, in one line.",
     "- elements: the distinct things drawn (for example \"strawberry body\", \"leaves\", \"title text\"), " +

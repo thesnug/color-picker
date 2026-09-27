@@ -285,6 +285,16 @@ export interface DescribeOptions {
   signal?: AbortSignal;
 }
 
+/** Visible preview only: fingerprinting always measures the original alpha-bearing file. */
+export async function visionPreview(bytes: Uint8Array, print: Pick<Fingerprint, "hasTransparency" | "inkLuminance">) {
+  if (!print.hasTransparency) return { bytes, mediaType: sniffMediaType(bytes) };
+  const sharp = await loadSharp("Transparent-art vision preview");
+  const background = print.inkLuminance > 0.5 ? "#242424" : "#ffffff";
+  const preview = await sharp(bytes).autoOrient().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+    .flatten({ background }).png().toBuffer();
+  return { bytes: preview, mediaType: "image/png" as const };
+}
+
 /**
  * Add a vision description to a fingerprint: the design's subject and mood in
  * a line each, and its named elements, each tied to the palette color that
@@ -313,7 +323,7 @@ export async function describeDesign(
   let description = path ? await readDescriptionCache(path, prompt) : undefined;
 
   if (!description) {
-    const image = { bytes, mediaType: sniffMediaType(bytes) };
+    const image = await visionPreview(bytes, print);
     const request = {
       image,
       prompt,
@@ -405,4 +415,21 @@ export async function applyRecolor(
     .png({ compressionLevel: 9 })
     .toFile(options.out);
   return { applicable: true, out: options.out, width, height, unmatched: result.unmatched };
+}
+
+/** Compare decoded print pixels, including alpha, rather than file encoding or source appearance. */
+export async function comparePrintFiles(approved: string | Uint8Array, provider: string | Uint8Array) {
+  const read = async (file: string | Uint8Array) => sharpDecoder(file instanceof Uint8Array ? file : await readFile(file), { maxDimension: Infinity });
+  const a = await read(approved);
+  const b = await read(provider);
+  if (a.width !== b.width || a.height !== b.height) return { matches: false, reason: "Print dimensions differ." };
+  for (let i = 0; i < a.pixels.data.length; i += 4) {
+    if (a.pixels.data[i + 3] !== b.pixels.data[i + 3]) return { matches: false, reason: "Print alpha differs from the approved rendition." };
+    // RGB hidden by full transparency has no printed meaning.
+    if (a.pixels.data[i + 3] === 0) continue;
+    for (let channel = 0; channel < 3; channel++) {
+      if (a.pixels.data[i + channel] !== b.pixels.data[i + channel]) return { matches: false, reason: "Visible print pixels differ from the approved rendition." };
+    }
+  }
+  return { matches: true, reason: "Decoded dimensions, alpha and visible pixels match the approved rendition." };
 }

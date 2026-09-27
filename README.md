@@ -773,3 +773,14 @@ npm run products:equivalents
 ## License
 
 MIT.
+
+### Batch apparel review
+
+MCP `batch_product_colors` evaluates original and reviewed ink alternates together,
+returns eight colors per design with an artwork/prepared-rendition mapping, and
+reports current/recent proposal repetition. It requires explicit approved color
+slugs and a reviewed default. `batch_repetition_report` reports manually selected
+sets too. `verify_print_rendition` compares downloaded provider files with the
+approved production file, including alpha. These tools do not replace size-stock,
+placement checks or eight-composition proofs; see the
+[batch approval workflow](skills/color-picker/references/batch-approval.md).

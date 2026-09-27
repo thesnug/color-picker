@@ -15,6 +15,7 @@ const ROOT = join(import.meta.dirname, "..");
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
 
 const TOOLS = [
+  "batch_product_colors", "batch_repetition_report", "verify_print_rendition",
   "nearest_colors",
   "combinations",
   "palettes_for_product_color",
@@ -162,6 +163,25 @@ describe("mcp over stdio", () => {
       expect(tool.description!.length).toBeGreaterThan(120);
       expect(tool.description).toMatch(/Use this/);
     }
+  });
+
+  it("selects a reviewed batch with mappings and reports its repetition", async () => {
+    const recommendations = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 12 });
+    const approvedSlugs = recommendations.json().picks.map((p: any) => p.color.slug);
+    const batchReply = await call("batch_product_colors", {
+      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
+      recent: [],
+    });
+    expect(batchReply.isError, batchReply.text).toBe(false);
+    const batch = batchReply.json();
+    expect(batch.selections[0].picks).toHaveLength(8);
+    expect(batch.selections[0].picks.every((p: any) => p.renditionId === "prepared-fixture")).toBe(true);
+    expect(batch.repetition.current.total).toBe(8);
+    expect(batch.cardFile).toBeTruthy();
+    const report = await call("batch_repetition_report", { current: batch.repetition.current.garments.map(({ count, ...garment }: any) => garment) });
+    expect(report.json().current.distinct).toBe(8);
+    const verified = await call("verify_print_rendition", { approvedPath: FLAT_MARK, providerPath: FLAT_MARK });
+    expect(verified.json().matches).toBe(true);
   });
 
   it("nearest_colors", async () => {

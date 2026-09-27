@@ -14,6 +14,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { z } from "zod";
+import { comparePrintFiles } from "../fingerprint/index.js";
+import { repetitionReport, selectBatchColors, type BatchDesign, type GarmentUse } from "../batch.js";
+import { type ProductColorRecommendation } from "../recommend.js";
 
 import {
   combosView,
@@ -136,7 +139,55 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     return json({ resultId, ...(view.json as object), ...extra, svg, ...card });
   };
 
+  const garmentUse = z.object({ product: z.string(), slug: z.string(), name: z.string(), hex: z.string().regex(/^#[0-9a-fA-F]{6}$/) });
   const tools: ToolDefinition[] = [
+    {
+      name: "verify_print_rendition",
+      description: "Compare the provider print file with the exact approved production rendition by decoded dimensions, alpha and visible pixels. Use this before authorized publication; download the provider file first. A mismatch blocks publication and requires corrected rendition and regenerated mockups.",
+      inputSchema: { approvedPath: z.string(), providerPath: z.string() },
+      handler: async ({ approvedPath, providerPath }) => json(await comparePrintFiles(approvedPath as string, providerPath as string)),
+    },
+    {
+      name: "batch_product_colors",
+      description: "Select exactly eight distinct garment colors per design from original and reviewed ink alternates. Preserves the reviewed default, assigns an exact artwork/rendition to every color, and reports current/recent repetition. Use this for batch apparel selection. Visual approval is required per alternate/color; provider fulfillment checks and composition proofs remain external approval gates.",
+      inputSchema: {
+        designs: z.array(z.object({
+          id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
+          artworks: z.array(z.object({
+            artworkId: z.string().min(1), renditionId: z.string().min(1), designPath: z.string().min(1),
+            approvedSlugs: z.array(z.string()).describe("Colors reviewed for legibility and subject recognition with this exact rendition."),
+          })).min(1),
+        })).min(1),
+        recent: z.array(garmentUse).optional().describe("Recent proposal usage, not stock."),
+      },
+      handler: async ({ designs, recent }) => {
+        const inputs = designs as { id: string; product?: string; defaultSlug: string; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
+        const batch: BatchDesign[] = [];
+        for (const input of inputs) {
+          const productId = input.product ?? loadProductIndex().default;
+          const candidates = [];
+          for (const art of input.artworks) {
+            const view = await recommendView({ file: art.designPath, product: productId, n: loadProduct(productId).colors.length });
+            const picks = (view.json as { picks: ProductColorRecommendation[] }).picks;
+            for (const slug of art.approvedSlugs) {
+              const pick = picks.find(p => p.color.slug === slug);
+              if (!pick) throw new InputError(`${input.id}: approved color ${slug} is unavailable or unknown.`);
+              candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true });
+            }
+          }
+          batch.push({ id: input.id, product: productId, defaultSlug: input.defaultSlug, candidates });
+        }
+        const result = selectBatchColors(batch, (recent as GarmentUse[] | undefined) ?? []);
+        const swatches = result.selections.flatMap(selection => selection.picks.map(p => ({ hex: p.recommendation.color.hex, name: `${selection.designId}: ${p.recommendation.color.name} · ${p.artworkId}` })));
+        return reply({ title: "Batch garment colors", json: result, text: () => JSON.stringify(result), sections: [{ svg: renderSwatchGrid(swatches, { title: "Batch garment colors (composition proofs required)" }) }] });
+      },
+    },
+    {
+      name: "batch_repetition_report",
+      description: "Report proposal repetition by exact garment, family, lightness, saturation and similar shades, separately for current/recent batches and combined. Use this before batch approval. Does not infer inventory or approval.",
+      inputSchema: { current: z.array(garmentUse), recent: z.array(garmentUse).optional() },
+      handler: async ({ current, recent }) => json(repetitionReport(current as GarmentUse[], (recent as GarmentUse[] | undefined) ?? [])),
+    },
     {
       name: "nearest_colors",
       description:
