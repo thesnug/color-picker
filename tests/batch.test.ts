@@ -56,6 +56,28 @@ describe("batch variety", () => {
     expect(choose(1.04)).toBe("crimson");
     expect(choose(1.2)).toBe("red");
   });
+  it("scores the eighth CC1717 artwork slot for recent repetition and pure Red", () => {
+    const groups = ["ivory", "true-navy", "black", "moss", "crimson", "banana", "hydrangea"];
+    const candidate = (slug: string, score: number) => {
+      const original = pool.find(p => p.recommendation.color.slug === slug)!;
+      expect(original).toBeDefined();
+      return { ...original, recommendation: { ...original.recommendation, score } };
+    };
+    // Keep the group representatives ahead of competing group members; compare alternates only at slot eight.
+    const base = groups.map(slug => candidate(slug, ["black", "crimson", "hydrangea"].includes(slug) ? 1.3 : 1));
+    const fresh = candidate("violet", 1);
+    const repeated = candidate("pepper", 1.15);
+    const recent = Array.from({ length: 5 }, () => ({
+      product: "comfort-colors-1717", slug: "pepper", name: repeated.recommendation.color.name, hex: repeated.recommendation.color.hex,
+    }));
+    const eighth = (alternate: ArtworkCandidate, history = recent) => selectBatchColors([{
+      ...design("artwork slot"), defaultSlug: "ivory", candidates: [...base, alternate, fresh],
+    }], history).selections[0]!.picks[7]!.recommendation.color.slug;
+    expect(eighth(repeated, [])).toBe("pepper");
+    expect(eighth(repeated)).toBe("violet");
+    expect(eighth(candidate("red", 1.04), [])).toBe("violet");
+    expect(eighth(candidate("red", 1.2), [])).toBe("red");
+  });
   it("preserves Butter when blue outlines make its yellow fill readable", () => {
     const butter = recommendProductColors({ palette: [{ hex: "#ffe36a", share: 0.4 }, { hex: "#123e85", share: 0.6 }], inkLuminance: 0.3 }, { n: 100 }).find(p => p.color.slug === "butter")!;
     const result = selectBatchColors([{ ...design("Fix with Butter"), defaultSlug: "butter", candidates: [...pool.filter(p => p.recommendation.color.slug !== "butter"), { artworkId: "blue-yellow", renditionId: "butter-approved", recommendation: butter, legible: true, subjectRecognizable: true, availableSizes: [...REQUIRED_SIZES], sizeEvidence }] }]);

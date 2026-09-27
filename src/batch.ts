@@ -116,9 +116,7 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
     }
     while (picks.length < 8) {
       const pool = eligible.filter(c => !picks.some(p => p.recommendation.color.slug === c.recommendation.color.slug));
-      pool.sort((a,b) => design.product === "comfort-colors-1717"
-        ? b.recommendation.score - a.recommendation.score
-        : score(b)-score(a));
+      pool.sort((a,b) => score(b)-score(a));
       if (!pool[0]) throw new RangeError(`${design.id}: fewer than eight distinct visually approved colors with provider-confirmed S–3XL availability; prepare/review alternates.`);
       add(pool[0]);
     }
