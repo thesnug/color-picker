@@ -13,7 +13,7 @@ The package is consumed as a git dependency pinned to a release tag. Releases
 commit `dist/`, so installs need no compiler.
 
 ```bash
-npm install github:thesnug/color-picker#v0.2.0
+npm install github:thesnug/color-picker#v0.3.0
 ```
 
 Or in `package.json`:
@@ -21,7 +21,7 @@ Or in `package.json`:
 ```json
 {
   "dependencies": {
-    "@thesnug/color-picker": "github:thesnug/color-picker#v0.2.0"
+    "@thesnug/color-picker": "github:thesnug/color-picker#v0.3.0"
   }
 }
 ```
@@ -547,7 +547,7 @@ env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 
 To run it without installing it in a project, as the
 [skill](skills/color-picker/SKILL.md) does, name every peer for `npx`:
-`npx -y -p github:thesnug/color-picker#v0.2.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp`.
+`npx -y -p github:thesnug/color-picker#v0.3.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp`.
 
 | Tool | Use it to |
 | --- | --- |
