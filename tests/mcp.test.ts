@@ -97,7 +97,8 @@ describe("mcp", () => {
   });
 
   it("names every tool in the skill", () => {
-    const skill = readFileSync(join(ROOT, "skills", "color-picker", "SKILL.md"), "utf8");
+    const skill = readFileSync(join(ROOT, "skills", "color-picker", "SKILL.md"), "utf8") +
+      readFileSync(join(ROOT, "skills", "color-picker", "references", "batch-approval.md"), "utf8");
     for (const name of toolDefinitions().map((tool) => tool.name)) {
       expect(skill, name).toContain(`\`${name}\``);
     }

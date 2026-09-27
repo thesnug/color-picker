@@ -36,13 +36,17 @@ describe("batch variety", () => {
     expect(() => selectBatchColors([{ ...design("short"), candidates: pool.slice(0, 4) }])).toThrow(/no visually approved|fewer than eight/);
     expect(() => selectBatchColors([{ ...design("missing size"), candidates: pool.map(p => ({ ...p, availableSizes: p.availableSizes.filter(size => size !== "3XL") })) }])).toThrow(/default/);
   });
-  it("excludes a color missing 3XL and names an unsatisfied group", () => {
+  it("excludes a color missing 3XL and reports an unsatisfied group", () => {
     const withoutIvory = pool.map(p => p.recommendation.color.slug === "ivory" ? { ...p, availableSizes: ["S", "M", "L", "XL", "2XL"] } : p);
-    expect(() => selectBatchColors([{ ...design("no ivory"), candidates: withoutIvory }])).toThrow(/Ivory.*S–3XL/);
+    const noIvory = selectBatchColors([{ ...design("no ivory"), candidates: withoutIvory }]).selections[0]!;
+    expect(noIvory.picks).toHaveLength(8);
+    expect(noIvory.picks.some(p => p.recommendation.color.slug === "ivory")).toBe(false);
+    expect(noIvory.unfilledGroups).toContain("Ivory");
     const withoutOneNavy = pool.map(p => p.recommendation.color.slug === "true-navy" ? { ...p, availableSizes: ["S", "M", "L", "XL", "2XL"] } : p);
     const result = selectBatchColors([{ ...design("navy fallback"), candidates: withoutOneNavy }]);
     expect(result.selections[0]!.picks.some(p => p.recommendation.color.slug === "true-navy")).toBe(false);
     expect(result.selections[0]!.picks.some(p => p.recommendation.color.slug === "navy")).toBe(true);
+    expect(result.selections[0]!.unfilledGroups).toEqual([]);
   });
   it("prefers Crimson to a comparable Red but permits a clearly stronger Red", () => {
     const base = pool.filter(p => p.recommendation.color.family !== "red-pink");

@@ -1,13 +1,13 @@
 ---
 name: color-picker
-description: Color choices from Sanzo Wada's A Dictionary of Color Combinations, with swatch cards. Use for palettes or color combinations, choosing shirt or garment colors for a design, recoloring a design to suit a shirt, checking a palette's contrast or accessibility, and any Comfort Colors color named ("Pepper", "Blue Spruce").
+description: Use for Sanzo Wada palettes, named Comfort Colors garment colors, shirt-color recommendations for artwork, artwork recolor planning, and color contrast checks. Shows swatch cards and product-specific evidence. Skip unrelated one-off CSS hex requests.
 ---
 
 # Color picker
 
 The `color-picker` MCP server answers color questions from Sanzo Wada's book and
-the garment colors of print products, and returns every answer with a rendered
-swatch card. The tool names below are the server's own; your host may prefix
+the garment colors of print products. Color results include rendered swatch
+cards. The tool names below are the server's own; your host may prefix
 them with the server name (`mcp__color-picker__combinations`).
 
 Reach for it when the user wants colors that go together, colors for a shirt,
@@ -16,9 +16,11 @@ no palette behind it (a CSS tweak, a syntax theme) needs none of this.
 
 ## Setup
 
-When no `color-picker` tools are available, register the server once for every
-project with the command for your host, then ask the user to start a new
-session, since servers load at startup.
+When no `color-picker` tools are available, use an installed package CLI if
+available. Otherwise register the server once for your host using the matching
+setup below. If that host loads new servers only at startup, explain the restart
+needed to use its MCP tools. Do not present generic web swatches as this
+package's reviewed garment data.
 
 Claude Code:
 
@@ -36,11 +38,12 @@ startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
 
-Keep the host's tool approval prompts enabled. Before a design-processing call,
-confirm the user wants that local design read; with a vision provider configured,
-its image may leave this machine for the provider before Jev judges it. For
-`recolor_plans`, choose an `outDir` the user controls: it can create directories
-and overwrite output PNGs there. Do not approve these calls by default.
+When `mood` or `vet` invokes a configured vision provider, the design image may
+leave this machine. A request to analyze the supplied design authorizes reading
+it; ask only if the intended provider use is outside the user's request. For
+`recolor_plans`, omit `outDir` when planning only. If applying recolors, choose
+an output directory where writing PNGs is appropriate; existing files there may
+be overwritten.
 
 The first start downloads the package, so it can take a minute; later starts
 use npm's cache.
@@ -64,7 +67,7 @@ deterministically, and the reply's `mood` or `vet` field says why.
 | --- | --- |
 | Palettes for a color, hex, or name | `combinations` |
 | Palettes for a shirt color by name ("what goes with Pepper") | `palettes_for_product_color` |
-| Which shirt colors suit a finished design | `recommend_product_colors` |
+| Which shirt colors suit an existing design, including a draft | `recommend_product_colors` |
 | The design's colors changed to suit each shirt | `recolor_plans` |
 | The Wada name for a hex, or the closest book colors | `nearest_colors` |
 | Site or app colors | `theme` |
@@ -72,58 +75,57 @@ deterministically, and the reply's `mood` or `vet` field says why.
 | A product's color range, or a color's exact name | `list_products` |
 | An earlier result as an HTML review page | `render_card` with its `resultId` and `format: "html"` |
 
-The garment hex values, stock, and Wada pairings live only in the server. When
-a call fails, tell the user the error and the setup step that fixes it, and
-stop there: colors from a web search or your own contrast math disagree with
-the reviewed product data.
+The package owns reviewed garment hex values, catalog availability, and Wada
+pairings. On a tool error, inspect its cause and fix the input or setup when
+possible. If the package remains unavailable, distinguish any general color
+advice from product-verified recommendations and say what could not be checked.
 
 Defaults:
 
 - **Product:** Comfort Colors 1717. Omit `product` unless the user names
   another garment; `list_products` gives the IDs.
-- **Jev:** pass `mood: true` to `recommend_product_colors`, and to
-  `palettes_for_product_color` whenever there is a design; pass `vet: true` to
-  `recolor_plans`. They never fail a call: without keys the reply's `mood` or
-  `vet` field says the order is the deterministic one, and why.
+- **Jev:** use `mood: true` when subjective fit to a design matters, and
+  `vet: true` for proposed recolors where subject recognition matters. Jev
+  supplements visual review; it does not establish legibility or stock. When
+  Jev is unavailable, inspect the reply's `mood` or `vet` reason and use the
+  deterministic result with that limitation stated.
 - **Designs:** `designPath` as an absolute path on this machine. Use
-  `designBase64` only when the file exists nowhere on disk.
+  `designBase64` when bytes are supplied without a usable path.
 
 ## Batch apparel and publication
 
-For eight-color apparel selection, repeated garment recommendations, or original
-artwork plus alternate inks, read [Batch selection and production approval](references/batch-approval.md).
-Use `batch_product_colors` after visual review, `batch_repetition_report` for
-current/recent usage, and `verify_print_rendition` before authorized publication.
-Gather provider S–3XL availability before batch selection; the batch swatch card
-requires separate composition proofs and placement checks.
+For exploratory garment ideas, including a provisional set of eight, use
+`recommend_product_colors` with a broad candidate range and review the artwork
+on varied shirts. Use `recolor_plans` to explore viable ink variations when
+needed. Label these suggestions provisional; product catalog availability does
+not prove S–3XL stock.
+
+For a final eight-color assortment or publication work, read
+[Batch selection and production approval](references/batch-approval.md). That
+workflow requires reviewed art/color combinations, provider size evidence,
+composition proofs, and exact production-rendition checks at the appropriate
+stages.
 
 ## Present the result
 
-Every reply is JSON with a `resultId` and, for tools that return colors, a
-swatch card: `svg` as markup and `cardFile`, the absolute path of the same card
-written to disk with its garment photos inlined, and `cardWarnings` when any
-photo could not be inlined. The card is the answer; the
-JSON is its evidence.
+Color-bearing replies include JSON evidence and usually an SVG swatch card at
+`cardFile`, with embedded garment photos when available. Report-only tools may
+return JSON without a card. `render_card` can show an earlier color result in
+another format.
 
-1. **Show the card.** Copy the file at `cardFile` to one named for the
-   question (`pepper-palettes.svg`) and show it: as an artifact or a sent file
-   where the host offers one, otherwise as a Markdown link to the file. Never
-   write `svg` into a file yourself: it links garment photos by URL, and hosts
-   that show an SVG file as an image block those links, so the shirt shows as
-   a broken-image icon. For side-by-side review, call `render_card` with
-   `format: "html"` and show its `cardFile` the same way. Size the card with
-   the call's `n` or `limit`, set to the number of picks you will show, and
-   show the card as returned. When the reply has `cardWarnings`, the card's
-   garment photos are links that may show as broken images: tell the user the
-   warning and its fix (usually installing `sharp`, per Setup) with the card.
-2. **Name the colors.** Under the card, say what it shows in Wada's names,
+1. **Show visual color results.** Display or link `cardFile` directly where the
+   host supports it. For side-by-side review, call `render_card` with
+   `format: "html"`. Avoid writing the reply's `svg` markup into a new file:
+   its external garment photos may not render in an image viewer. If
+   `cardWarnings` reports missing photos, explain the limitation.
+2. **Name the colors.** For visual results, say what the card shows in Wada's names,
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name
    ("Graphite"), and a design's own colors by the Wada names the reply gives
    them (`wada.name`): "an Apricot Orange ring on a Sulphur Yellow center."
-3. **Carry the warnings.** Repeat what the reply flags: design colors that
+3. **Carry relevant warnings.** Explain what the reply flags: design colors that
    would vanish into a shirt, garment colors the provider does not stock,
    failed contrast pairs, and the `mood` or `vet` reason when Jev did not run.
 
-Hex codes appear only beside a name. A list of bare hex codes is never the
-answer.
+For palette and garment recommendations, pair hex codes with color names. If
+the user asks for machine-readable codes, provide them in the requested format.

@@ -32,6 +32,8 @@ export interface BatchSelection {
   designId: string;
   defaultSlug: string;
   picks: ArtworkCandidate[];
+  /** Desired Comfort Colors 1717 groups that had no eligible reviewed candidate. */
+  unfilledGroups: string[];
 }
 
 export const REQUIRED_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"] as const;
@@ -95,6 +97,7 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
       uses.push({ product: design.product, slug: color.slug, name: color.name, hex: color.hex });
     };
     add(defaults[0]);
+    const unfilledGroups: string[] = [];
     const score = (c: ArtworkCandidate) => {
       const color = c.recommendation.color;
       const history = [...recent, ...uses].filter(u => u.product === design.product);
@@ -110,7 +113,10 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
         if (picks.some(group.match)) continue;
         const options = eligible.filter(c => group.match(c) && !picks.some(p => p.recommendation.color.slug === c.recommendation.color.slug));
         options.sort((a,b) => score(b)-score(a));
-        if (!options[0]) throw new RangeError(`${design.id}: no visually approved ${group.name} candidate has provider-confirmed S–3XL availability.`);
+        if (!options[0]) {
+          unfilledGroups.push(group.name);
+          continue;
+        }
         add(options[0]);
       }
     }
@@ -120,8 +126,8 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
       if (!pool[0]) throw new RangeError(`${design.id}: fewer than eight distinct visually approved colors with provider-confirmed S–3XL availability; prepare/review alternates.`);
       add(pool[0]);
     }
-    selections.push({ designId: design.id, defaultSlug: design.defaultSlug, picks });
+    selections.push({ designId: design.id, defaultSlug: design.defaultSlug, picks, unfilledGroups });
   }
   return { selections, repetition: repetitionReport(uses, recent),
-    note: "Deterministic diversity selection of reviewed candidates; no mood re-ranking or recolor vetting was performed here. Approval still requires provider size, placement, rendition and proof checks." };
+    note: "Deterministic diversity selection of reviewed candidates; unfilledGroups names desired color groups without a viable candidate. No mood re-ranking or recolor vetting was performed here. Approval still requires provider size, placement, rendition and proof checks." };
 }

@@ -1,6 +1,9 @@
 # Batch selection and production approval
 
-Use this workflow for an eight-color apparel batch, especially Working Kitchen.
+Use this workflow when choosing a final eight-color apparel assortment or
+preparing publication, especially for Working Kitchen. Exploratory suggestions
+can use `recommend_product_colors` without prepared renditions or provider stock
+evidence; label them provisional.
 
 1. Read each design's brief and latest decisions. Gather the original and existing
    approved alternate inks with their exact prepared production rendition IDs.
@@ -28,14 +31,15 @@ Use this workflow for an eight-color apparel batch, especially Working Kitchen.
    Call `batch_product_colors` with designs, defaultSlug, and artworks containing
    artworkId, renditionId, designPath (the prepared print file), and approvedSlugs.
    Include recent proposals as `recent` when available; disclose missing history.
-   For Comfort Colors 1717 it selects exactly eight distinct colors: Ivory; True
+   For Comfort Colors 1717 it aims for eight distinct colors: Ivory; True
    Navy or Navy; Black, Pepper or Graphite; a green or earth; a red or pink; an
    orange or yellow; a blue or purple other than the Navy slot; and one color
    chosen for the artwork. A default can fill any of these slots; when it fills
    none, it takes the artwork slot. Favor Crimson or Chili over pure Red when
    their artwork fit is comparable, but allow Red when it works clearly better.
-   If a required group has no viable color, surface that gap and prepare another
-   artwork variation or seek a selection decision. Preserve intentional defaults
+   If a desired group has no viable color, the tool fills from other eligible
+   colors and returns the gap in `unfilledGroups`. Explain the gap and try a
+   viable artwork variation where one exists. Preserve intentional defaults
    and design-supporting colors. `batch_repetition_report` also reports manually revised
    selections. Complete with current/recent usage by name, family, lightness,
    saturation and similar shades. These are proposal counts, never inventory.
@@ -46,7 +50,8 @@ Use this workflow for an eight-color apparel batch, especially Working Kitchen.
    placement assigned to each color. A swatch card is not a composition proof.
    Completion: eight colors, one default, eight explicit artwork/rendition mappings,
    six-size availability evidence, print-area/placement evidence, and one proof
-   per shirt are present. Ask for approval only when this packet is reviewable.
+   per shirt are present. Present the packet when the user asks to review the
+   final assortment or the publication workflow requires approval.
 5. Before authorized publication, resolve each color to the rendition shown in its
    approved proof and reuse it. Determine background handling from source alpha AND
    the approved preparation requirements. An opaque source with an approved

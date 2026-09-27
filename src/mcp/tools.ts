@@ -149,7 +149,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     },
     {
       name: "batch_product_colors",
-      description: "Select eight visually approved garment colors per design with Comfort Colors 1717 family coverage and provider-confirmed S–3XL availability. Use this for batch apparel selection after visual and size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
+      description: "Select eight visually approved garment colors per design, aiming for Comfort Colors 1717 family coverage and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
       inputSchema: {
         designs: z.array(z.object({
           id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
@@ -270,10 +270,10 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     {
       name: "recommend_product_colors",
       description:
-        "Rank a product's garment colors for a design without changing the design. Use this when someone has " +
-        "finished artwork and asks which shirt colors to offer it on. Each pick carries its score, plain-language " +
+        "Rank a product's garment colors for a design without changing the design. Use this for exploratory " +
+        "shirt-color ideas as well as an existing finished design. Each pick carries its score, plain-language " +
         "reasons, and a warning for each design color that would vanish into the garment. Use recolor_plans " +
-        "instead when the design's colors may change.",
+        "alongside it when alternate inks may open more garment options.",
       inputSchema: {
         designPath,
         designBase64,
@@ -391,7 +391,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
       name: "list_products",
       description:
         "List the garment products this package knows, or one product's colors with hex, family, and whether " +
-        "the print provider stocks each. Use this to find a product ID or a color's exact name before calling " +
+        "the catalog lists as available (not size-level stock). Use this to find a product ID or a color's exact name before calling " +
         "the other tools, or to show someone a product's color range.",
       inputSchema: {
         product: z
