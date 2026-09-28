@@ -7,6 +7,12 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.4.0] - 2026-09-28
+
+- **Batch API change:** `batch_product_colors` now requires `sizeAvailability`
+  for every approved color. Core batch candidates require `availableSizes` and
+  `sizeEvidence`; selections report `unfilledGroups`. Update callers before
+  moving their pinned tag to v0.4.0.
 - Aim eight-color Comfort Colors 1717 batches across requested garment groups and report gaps,
   with a preference for Chili or Crimson over comparable pure Red, and require
   provider-confirmed S–3XL availability before selection.
