@@ -7,6 +7,8 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.5.0] - 2026-09-28
+
 - Let requesting projects supply optional batch assortment groups; remove the
   built-in garment-color slots and named-color preference from selection and skill guidance.
 

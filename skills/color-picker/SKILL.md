@@ -25,7 +25,7 @@ package's reviewed garment data.
 Claude Code:
 
 ```bash
-claude mcp add --scope user color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx -y -p github:thesnug/color-picker#v0.4.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp
+claude mcp add --scope user color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx -y -p github:thesnug/color-picker#v0.5.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp
 ```
 
 Codex, in `~/.codex/config.toml`:
@@ -33,7 +33,7 @@ Codex, in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.color-picker]
 command = "npx"
-args = ["-y", "-p", "github:thesnug/color-picker#v0.4.0", "-p", "sharp@^0.35.4", "-p", "@typesafe-ai/sdk@^0.6.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
+args = ["-y", "-p", "github:thesnug/color-picker#v0.5.0", "-p", "sharp@^0.35.4", "-p", "@typesafe-ai/sdk@^0.6.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
 startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
