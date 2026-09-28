@@ -19,15 +19,7 @@ describe("batch variety", () => {
       expect(new Set(selection.picks.map(p => p.recommendation.color.slug)).size).toBe(8);
       expect(selection.picks[0]!.recommendation.color.slug).toBe(defaultSlug);
       expect(selection.picks.every(p => p.renditionId && p.recommendation.designColors.every(c => c.ratio >= 4.5))).toBe(true);
-      const slugs = selection.picks.map(p => p.recommendation.color.slug);
-      const families = selection.picks.map(p => p.recommendation.color.family);
-      expect(slugs).toContain("ivory");
-      expect(slugs.some(slug => ["true-navy", "navy"].includes(slug))).toBe(true);
-      expect(slugs.some(slug => ["black", "pepper", "graphite"].includes(slug))).toBe(true);
-      expect(families.some(family => ["green", "earth"].includes(family))).toBe(true);
-      expect(families).toContain("red-pink");
-      expect(families).toContain("orange-yellow");
-      expect(selection.picks.some(p => ["blue", "purple"].includes(p.recommendation.color.family) && !["true-navy", "navy"].includes(p.recommendation.color.slug))).toBe(true);
+      expect(selection.unfilledGroups).toEqual([]);
     }
     expect(result.repetition.current.distinct).toBeGreaterThan(8);
   });
@@ -36,31 +28,33 @@ describe("batch variety", () => {
     expect(() => selectBatchColors([{ ...design("short"), candidates: pool.slice(0, 4) }])).toThrow(/no visually approved|fewer than eight/);
     expect(() => selectBatchColors([{ ...design("missing size"), candidates: pool.map(p => ({ ...p, availableSizes: p.availableSizes.filter(size => size !== "3XL") })) }])).toThrow(/default/);
   });
-  it("excludes a color missing 3XL and reports an unsatisfied group", () => {
+  it("uses only caller-supplied groups and excludes colors missing 3XL", () => {
     const withoutIvory = pool.map(p => p.recommendation.color.slug === "ivory" ? { ...p, availableSizes: ["S", "M", "L", "XL", "2XL"] } : p);
-    const noIvory = selectBatchColors([{ ...design("no ivory"), candidates: withoutIvory }]).selections[0]!;
+    const desiredGroups = [{ name: "light neutral", slugs: ["ivory"] }, { name: "dark blue", slugs: ["true-navy", "navy"] }];
+    const noIvory = selectBatchColors([{ ...design("no ivory"), candidates: withoutIvory, desiredGroups }]).selections[0]!;
     expect(noIvory.picks).toHaveLength(8);
     expect(noIvory.picks.some(p => p.recommendation.color.slug === "ivory")).toBe(false);
-    expect(noIvory.unfilledGroups).toContain("Ivory");
+    expect(noIvory.unfilledGroups).toContain("light neutral");
+    expect(selectBatchColors([{ ...design("no policy"), candidates: withoutIvory }]).selections[0]!.unfilledGroups).toEqual([]);
     const withoutOneNavy = pool.map(p => p.recommendation.color.slug === "true-navy" ? { ...p, availableSizes: ["S", "M", "L", "XL", "2XL"] } : p);
-    const result = selectBatchColors([{ ...design("navy fallback"), candidates: withoutOneNavy }]);
+    const result = selectBatchColors([{ ...design("navy fallback"), candidates: withoutOneNavy, desiredGroups }]);
     expect(result.selections[0]!.picks.some(p => p.recommendation.color.slug === "true-navy")).toBe(false);
     expect(result.selections[0]!.picks.some(p => p.recommendation.color.slug === "navy")).toBe(true);
     expect(result.selections[0]!.unfilledGroups).toEqual([]);
   });
-  it("prefers Crimson to a comparable Red but permits a clearly stronger Red", () => {
+  it("has no built-in penalty for a named color", () => {
     const base = pool.filter(p => p.recommendation.color.family !== "red-pink");
     const red = pool.find(p => p.recommendation.color.slug === "red")!;
     const crimson = pool.find(p => p.recommendation.color.slug === "crimson")!;
-    const choose = (redScore: number) => selectBatchColors([{ ...design("red choice"), candidates: [
+    const choose = (redScore: number) => selectBatchColors([{ ...design("red choice"), desiredGroups: [{ name: "warm", families: ["red-pink"] }], candidates: [
       ...base,
       { ...red, recommendation: { ...red.recommendation, score: redScore } },
       { ...crimson, recommendation: { ...crimson.recommendation, score: 1 } },
     ] }]).selections[0]!.picks.find(p => p.recommendation.color.family === "red-pink")!.recommendation.color.slug;
-    expect(choose(1.04)).toBe("crimson");
-    expect(choose(1.2)).toBe("red");
+    expect(choose(1.04)).toBe("red");
+    expect(choose(0.96)).toBe("crimson");
   });
-  it("scores the eighth CC1717 artwork slot for recent repetition and pure Red", () => {
+  it("scores the eighth artwork slot for recent repetition", () => {
     const groups = ["ivory", "true-navy", "black", "moss", "crimson", "banana", "hydrangea"];
     const candidate = (slug: string, score: number) => {
       const original = pool.find(p => p.recommendation.color.slug === slug)!;
@@ -75,12 +69,21 @@ describe("batch variety", () => {
       product: "comfort-colors-1717", slug: "pepper", name: repeated.recommendation.color.name, hex: repeated.recommendation.color.hex,
     }));
     const eighth = (alternate: ArtworkCandidate, history = recent) => selectBatchColors([{
-      ...design("artwork slot"), defaultSlug: "ivory", candidates: [...base, alternate, fresh],
+      ...design("artwork slot"), defaultSlug: "ivory", desiredGroups: groups.slice(1).map(slug => ({ name: slug, slugs: [slug] })), candidates: [...base, alternate, fresh],
     }], history).selections[0]!.picks[7]!.recommendation.color.slug;
     expect(eighth(repeated, [])).toBe("pepper");
     expect(eighth(repeated)).toBe("violet");
-    expect(eighth(candidate("red", 1.04), [])).toBe("violet");
     expect(eighth(candidate("red", 1.2), [])).toBe("red");
+  });
+  it("matches project family groups with slug exceptions and validates group definitions", () => {
+    const result = selectBatchColors([{ ...design("project groups"), desiredGroups: [
+      { name: "warm", families: ["red-pink", "orange-yellow"] },
+      { name: "blue beyond default", families: ["blue", "purple"], excludeSlugs: [defaultSlug] },
+    ] }]).selections[0]!;
+    expect(result.unfilledGroups).toEqual([]);
+    expect(result.picks.some(p => ["red-pink", "orange-yellow"].includes(p.recommendation.color.family))).toBe(true);
+    expect(result.picks.some(p => ["blue", "purple"].includes(p.recommendation.color.family) && p.recommendation.color.slug !== defaultSlug)).toBe(true);
+    expect(() => selectBatchColors([{ ...design("invalid"), desiredGroups: [{ name: "empty" }] }])).toThrow(/desired groups/);
   });
   it("preserves Butter when blue outlines make its yellow fill readable", () => {
     const butter = recommendProductColors({ palette: [{ hex: "#ffe36a", share: 0.4 }, { hex: "#123e85", share: 0.6 }], inkLuminance: 0.3 }, { n: 100 }).find(p => p.color.slug === "butter")!;

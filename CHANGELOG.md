@@ -7,6 +7,9 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+- Let requesting projects supply optional batch assortment groups; remove the
+  built-in garment-color slots and named-color preference from selection and skill guidance.
+
 ## [0.4.0] - 2026-09-28
 
 - **Batch API change:** `batch_product_colors` now requires `sizeAvailability`

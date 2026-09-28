@@ -388,22 +388,22 @@ soft preference alongside existing design scores. Selection is sequential in
 caller-supplied design order and deterministic, not a global optimum. Recent
 proposal history is caller supplied and never inferred from live inventory.
 
-For Comfort Colors 1717, seven distinct slots cover Ivory, True Navy/Navy,
-Black/Pepper/Graphite, green/earth, red/pink, orange/yellow, and a second
-blue/purple beyond Navy. The eighth is selected for the artwork; an approved
-default fills a slot when possible. This is a desired eight-color assortment
-subject to legibility and subject recognition. If a slot has no viable
-candidate, selection fills from the remaining eligible pool and returns its
-name in `unfilledGroups` instead of silently claiming coverage. Selection
+The requesting project owns assortment goals. It may supply up to eight named
+`desiredGroups` per design, each matching garment slugs or catalog families,
+with optional excluded slugs. Groups are considered in caller order after the
+reviewed default. A default may satisfy a group. If a group has no eligible
+distinct candidate or all eight places are filled, selection fills from the
+remaining eligible pool and reports its name in `unfilledGroups`. Without
+groups, selection uses design fit and diversity scores alone. No garment
+color, family quota, or named-color penalty is built into the selector. It
 still fails when fewer than eight distinct size-eligible colors remain.
 Exploratory recommendations use `recommend_product_colors` and may show eight
 provisional choices without prepared renditions or provider size evidence;
 `batch_product_colors` is the final-assortment path and keeps those production
 inputs explicit.
-Pure Red has a small selection penalty so Chili or Crimson wins when similarly
-suited, while a clearly stronger Red can still win. Every candidate must carry
-current provider evidence for S, M, L, XL, 2XL and 3XL before selection. The
-catalog `available` flag cannot prove size availability. Jev remains limited to
+Every candidate must carry current provider evidence for S, M, L, XL, 2XL and
+3XL before selection. The catalog `available` flag cannot prove size availability.
+Jev remains limited to
 semantic mood and recolor plausibility; deterministic size and group checks do
 not need Jev.
 

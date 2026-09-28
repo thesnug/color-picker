@@ -170,12 +170,14 @@ describe("mcp over stdio", () => {
     const recommendations = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 50 });
     const approvedSlugs = [...new Set([...recommendations.json().picks.map((p: any) => p.color.slug), "ivory", "true-navy", "pepper", "sage", "crimson", "butter", "lagoon-blue"])];
     const batchReply = await call("batch_product_colors", {
-      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], sizeAvailability: approvedSlugs.map((slug: string) => ({ slug, sizes: ["S", "M", "L", "XL", "2XL", "3XL"], checkedAt: "2026-09-27", source: "fixture provider catalog" })), artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
+      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], desiredGroups: [{ name: "project choice", slugs: [approvedSlugs[1]] }, { name: "no reviewed match", slugs: ["not-in-catalog"] }], sizeAvailability: approvedSlugs.map((slug: string) => ({ slug, sizes: ["S", "M", "L", "XL", "2XL", "3XL"], checkedAt: "2026-09-27", source: "fixture provider catalog" })), artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
       recent: [],
     });
     expect(batchReply.isError, batchReply.text).toBe(false);
     const batch = batchReply.json();
     expect(batch.selections[0].picks).toHaveLength(8);
+    expect(batch.selections[0].picks.some((p: any) => p.recommendation.color.slug === approvedSlugs[1])).toBe(true);
+    expect(batch.selections[0].unfilledGroups).toEqual(["no reviewed match"]);
     expect(batch.selections[0].picks.every((p: any) => p.renditionId === "prepared-fixture")).toBe(true);
     expect(batch.repetition.current.total).toBe(8);
     expect(batch.selections[0].picks.every((p: any) => p.availableSizes.includes("3XL") && p.sizeEvidence.source === "fixture provider catalog")).toBe(true);
