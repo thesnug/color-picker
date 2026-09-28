@@ -149,10 +149,16 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     },
     {
       name: "batch_product_colors",
-      description: "Select eight visually approved garment colors per design, aiming for Comfort Colors 1717 family coverage and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
+      description: "Select eight visually approved garment colors per design, using optional project-supplied desired groups and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
       inputSchema: {
         designs: z.array(z.object({
           id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
+          desiredGroups: z.array(z.object({
+            name: z.string().min(1),
+            slugs: z.array(z.string().min(1)).optional(),
+            families: z.array(z.string().min(1)).optional(),
+            excludeSlugs: z.array(z.string().min(1)).optional(),
+          }).refine(group => !!(group.slugs?.length || group.families?.length), "Each group needs slugs or families.")).max(8).optional().describe("Optional project-defined assortment goals, in priority order. No garment colors or family quotas are assumed."),
           sizeAvailability: z.array(z.object({
             slug: z.string().min(1), sizes: z.array(z.enum(["S", "M", "L", "XL", "2XL", "3XL"])),
             checkedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), source: z.string().min(1),
@@ -165,7 +171,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         recent: z.array(garmentUse).optional().describe("Recent proposal usage, not stock."),
       },
       handler: async ({ designs, recent }) => {
-        const inputs = designs as { id: string; product?: string; defaultSlug: string; sizeAvailability: { slug: string; sizes: string[]; checkedAt: string; source: string }[]; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
+        const inputs = designs as { id: string; product?: string; defaultSlug: string; desiredGroups?: BatchDesign["desiredGroups"]; sizeAvailability: { slug: string; sizes: string[]; checkedAt: string; source: string }[]; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
         const batch: BatchDesign[] = [];
         for (const input of inputs) {
           const productId = input.product ?? loadProductIndex().default;
@@ -183,7 +189,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
               candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true, availableSizes: sizeEvidence.sizes, sizeEvidence: { checkedAt: sizeEvidence.checkedAt, source: sizeEvidence.source } });
             }
           }
-          batch.push({ id: input.id, product: productId, defaultSlug: input.defaultSlug, candidates });
+          batch.push({ id: input.id, product: productId, defaultSlug: input.defaultSlug, ...(input.desiredGroups && { desiredGroups: input.desiredGroups }), candidates });
         }
         const result = selectBatchColors(batch, (recent as GarmentUse[] | undefined) ?? []);
         const swatches = result.selections.flatMap(selection => selection.picks.map(p => ({ hex: p.recommendation.color.hex, name: `${selection.designId}: ${p.recommendation.color.name} · ${p.artworkId}` })));

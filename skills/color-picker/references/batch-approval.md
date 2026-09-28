@@ -1,7 +1,7 @@
 # Batch selection and production approval
 
 Use this workflow when choosing a final eight-color apparel assortment or
-preparing publication, especially for Working Kitchen. Exploratory suggestions
+preparing publication. Exploratory suggestions
 can use `recommend_product_colors` without prepared renditions or provider stock
 evidence; label them provisional.
 
@@ -17,8 +17,8 @@ evidence; label them provisional.
    Completion: viable ink versions are identified and each has a traceable prepared file.
 2. Review legibility and subject recognition per artwork/color combination.
    Distinguish lettering and unoutlined disappearing details from small outlined
-   fills. Ratios are evidence, not automatic rejection: Fix with Butter can keep
-   Butter because blue lettering and outlines define the yellow butter. Vision
+   fills. Ratios are evidence, not automatic rejection: a low-contrast fill may
+   remain readable when contrasting lettering and outlines define its subject. Vision
    receives a visible backdrop; ink analysis uses original alpha. Disclose uncertain
    recognition and visually inspect the art before approving any candidate.
    Completion: each alternate has explicit reviewed color slugs, with contextual
@@ -31,21 +31,20 @@ evidence; label them provisional.
    Call `batch_product_colors` with designs, defaultSlug, and artworks containing
    artworkId, renditionId, designPath (the prepared print file), and approvedSlugs.
    Include recent proposals as `recent` when available; disclose missing history.
-   For Comfort Colors 1717 it aims for eight distinct colors: Ivory; True
-   Navy or Navy; Black, Pepper or Graphite; a green or earth; a red or pink; an
-   orange or yellow; a blue or purple other than the Navy slot; and one color
-   chosen for the artwork. A default can fill any of these slots; when it fills
-   none, it takes the artwork slot. Favor Crimson or Chili over pure Red when
-   their artwork fit is comparable, but allow Red when it works clearly better.
-   If a desired group has no viable color, the tool fills from other eligible
+   Read the requesting project's brief for assortment goals. If it specifies
+   color groups, pass them as `desiredGroups` with a name and allowed slugs or
+   families; use `excludeSlugs` when a family has exceptions. The tool has no
+   built-in garment palette or preferred named colors. Without project groups,
+   it selects eight distinct reviewed candidates by artwork fit and diversity.
+   If a requested group has no viable color, the tool fills from other eligible
    colors and returns the gap in `unfilledGroups`. Explain the gap and try a
    viable artwork variation where one exists. Preserve intentional defaults
    and design-supporting colors. `batch_repetition_report` also reports manually revised
    selections. Complete with current/recent usage by name, family, lightness,
    saturation and similar shades. These are proposal counts, never inventory.
 4. Recheck provider availability for the selected colors before approval. Verify front
-   print-area coverage and placement compatibility for each prepared rendition;
-   for Working Kitchen enforce the current visible-art height limit from its brief.
+   print-area coverage and placement compatibility for each prepared rendition,
+   including any size limits in the requesting project's brief.
    Produce one eight-composition proof per shirt using the exact rendition and
    placement assigned to each color. A swatch card is not a composition proof.
    Completion: eight colors, one default, eight explicit artwork/rendition mappings,

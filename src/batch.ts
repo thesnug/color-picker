@@ -27,26 +27,29 @@ export interface BatchDesign {
   candidates: readonly ArtworkCandidate[];
   /** A reviewed garment default remains selected even when frequently used. */
   defaultSlug: string;
+  /** Optional assortment goals supplied by the requesting project, in priority order. */
+  desiredGroups?: readonly DesiredColorGroup[];
+}
+export interface DesiredColorGroup {
+  name: string;
+  slugs?: readonly string[];
+  families?: readonly string[];
+  excludeSlugs?: readonly string[];
 }
 export interface BatchSelection {
   designId: string;
   defaultSlug: string;
   picks: ArtworkCandidate[];
-  /** Desired Comfort Colors 1717 groups that had no eligible reviewed candidate. */
+  /** Caller-supplied groups that could not be filled with an eligible distinct color. */
   unfilledGroups: string[];
 }
 
 export const REQUIRED_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"] as const;
 
-const cc1717Groups = [
-  { name: "Ivory", match: (c: ArtworkCandidate) => c.recommendation.color.slug === "ivory" },
-  { name: "True Navy or Navy", match: (c: ArtworkCandidate) => ["true-navy", "navy"].includes(c.recommendation.color.slug) },
-  { name: "Black, Pepper, or Graphite", match: (c: ArtworkCandidate) => ["black", "pepper", "graphite"].includes(c.recommendation.color.slug) },
-  { name: "green or earth", match: (c: ArtworkCandidate) => ["green", "earth"].includes(c.recommendation.color.family) },
-  { name: "red or pink", match: (c: ArtworkCandidate) => c.recommendation.color.family === "red-pink" },
-  { name: "orange or yellow", match: (c: ArtworkCandidate) => c.recommendation.color.family === "orange-yellow" },
-  { name: "blue or purple beyond Navy", match: (c: ArtworkCandidate) => ["blue", "purple"].includes(c.recommendation.color.family) && !["true-navy", "navy"].includes(c.recommendation.color.slug) },
-];
+const matchesGroup = (candidate: ArtworkCandidate, group: DesiredColorGroup) => {
+  const { slug, family } = candidate.recommendation.color;
+  return !group.excludeSlugs?.includes(slug) && (group.slugs?.includes(slug) || group.families?.includes(family));
+};
 
 export function repetitionReport(current: readonly GarmentUse[], recent: readonly GarmentUse[] = []) {
   const summarize = (uses: readonly GarmentUse[]) => {
@@ -84,6 +87,10 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
   const selections: BatchSelection[] = [];
   if (new Set(designs.map(d => d.id)).size !== designs.length) throw new RangeError("Design IDs must be unique.");
   for (const design of designs) {
+    const groups = design.desiredGroups ?? [];
+    if (groups.length > 8 || new Set(groups.map(g => g.name)).size !== groups.length || groups.some(g => !g.name.trim() || !(g.slugs?.length || g.families?.length))) {
+      throw new RangeError(`${design.id}: supply at most eight uniquely named desired groups, each with slugs or families.`);
+    }
     const eligible = design.candidates.filter(c => c.legible && c.subjectRecognizable && c.recommendation.color.available && c.sizeEvidence?.checkedAt && c.sizeEvidence?.source && REQUIRED_SIZES.every(size => c.availableSizes?.includes(size)));
     if (eligible.some(c => !c.artworkId.trim() || !c.renditionId.trim() || !Number.isFinite(c.recommendation.score))) {
       throw new RangeError(`${design.id}: candidates need artwork/rendition IDs and finite scores.`);
@@ -104,21 +111,17 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
       const exact = history.filter(u => u.slug === color.slug).length;
       const near = history.filter(u => u.slug !== color.slug && distance(u.hex, color.hex) < 10).length;
       const family = history.filter(u => colorFamily(u.hex, u.name) === colorFamily(color.hex, color.name)).length;
-      // Red remains eligible when its artwork fit clearly beats the alternatives.
-      const pureRedPenalty = design.product === "comfort-colors-1717" && color.slug === "red" ? 0.08 : 0;
-      return c.recommendation.score - 0.08 * exact - 0.04 * near - 0.01 * family - pureRedPenalty;
+      return c.recommendation.score - 0.08 * exact - 0.04 * near - 0.01 * family;
     };
-    if (design.product === "comfort-colors-1717") {
-      for (const group of cc1717Groups) {
-        if (picks.some(group.match)) continue;
-        const options = eligible.filter(c => group.match(c) && !picks.some(p => p.recommendation.color.slug === c.recommendation.color.slug));
-        options.sort((a,b) => score(b)-score(a));
-        if (!options[0]) {
-          unfilledGroups.push(group.name);
-          continue;
-        }
-        add(options[0]);
+    for (const group of groups) {
+      if (picks.some(p => matchesGroup(p, group))) continue;
+      const options = eligible.filter(c => matchesGroup(c, group) && !picks.some(p => p.recommendation.color.slug === c.recommendation.color.slug));
+      options.sort((a,b) => score(b)-score(a));
+      if (!options[0] || picks.length === 8) {
+        unfilledGroups.push(group.name);
+        continue;
       }
+      add(options[0]);
     }
     while (picks.length < 8) {
       const pool = eligible.filter(c => !picks.some(p => p.recommendation.color.slug === c.recommendation.color.slug));
@@ -129,5 +132,5 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
     selections.push({ designId: design.id, defaultSlug: design.defaultSlug, picks, unfilledGroups });
   }
   return { selections, repetition: repetitionReport(uses, recent),
-    note: "Deterministic diversity selection of reviewed candidates; unfilledGroups names desired color groups without a viable candidate. No mood re-ranking or recolor vetting was performed here. Approval still requires provider size, placement, rendition and proof checks." };
+    note: "Deterministic diversity selection of reviewed candidates; unfilledGroups names caller-supplied color groups without an eligible distinct pick. No mood re-ranking or recolor vetting was performed here. Approval still requires provider size, placement, rendition and proof checks." };
 }
