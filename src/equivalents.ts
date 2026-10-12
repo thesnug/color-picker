@@ -5,14 +5,10 @@
  * provenance for Comfort Colors 1717".
  */
 
-import {
-  loadProductEquivalents,
-  type Product,
-  type ProductColorEquivalents,
-  type ProductEquivalentsFile,
-} from "./data/index.js";
+import { storedProductEquivalents } from "./data/store.js";
+import type { Product, ProductColorEquivalents } from "./data/types.js";
 
-export type { EquivalentMatch, ProductColorEquivalents } from "./data/index.js";
+export type { EquivalentMatch, ProductColorEquivalents } from "./data/types.js";
 
 /**
  * The committed Wada equivalents of one product color, or undefined when the
@@ -25,15 +21,6 @@ export function equivalentsFor(
   product: string | Pick<Product, "id">,
   colorSlug: string,
 ): ProductColorEquivalents | undefined {
-  const { colors } = equivalentsFile(typeof product === "string" ? product : product.id);
+  const { colors } = storedProductEquivalents(typeof product === "string" ? product : product.id);
   return Object.hasOwn(colors, colorSlug) ? colors[colorSlug] : undefined;
-}
-
-// Each file is read once, on first use.
-const cache = new Map<string, ProductEquivalentsFile>();
-
-function equivalentsFile(id: string): ProductEquivalentsFile {
-  let file = cache.get(id);
-  if (!file) cache.set(id, (file = loadProductEquivalents(id)));
-  return file;
 }

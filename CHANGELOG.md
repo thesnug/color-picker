@@ -7,6 +7,80 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.6.0] - 2026-10-12
+
+One color engine for the chat skill and POD (INT-2711). POD's
+`ink-legibility-v2` gate becomes the verdict here, unchanged, and the MCP
+tools and POD's Creative color study call the same functions.
+
+### Engine
+
+- New entry point `@thesnug/color-picker/engine` (`ENGINE_VERSION` 1.0.0,
+  `LEGIBILITY_PROTOCOL` `ink-legibility-v2`): `legibilitySampling`,
+  `measureInkPixels`, `analyzeDesign`, `inkOnGarment`, `judgeLegibility`,
+  `garmentFamily`, `legibleInkNeeds`, `garmentsFromProduct`, `rankGarments`,
+  `rankArtworkGarmentPairs`, `planLegibleInkOptions`, `snapSubstitutionPlan`,
+  `toSubstitutionPlan`, `planArtworkOptions`, `judgeRecolor`,
+  `substitutePigments`, and `RecolorPigmentError`, plus re-exports of the pure
+  core. Its import closure has no `node:` modules or file reads, so POD can
+  vendor it; CI checks that after the build (`npm run engine:purity`).
+- `tests/fixtures/engine/` records what the MCP tools answer for seven
+  synthetic print files. A test fails when an answer changes, and re-recording
+  a changed answer without bumping `ENGINE_VERSION` is refused. POD vendors the
+  fixtures for its drift test.
+
+### Behavior changes
+
+- **`recommend_product_colors` and `color-picker recommend`** rank with the
+  engine: garments the design passes the legibility verdict on come first,
+  then by score, and the `vanish` component is the share of ink the verdict
+  calls lost (`vanishBasis: "lost-ink"`), so a pale fill inside a dark outline
+  is no longer penalized. Each pick adds `garment` and `legibility`; warnings
+  name lost ink, not every color near the garment. The reply adds `engine` and
+  `measurement`, and `design` is the measured summary (`hash`, `palette`,
+  `inkLuminance`, `approximate`, and `description` with `mood`) rather than the
+  fingerprint. With `mood`, only legible picks go to Jev. New inputs `colors`
+  and `contentBounds`; `n` goes up to 100.
+- **`recolorPlans` flags** a plan whose new ink is under 3:1 on the garment, not
+  only one within the print minimum distance, with a warning saying so.
+- **`applyRecolor`, `recolor_plans` `outDir`, and `recolor --apply`** substitute
+  pigments instead of snapping every pixel to its nearest mapped color:
+  antialiased edges keep their blend, and only mapped inks change. The result
+  adds `replacements` and `changed`; `unmatched` is now the share of visible
+  pixels no pigment matched. Art the measurement marks approximate, or a
+  mapping that covers less than 90% of the ink, is left to the prompt;
+  `tolerance` is no longer read.
+- **`recolor_plans`** plans carry `substitution` (null for a plan that merges
+  inks) and `legibility`, the recolored design's verdict on its garment.
+- **`batch_product_colors`** refuses an approved color the artwork fails the
+  verdict on.
+- Stored Wada equivalents name a garment only when they were computed from its
+  hex; another hex for the same slug uses its nearest Wada colors.
+
+### CLI and MCP
+
+- New tools `check_print_legibility` (verdicts for product colors or garments
+  given by hex) and `artwork_options` (pigment substitutions that add legible
+  garments, optionally written as PNGs), and CLI commands `legibility` and
+  `options`, with `--colors`, `--bounds`, and `--count`.
+- `check_accessibility` says that `print` checks palette separation only.
+
+### Library
+
+- The assets are bundled as TypeScript modules in `src/data/generated/`
+  (`scripts/build-engine-data.ts`, run by `npm run data:build` and checked by
+  `npm run data:check`), so the core reads no files. The `data` loaders return
+  the same values as before, as fresh copies.
+- New `scoreGarments` and `recolorPlansFor` score and plan for any garment
+  colors; `diversityCounts` and `withDiversityPenalty` are the batch variety
+  penalty, unchanged; the fingerprint entry point adds `decodeForLegibility`,
+  `analyzeDesignFile`, and `writePng`.
+
+### Agents
+
+- The skill explains the legibility verdict and the new tools, and the batch
+  approval workflow gates approval on `check_print_legibility`.
+
 ## [0.5.0] - 2026-09-28
 
 - Let requesting projects supply optional batch assortment groups; remove the

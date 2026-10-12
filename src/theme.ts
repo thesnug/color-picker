@@ -36,7 +36,7 @@ import {
   toOklch,
 } from "./color/convert.js";
 import type { RampOptions } from "./color/harmony.js";
-import { loadAccessibility } from "./data/index.js";
+import { storedAccessibility } from "./data/store.js";
 
 // ---------------------------------------------------------------------------
 // Theme
@@ -125,7 +125,7 @@ const round = (value: number, places: number) => Number(value.toFixed(places));
  * exists for the mode.
  */
 export function theme(combination: CombinationInput, options: ThemeOptions = {}): ThemeResult {
-  const rules = options.rules ?? loadAccessibility();
+  const rules = options.rules ?? storedAccessibility();
   const opts: AccessibilityOptions = { rules };
   const assigned = roles(combination, { ...opts, ...(options.mode && { mode: options.mode }) });
   if (!assigned.ok) {

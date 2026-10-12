@@ -16,16 +16,20 @@ import { join } from "node:path";
 import { z } from "zod";
 import { comparePrintFiles } from "../fingerprint/index.js";
 import { repetitionReport, selectBatchColors, type BatchDesign, type GarmentUse } from "../batch.js";
-import { type ProductColorRecommendation } from "../recommend.js";
+import type { ContentBounds } from "../engine/index.js";
 
 import {
+  artworkOptionsView,
   combosView,
+  DEFAULT_COLOR_COUNT,
   DEFAULT_RECOLOR_N,
   DEFAULT_RECOMMEND_N,
   InputError,
+  legibilityView,
   nearestView,
   palettesView,
   recolorView,
+  type RecommendPick,
   recommendView,
   themeView,
   type View,
@@ -100,6 +104,22 @@ const designBase64 = z
 const count = (fallback: number, what: string) =>
   z.number().int().min(1).max(50).optional().describe(`How many ${what}. Default ${fallback}.`);
 
+const fraction = z.number().min(0).max(1);
+const contentBounds = z
+  .object({ x: fraction, y: fraction, w: fraction.gt(0), h: fraction.gt(0) })
+  .optional()
+  .describe(
+    "The print's visible content as fractions of the canvas (left, top, width, height), when known. The " +
+      "measurement crops to it plus a 1% margin before sampling at 1024 px, as POD does; give it for art with " +
+      "wide empty margins so the answer matches POD's.",
+  );
+
+const productColors = z
+  .array(z.string().min(1))
+  .min(1)
+  .optional()
+  .describe("Only these product colors, by name, slug, or alias. Default every stocked color.");
+
 // ---------------------------------------------------------------------------
 // Tools
 
@@ -149,7 +169,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     },
     {
       name: "batch_product_colors",
-      description: "Select eight visually approved garment colors per design, using optional project-supplied desired groups and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
+      description: "Select eight visually approved garment colors per design, using optional project-supplied desired groups and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Refuses an approved color the artwork fails the ink-legibility-v2 verdict on. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
       inputSchema: {
         designs: z.array(z.object({
           id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
@@ -165,13 +185,14 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
           })).describe("Current provider variant evidence per color; every required size must be available before selection."),
           artworks: z.array(z.object({
             artworkId: z.string().min(1), renditionId: z.string().min(1), designPath: z.string().min(1),
-            approvedSlugs: z.array(z.string()).describe("Colors reviewed for legibility and subject recognition with this exact rendition."),
+            approvedSlugs: z.array(z.string()).describe("Colors reviewed for legibility and subject recognition with this exact rendition. Each must also pass the ink-legibility-v2 verdict."),
+            contentBounds,
           })).min(1),
         })).min(1),
         recent: z.array(garmentUse).optional().describe("Recent proposal usage, not stock."),
       },
       handler: async ({ designs, recent }) => {
-        const inputs = designs as { id: string; product?: string; defaultSlug: string; desiredGroups?: BatchDesign["desiredGroups"]; sizeAvailability: { slug: string; sizes: string[]; checkedAt: string; source: string }[]; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[] }[] }[];
+        const inputs = designs as { id: string; product?: string; defaultSlug: string; desiredGroups?: BatchDesign["desiredGroups"]; sizeAvailability: { slug: string; sizes: string[]; checkedAt: string; source: string }[]; artworks: { artworkId: string; renditionId: string; designPath: string; approvedSlugs: string[]; contentBounds?: ContentBounds }[] }[];
         const batch: BatchDesign[] = [];
         for (const input of inputs) {
           const productId = input.product ?? loadProductIndex().default;
@@ -179,13 +200,14 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
           if (sizeBySlug.size !== input.sizeAvailability.length) throw new InputError(`${input.id}: duplicate size availability slug.`);
           const candidates = [];
           for (const art of input.artworks) {
-            const view = await recommendView({ file: art.designPath, product: productId, n: loadProduct(productId).colors.length });
-            const picks = (view.json as { picks: ProductColorRecommendation[] }).picks;
+            const view = await recommendView({ file: art.designPath, product: productId, n: loadProduct(productId).colors.length, ...(art.contentBounds && { contentBounds: art.contentBounds }) });
+            const picks = (view.json as { picks: RecommendPick[] }).picks;
             for (const slug of art.approvedSlugs) {
               const sizeEvidence = sizeBySlug.get(slug);
               if (!sizeEvidence) throw new InputError(`${input.id}: no provider size evidence for ${slug}.`);
               const pick = picks.find(p => p.color.slug === slug);
               if (!pick) throw new InputError(`${input.id}: approved color ${slug} is unavailable or unknown.`);
+              if (!pick.legibility.pass) throw new InputError(`${input.id}: approved color ${slug} fails ink legibility with ${art.artworkId}: ${pick.legibility.reason}`);
               candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true, availableSizes: sizeEvidence.sizes, sizeEvidence: { checkedAt: sizeEvidence.checkedAt, source: sizeEvidence.source } });
             }
           }
@@ -277,31 +299,120 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
       name: "recommend_product_colors",
       description:
         "Rank a product's garment colors for a design without changing the design. Use this for exploratory " +
-        "shirt-color ideas as well as an existing finished design. Each pick carries its score, plain-language " +
-        "reasons, and a warning for each design color that would vanish into the garment. Use recolor_plans " +
-        "alongside it when alternate inks may open more garment options.",
+        "shirt-color ideas as well as an existing finished design. Garments the design passes the " +
+        "ink-legibility-v2 verdict on rank first (each pick's legibility says why), then by score; the vanish " +
+        "penalty counts only ink the verdict calls lost, so a pale fill inside a dark outline is not penalized. " +
+        "Each pick carries its score, plain-language reasons, and a warning for each lost ink. Use recolor_plans " +
+        "or artwork_options alongside it when alternate inks may open more garment options.",
       inputSchema: {
         designPath,
         designBase64,
-        n: count(DEFAULT_RECOMMEND_N, "garment colors to return"),
+        n: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe(`How many garment colors to return. Default ${DEFAULT_RECOMMEND_N}; 100 returns every one.`),
         product,
+        colors: productColors,
+        contentBounds,
         mood: z
           .boolean()
           .optional()
           .describe(
-            "Re-rank the top picks by how well each garment suits the design's subject and mood, with Jev. " +
+            "Re-rank the top legible picks by how well each garment suits the design's subject and mood, with Jev. " +
               "Without Jev the order is unchanged and the reply's mood.reason says why.",
           ),
       },
-      handler: async ({ designPath: path, designBase64: base64, n, product: productId, mood }) => {
+      handler: async ({ designPath: path, designBase64: base64, n, product: productId, colors, contentBounds: bounds, mood }) => {
         const design = designInput(path, base64);
         const view = await recommendView({
           ...design,
           n: (n as number | undefined) ?? DEFAULT_RECOMMEND_N,
           ...(productId !== undefined && { product: productId as string }),
+          ...(colors !== undefined && { colors: colors as string[] }),
+          ...(bounds !== undefined && { contentBounds: bounds as ContentBounds }),
           ...(mood === true && { mood: true }),
         });
         return reply(view);
+      },
+    },
+    {
+      name: "check_print_legibility",
+      description:
+        "Judge whether a print file's ink reads on garment colors, with the ink-legibility-v2 verdict POD's " +
+        "Creative color study gates on: each ink laid on the garment must reach 3:1 and sit 10 apart in OKLab, " +
+        "unless legible ink frames it (a fill inside an outline); a garment fails when a fifth of the ink is lost " +
+        "or less than a fifth reads. Use this before proposing, approving, or publishing a design and garment " +
+        "pair, and to explain why a pair is unreadable. Give product colors, garments with their own hexes " +
+        "(a provider's variants), or neither for every stocked color.",
+      inputSchema: {
+        designPath,
+        designBase64,
+        product,
+        colors: productColors,
+        garments: z
+          .array(z.object({ colorName: z.string().min(1), hex: z.string().regex(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/) }))
+          .min(1)
+          .optional()
+          .describe("Garment colors given directly, as { colorName, hex }, judged after any colors."),
+        contentBounds,
+      },
+      handler: async ({ designPath: path, designBase64: base64, product: productId, colors, garments, contentBounds: bounds }) => {
+        const design = designInput(path, base64);
+        return reply(
+          await legibilityView({
+            ...design,
+            ...(productId !== undefined && { product: productId as string }),
+            ...(colors !== undefined && { colors: colors as string[] }),
+            ...(garments !== undefined && { garments: garments as { colorName: string; hex: string }[] }),
+            ...(bounds !== undefined && { contentBounds: bounds as ContentBounds }),
+          }),
+        );
+      },
+    },
+    {
+      name: "artwork_options",
+      description:
+        "Plan Artwork Options: pigment substitutions that make a design read on the garment colors it fails, as " +
+        "POD's Creative color study plans them. Use this when a design's ink is illegible on too many garments " +
+        "(for example pastel lettering for light shirts). Each option is either legible ink (each faint ink keeps " +
+        "its hue and moves darker or lighter until it reads) or a Wada recolor keeping the design's lightness " +
+        "order, screened on the measured pixels and kept only when it adds legible colors. Give outDir to write " +
+        "each recolored PNG. A recolor changes the artwork: show the options for review, never publish them.",
+      inputSchema: {
+        designPath,
+        designBase64,
+        product,
+        colors: productColors,
+        colorCount: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe(`How many garment colors the assortment wants. Default ${DEFAULT_COLOR_COUNT}.`),
+        maxPalettePlans: z.number().int().min(0).max(6).optional().describe("At most this many Wada options. Default 3."),
+        contentBounds,
+        outDir: z
+          .string()
+          .optional()
+          .describe("Directory on the server's machine to write each option's recolored PNG to. Omit to only plan."),
+      },
+      handler: async ({ designPath: path, designBase64: base64, product: productId, colors, colorCount, maxPalettePlans, contentBounds: bounds, outDir }) => {
+        const design = designInput(path, base64);
+        return reply(
+          await artworkOptionsView({
+            ...design,
+            ...(productId !== undefined && { product: productId as string }),
+            ...(colors !== undefined && { colors: colors as string[] }),
+            ...(colorCount !== undefined && { colorCount: colorCount as number }),
+            ...(maxPalettePlans !== undefined && { maxPalettePlans: maxPalettePlans as number }),
+            ...(bounds !== undefined && { contentBounds: bounds as ContentBounds }),
+            ...(outDir !== undefined && { apply: outDir as string }),
+          }),
+        );
       },
     },
     {
@@ -309,13 +420,16 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
       description:
         "Plan a recolor of a design for each of a product's garment colors: a from-to mapping of the design's " +
         "colors onto a Wada combination that includes the garment, keeping lightness order, plus a prompt for " +
-        "redrawing painterly art. Use this when the design's colors may change to suit the shirt. Give outDir to " +
-        "also write each recolored PNG; photographic art is detected and left to the prompt.",
+        "redrawing painterly art. Use this when the design's colors may change to suit the shirt. Each plan " +
+        "carries its pigment substitution on the design's measured inks and the recolored design's " +
+        "ink-legibility-v2 verdict on its garment. Give outDir to also write each recolored PNG by pigment " +
+        "substitution; photographic art is detected and left to the prompt.",
       inputSchema: {
         designPath,
         designBase64,
         n: count(DEFAULT_RECOLOR_N, "garment colors to plan for"),
         product,
+        contentBounds,
         outDir: z
           .string()
           .optional()
@@ -333,13 +447,14 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
           .optional()
           .describe("With vet, keep implausible plans, marked implausible, instead of dropping them."),
       },
-      handler: async ({ designPath: path, designBase64: base64, n, product: productId, outDir, vet, includeImplausible }) => {
+      handler: async ({ designPath: path, designBase64: base64, n, product: productId, contentBounds: bounds, outDir, vet, includeImplausible }) => {
         if (includeImplausible && !vet) throw new InputError("includeImplausible applies only with vet");
         const design = designInput(path, base64);
         const view = await recolorView({
           ...design,
           n: (n as number | undefined) ?? DEFAULT_RECOLOR_N,
           ...(productId !== undefined && { product: productId as string }),
+          ...(bounds !== undefined && { contentBounds: bounds as ContentBounds }),
           ...(outDir !== undefined && { apply: outDir as string }),
           ...(vet === true && { vet: true }),
           ...(includeImplausible === true && { includeImplausible: true }),
@@ -376,8 +491,9 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
       description:
         "Check a set of colors for contrast and color-vision safety. Use this before recommending colors for text " +
         "or interface elements (web-text, web-ui: WCAG 2.2 AA, with APCA alongside) or for a print where colors " +
-        "must stay distinct on fabric (print: a minimum OKLab distance). Every context also simulates protanopia, " +
-        "deuteranopia, and tritanopia and reports pairs that collapse.",
+        "must stay distinct on fabric (print: a minimum OKLab distance between every pair; this checks palette " +
+        "separation only, not whether a print file reads on a garment, which is check_print_legibility). Every " +
+        "context also simulates protanopia, deuteranopia, and tritanopia and reports pairs that collapse.",
       inputSchema: {
         colors: z
           .array(z.string())

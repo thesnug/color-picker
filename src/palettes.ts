@@ -13,15 +13,8 @@ import {
   type HarmonySnap,
   type Palette,
 } from "./combinations.js";
-import {
-  type Combination,
-  type DerivedColor,
-  type EquivalentMatch,
-  loadProduct,
-  loadProductIndex,
-  type Product,
-  type ProductColor,
-} from "./data/index.js";
+import { storedDefaultProduct, storedProduct } from "./data/store.js";
+import type { Combination, DerivedColor, EquivalentMatch, Product, ProductColor } from "./data/types.js";
 import { equivalentsFor } from "./equivalents.js";
 
 export interface ProductPalettesOptions {
@@ -199,8 +192,8 @@ function normalizeName(name: string): string {
 }
 
 function resolveProduct(product: ProductPalettesOptions["product"]): Product {
-  if (product === undefined) return loadProduct(loadProductIndex().default);
-  return typeof product === "string" ? loadProduct(product) : product;
+  if (product === undefined) return storedDefaultProduct();
+  return typeof product === "string" ? storedProduct(product) : product;
 }
 
 function onShirt(

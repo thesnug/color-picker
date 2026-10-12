@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { Questions, ScoreQuestion, SystemOneRequest, SystemOneResult } from "@typesafe-ai/sdk";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { recommendView } from "../src/cli/commands.js";
+import { type RecommendPick, recommendView } from "../src/cli/commands.js";
 import { run } from "../src/cli/index.js";
 import { fingerprint, type Fingerprint, type VisionProvider } from "../src/fingerprint/index.js";
 import {
@@ -259,9 +259,12 @@ describe("rerankByMood", () => {
 });
 
 describe("recommend with mood", () => {
-  it("describes the design, re-ranks the top picks, and shows the mood level as a badge", async () => {
+  it("describes the design, re-ranks the top legible picks, and shows the mood level as a badge", async () => {
     const vision = fakeVision(print);
-    const picks = picksFor(print, MOOD_TOP);
+    // Only garments the design reads on go to Jev.
+    const ranked = (await recommendView({ file: FLAT_MARK, n: MOOD_TOP })).json as { picks: RecommendPick[] };
+    const picks = ranked.picks.filter((p) => p.legibility.pass);
+    expect(picks.length).toBeGreaterThan(2);
     // The second pick elevates the design; the rest are neutral, so it moves to the top.
     const client = fakeClient({ [moodCandidateId(picks[1]!)]: 3 });
     const view = await recommendView({ file: FLAT_MARK, n: 3, mood: { client, providers: [vision], cache } });
@@ -282,8 +285,9 @@ describe("recommend with mood", () => {
     const top = json.picks[0]!;
     expect(top.combinedScore).toBeGreaterThan(json.picks[1]!.combinedScore);
     expect(view.text(false)).toContain(
-      `1. ${picks[1]!.color.name} · score ${fmt(top.score, 3)} · mood elevates (1) · combined ${fmt(top.combinedScore, 3)}`,
+      `1. ${picks[1]!.color.name} · score ${fmt(top.score, 3)} · legible · mood elevates (1) · combined ${fmt(top.combinedScore, 3)}`,
     );
+    expect(Object.keys(client.requests[0]!.questions)).toHaveLength(picks.length);
     expect(renderHtml(view.sections)).toContain('<span class="badge">Mood: elevates</span>');
   });
 

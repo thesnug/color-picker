@@ -13,7 +13,7 @@ The package is consumed as a git dependency pinned to a release tag. Releases
 commit `dist/`, so installs need no compiler.
 
 ```bash
-npm install github:thesnug/color-picker#v0.5.0
+npm install github:thesnug/color-picker#v0.6.0
 ```
 
 Or in `package.json`:
@@ -21,7 +21,7 @@ Or in `package.json`:
 ```json
 {
   "dependencies": {
-    "@thesnug/color-picker": "github:thesnug/color-picker#v0.5.0"
+    "@thesnug/color-picker": "github:thesnug/color-picker#v0.6.0"
   }
 }
 ```
@@ -37,6 +37,7 @@ https://github.com/thesnug/color-picker/tags, and what changed in each is in
 | Entry point | Contents |
 | --- | --- |
 | `@thesnug/color-picker` | Color math, nearest match, combinations, web themes and ramps, recommendations, recolor plans |
+| `@thesnug/color-picker/engine` | The print legibility engine the MCP tools and POD share: ink measurement, the `ink-legibility-v2` verdict, garment ranking, recolor planning, pigment substitution. Pure: no `node:` modules, no file reads |
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
 | `@thesnug/color-picker/fingerprint` | Design fingerprints from image files |
@@ -366,6 +367,62 @@ The weights are `RECOMMEND_WEIGHTS`. Pass `weights` to change them, or call
 `scoreComponents(pick.components, weights)` to re-rank existing picks without
 analyzing the design again. Options: `product` (an ID or a loaded product;
 default Comfort Colors 1717) and `availableOnly` (default true).
+`scoreGarments` scores any garment colors the same way, unranked.
+
+This score cannot see outlines: a pale fill inside a dark outline counts as
+vanishing on a pale shirt. For a print file, rank with the engine's
+`rankGarments` (below), which the CLI and the MCP tool use.
+
+### Print legibility engine
+
+`@thesnug/color-picker/engine` is the color logic the MCP tools and POD's
+Creative color study share, so the chat skill and POD give the same answers for
+the same file. It is pure: the catalog and Wada data are bundled, and the caller
+decodes the print file and encodes any pixels it writes.
+
+```ts
+import { garmentsFromProduct, judgeLegibility, rankGarments } from "@thesnug/color-picker/engine";
+import { analyzeDesignFile } from "@thesnug/color-picker/fingerprint";
+
+const { analysis, pixels } = await analyzeDesignFile("art/lettering.png", { contentBounds: null });
+const garments = garmentsFromProduct("comfort-colors-1717");
+const ranked = rankGarments(analysis, garments);
+ranked[0].legibility.pass;    // true: garments the ink reads on come first
+ranked[0].legibility.reason;  // "100% of the ink reads at 3:1 or better on Black."
+judgeLegibility(analysis.measurement, { colorName: "Ivory", hex: "#fff7e7" }).reason;
+// "#fb7781 (68% of the ink) is 2.45:1 on Ivory, under 3:1, and isn't framed by legible ink."
+```
+
+- **Measure.** `legibilitySampling` is the decode contract: crop to the
+  print's content bounds plus 1% when known, then fit inside 1024 px with
+  nearest-neighbor sampling. `decodeForLegibility` in the fingerprint entry
+  point follows it with `sharp`. `measureInkPixels` reduces the pixels to up to
+  twelve inks, assigns every visible pixel to one, and counts the edges between
+  inks and transparency; `analyzeDesign` adds the summary rankings read.
+- **Judge** (`ink-legibility-v2`, POD's rule, ported unchanged). Each ink, laid
+  on the garment at its median alpha, is legible at 3:1 or better and at least
+  10 apart in OKLab. A faint ink is framed, not lost, when legible ink draws at
+  least 60% of its own boundary (marks it fully encloses do not count, and a
+  faint neighbor frames it only as far as that neighbor is framed). A garment
+  fails when a fifth of the ink is lost or less than a fifth reads; gradient
+  art gets no framing exception. `judgeLegibility` returns the verdict with its
+  reason; `inkOnGarment` judges one ink.
+- **Rank.** `rankGarments` puts the garments the design passes first, then
+  ranks by the recommendation score with `vanish` set to the share of ink the
+  verdict calls lost. `rankArtworkGarmentPairs` orders artwork and garment
+  pairs for inspection: legible pairs only, each color's best artwork first,
+  colors chosen with the batch variety penalty.
+- **Recolor.** `planLegibleInkOptions` moves each faint ink darker or lighter
+  in its own hue until it reads on a garment family. `toSubstitutionPlan` turns
+  a Wada `RecolorPlan` into pigment substitutions on the measured inks.
+  `planArtworkOptions` screens both on the pixels and keeps those that add
+  legible garments. `substitutePigments` applies a plan: only the planned
+  pigments change, each pixel keeping its offset from its pigment and its alpha.
+
+Every verdict records `LEGIBILITY_PROTOCOL`. `ENGINE_VERSION` changes whenever
+any engine output does; `tests/fixtures/engine/` records the MCP tools' answers
+for synthetic print files, which POD vendors with the engine and checks its own
+answers against.
 
 ### Recommend garment colors with recoloring
 
@@ -385,22 +442,24 @@ plan.color.name;   // "Graphite"
 plan.mapping[0];   // { from: { hex: "#e8836b", share: 0.5095 }, to: { index: …, name: "Ochraceous Salmon", hex: "#d99e73" } }
 plan.prompt;       // "Recolor the artwork for a Graphite shirt: change the #e8836b areas to Ochraceous Salmon #d99e73; …"
 
-await applyRecolor("art/flat-mark.png", plan.mapping, { out: "art/flat-mark-graphite.png", fingerprint: design });
+await applyRecolor("art/flat-mark.png", plan.mapping, { out: "art/flat-mark-graphite.png" });
 ```
 
 Within a garment, a book combination with enough members beats a harmony,
 and both beat a combination with fewer members, where neighbors in lightness
-share an ink. Any plan where a new ink is within the print minimum distance of
-the garment is `flagged` and used only when the garment has nothing else.
-`score` adds `contrast` (0.6, as for `recommendProductColors`), subtracts
-`vanish` (0.6), and adds `fidelity` (0.3), which favors the plan that changes
-the design least; the weights are `RECOLOR_WEIGHTS`.
+share an ink. Any plan where a new ink will not read on the garment, under 3:1
+or within the print minimum distance of it, is `flagged` and used only when
+the garment has nothing else. `score` adds `contrast` (0.6, as for
+`recommendProductColors`), subtracts `vanish` (0.6), and adds `fidelity` (0.3),
+which favors the plan that changes the design least; the weights are
+`RECOLOR_WEIGHTS`. `recolorPlansFor` plans for any garment colors.
 
-`applyRecolor` recolors flat-color art exactly: every visible pixel takes the
-new ink of its nearest design color, keeping its alpha. When the fingerprint's
-palette covers less than 90% of the design, or more than 5% of the pixels are
-farther than 10 from every mapped color, the art counts as photographic and it
-returns `{ applicable: false, reason }`; use the prompt instead.
+`applyRecolor` recolors flat-color art exactly by pigment substitution: each
+mapped color binds to the design's measured ink, and only those pigments
+change, every pixel keeping its offset from its pigment (so antialiased edges
+stay smooth) and its alpha. Photographic or gradient art, a mapping whose
+colors cover less than 90% of the ink, or more than 5% of the pixels matching
+no pigment returns `{ applicable: false, reason }`; use the prompt instead.
 
 #### Vetting swaps with Jev
 
@@ -447,9 +506,11 @@ color-picker show 176 227                     # book combinations by ID
 color-picker palettes "Blue Spruce"           # palettes for a garment color
 color-picker recommend art/light-ink.png -n 3 # garment colors for a design
 color-picker recommend art/light-ink.png --mood  # re-ranked by mood with Jev
+color-picker legibility art/lettering.png --colors "Black,Ivory"  # does the ink read?
 color-picker palettes "Black" --mood --design art/light-ink.png
 color-picker recolor art/flat-mark.png --apply out/  # with recoloring
 color-picker recolor art/strawberry.png --vet  # drop recolors Jev finds implausible
+color-picker options art/lettering.png --apply out/  # inks that read on more shirts
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
 color-picker theme "#1a1a40" --mode dark --format tailwind
@@ -474,8 +535,12 @@ output is piped or `NO_COLOR` is set.
 | `-k <n>` | `nearest` | Number of matches (default 3) |
 | `--size <n>` | `combos`, `palettes` | Only palettes with `n` colors |
 | `--limit <n>` | `combos`, `palettes` | Maximum palettes (default 8) |
-| `-n <n>` | `recommend` | Number of picks (default 5) |
-| `--product <id>` | `recommend`, `palettes` | Garment product (default `comfort-colors-1717`) |
+| `-n <n>` | `recommend`, `recolor` | Number of picks (default 5) |
+| `--product <id>` | `recommend`, `recolor`, `palettes`, `legibility`, `options` | Garment product (default `comfort-colors-1717`) |
+| `--colors <a,b,...>` | `recommend`, `legibility`, `options` | Only these product colors, by name, slug, or alias |
+| `--bounds <x,y,w,h>` | `recommend`, `recolor`, `legibility`, `options` | The print's visible content as fractions of the canvas, to measure it as POD does |
+| `--count <n>` | `options` | Garment colors the assortment wants (default 8) |
+| `--apply <dir>` | `recolor`, `options` | Write each recolored design as a PNG in `dir` |
 | `--format <css\|tailwind\|tokens>` | `theme` | Print CSS custom properties, a Tailwind v4 `@theme` block, or design tokens |
 | `--mode <light\|dark>` | `theme` | Light (default) or dark |
 | `--json` | any | Print the library result as JSON instead of text |
@@ -495,7 +560,8 @@ color-picker combos "hermosa pink" --limit 4 --html review.html
 
 For `recommend`, the HTML page shows each pick as a product card, with the
 garment photo when the product has one and the design's colors as chips beside
-it. Warnings name the design colors that would vanish into the shirt.
+it. Each heading says whether the ink reads on the garment, and warnings name
+the ink the legibility verdict calls lost.
 
 `theme` takes a hex code, a color name, or a book combination ID; a bare number
 is an ID, so write a numeric hex with `#`. For a color it uses the
@@ -547,17 +613,19 @@ env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 
 To run it without installing it in a project, as the
 [skill](skills/color-picker/SKILL.md) does, name every peer for `npx`:
-`npx -y -p github:thesnug/color-picker#v0.5.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp`.
+`npx -y -p github:thesnug/color-picker#v0.6.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp`.
 
 | Tool | Use it to |
 | --- | --- |
 | `nearest_colors` | Name a hex code, or translate a CSS or xkcd name into Wada colors |
 | `combinations` | Get Wada palettes for any color |
 | `palettes_for_product_color` | Get ink palettes for a garment color by name, such as "Pepper" |
-| `recommend_product_colors` | Rank garment colors for a design, unchanged |
-| `recolor_plans` | Plan a recolor of a design for each garment, and optionally write the PNGs |
+| `recommend_product_colors` | Rank garment colors for a design, unchanged: those its ink reads on first |
+| `check_print_legibility` | Judge whether a print file's ink reads on garment colors (`ink-legibility-v2`) |
+| `recolor_plans` | Plan a recolor of a design for each garment, with each plan's legibility, and optionally write the PNGs |
+| `artwork_options` | Plan pigment substitutions that make a design read on the garments it fails |
 | `theme` | Build a light or dark web theme, with CSS, Tailwind, and design tokens |
-| `check_accessibility` | Check colors for WCAG and APCA contrast, print separation, and color-vision safety |
+| `check_accessibility` | Check colors for WCAG and APCA contrast, print separation between colors, and color-vision safety |
 | `list_products` | List products, or one product's colors and stock |
 | `render_card` | Render an earlier result, or a list of colors, as SVG or HTML |
 
@@ -571,8 +639,12 @@ Card files go to a new temporary directory, or to `COLOR_PICKER_CARD_DIR`. Pass 
 The server keeps the last 50 results.
 
 Design tools take `designPath`, a file on the server's machine, or
-`designBase64`, the file's bytes. Fingerprints are cached by file hash, so repeat
-calls about the same design skip decoding.
+`designBase64`, the file's bytes, and optionally `contentBounds`, the print's
+visible content as fractions of the canvas. Fingerprints are cached by file
+hash, so repeat calls about the same design skip decoding. The tools that
+measure a print (`recommend_product_colors`, `check_print_legibility`,
+`recolor_plans`, `artwork_options`) call the engine entry point and carry
+`engine: { version, protocol }` and the `measurement` in their replies.
 
 The Jev judgments are opt-in. `recommend_product_colors` and
 `palettes_for_product_color` take `mood` to re-rank by the design's subject and
@@ -629,10 +701,24 @@ npm run build     # tsc to dist/ with declarations
 The sample designs in `tests/fixtures/designs/` are synthetic and generated by
 `npx tsx scripts/make-design-fixtures.ts`.
 
+The print files in `tests/fixtures/engine/` are synthetic too, drawn by
+`npx tsx scripts/make-engine-fixtures.ts`. Beside each, `<file>.expected.json`
+records what the MCP tools answer for it: measurement, verdicts, ranking,
+artwork options, and hashes of the substituted pixels. A test fails when any
+answer changes. When a change is intended, bump `ENGINE_VERSION` in
+`src/engine/rules.ts` and re-record; re-recording under an unchanged version
+is refused, so POD, which vendors these files, sees every change.
+
+```bash
+npm run engine:fixtures        # re-record, after bumping ENGINE_VERSION
+npm run engine:fixtures:check  # fail if a recorded answer changed
+npm run engine:purity          # after the build: the engine imports nothing outside itself
+```
+
 `dist/` is ignored in git and is committed only by the release script at tag
 time, on a commit reachable only from the tag. How to cut a release is in
-[AGENTS.md](AGENTS.md). CI runs typecheck, tests, and the build on pull requests
-and on `main`.
+[AGENTS.md](AGENTS.md). CI runs typecheck, the data checks, tests, the build,
+and the engine purity check on pull requests and on `main`.
 
 ### Evaluating Jev thresholds
 
@@ -661,9 +747,15 @@ object per combination with a harmony label). The name corrections are listed at
 the top of the script. Both files are committed; CI fails when they are stale.
 
 ```bash
-npm run data:build  # regenerate assets/derived/
-npm run data:check  # fail if assets/derived/ is out of date
+npm run data:build  # regenerate assets/derived/ and src/data/generated/
+npm run data:check  # fail if either is out of date
 ```
+
+`scripts/build-engine-data.ts`, run by both, bundles the assets the library
+reads (the derived Wada data, products, equivalents, accessibility thresholds,
+and name dictionaries) as TypeScript modules in `src/data/generated/`, so the
+core and the engine read no files at run time. Run `npm run data:build` after
+changing any asset, including after `products:import` or `products:equivalents`.
 
 `assets/names/css.json` (CSS named colors) and `assets/names/xkcd.json` (the xkcd
 color survey, CC0) are the name dictionaries `nearest` falls back to. Each file
@@ -779,7 +871,8 @@ MIT.
 MCP `batch_product_colors` evaluates original and reviewed ink alternates together,
 returns eight colors per design with an artwork/prepared-rendition mapping, and
 reports current/recent proposal repetition. It requires explicit approved color
-slugs and a reviewed default. `batch_repetition_report` reports manually selected
+slugs and a reviewed default, and refuses an approved color the artwork fails
+the print legibility verdict on. `batch_repetition_report` reports manually selected
 sets too. `verify_print_rendition` compares downloaded provider files with the
 approved production file, including alpha. These tools do not replace size-stock,
 placement checks or eight-composition proofs; see the

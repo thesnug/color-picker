@@ -46,6 +46,31 @@ export interface BatchSelection {
 
 export const REQUIRED_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"] as const;
 
+/** How often a garment already appears in a history: exactly, as a near shade (OKLab distance under 10), and by family. */
+export interface DiversityCounts {
+  exact: number;
+  near: number;
+  family: number;
+}
+
+/** Count a garment's repeats in `history`: the same slug, a near shade of another slug, and the same color family. */
+export function diversityCounts(color: { slug: string; name: string; hex: string }, history: readonly GarmentUse[]): DiversityCounts {
+  const exact = history.filter(u => u.slug === color.slug).length;
+  const near = history.filter(u => u.slug !== color.slug && distance(u.hex, color.hex) < 10).length;
+  const family = history.filter(u => colorFamily(u.hex, u.name) === colorFamily(color.hex, color.name)).length;
+  return { exact, near, family };
+}
+
+/**
+ * A design-fit score less the variety penalty batch selection applies: 0.08
+ * per exact repeat, 0.04 per near shade, 0.01 per garment of the same family.
+ * A preference among legible candidates, never a legibility override.
+ */
+export function withDiversityPenalty(score: number, color: { slug: string; name: string; hex: string }, history: readonly GarmentUse[]): number {
+  const { exact, near, family } = diversityCounts(color, history);
+  return score - 0.08 * exact - 0.04 * near - 0.01 * family;
+}
+
 const matchesGroup = (candidate: ArtworkCandidate, group: DesiredColorGroup) => {
   const { slug, family } = candidate.recommendation.color;
   return !group.excludeSlugs?.includes(slug) && (group.slugs?.includes(slug) || group.families?.includes(family));
@@ -106,12 +131,8 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
     add(defaults[0]);
     const unfilledGroups: string[] = [];
     const score = (c: ArtworkCandidate) => {
-      const color = c.recommendation.color;
       const history = [...recent, ...uses].filter(u => u.product === design.product);
-      const exact = history.filter(u => u.slug === color.slug).length;
-      const near = history.filter(u => u.slug !== color.slug && distance(u.hex, color.hex) < 10).length;
-      const family = history.filter(u => colorFamily(u.hex, u.name) === colorFamily(color.hex, color.name)).length;
-      return c.recommendation.score - 0.08 * exact - 0.04 * near - 0.01 * family;
+      return withDiversityPenalty(c.recommendation.score, c.recommendation.color, history);
     };
     for (const group of groups) {
       if (picks.some(p => matchesGroup(p, group))) continue;

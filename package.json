@@ -1,6 +1,6 @@
 {
   "name": "@thesnug/color-picker",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Color palettes from Sanzo Wada's A Dictionary of Color Combinations, with garment color recommendations for print-on-demand designs.",
   "license": "MIT",
   "repository": {
@@ -23,6 +23,10 @@
     "./render": {
       "types": "./dist/render/index.d.ts",
       "default": "./dist/render/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "default": "./dist/engine/index.js"
     },
     "./fingerprint": {
       "types": "./dist/fingerprint/index.d.ts",
@@ -47,8 +51,11 @@
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
-    "data:build": "tsx scripts/build-data.ts",
-    "data:check": "tsx scripts/build-data.ts --check",
+    "data:build": "tsx scripts/build-data.ts && tsx scripts/build-engine-data.ts",
+    "data:check": "tsx scripts/build-data.ts --check && tsx scripts/build-engine-data.ts --check",
+    "engine:fixtures": "tsx scripts/record-engine-fixtures.ts",
+    "engine:fixtures:check": "tsx scripts/record-engine-fixtures.ts --check",
+    "engine:purity": "tsx scripts/check-engine-purity.ts",
     "jev:describe:evaluate": "tsx scripts/evaluate-describe-color.ts",
     "jev:evaluate": "tsx scripts/evaluate-jev.ts",
     "products:check": "tsx scripts/validate-products.ts",

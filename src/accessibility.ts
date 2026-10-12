@@ -8,7 +8,8 @@
 import { apcaContrast, contrastRatio, relativeLuminance } from "./color/contrast.js";
 import { type ColorInput, distance, type Hex, toOklch, toRgb, rgbToHex } from "./color/convert.js";
 import { type Deficiency, simulateCvd } from "./color/cvd.js";
-import { type Accessibility, loadAccessibility, loadColors } from "./data/index.js";
+import { storedAccessibility, storedColors } from "./data/store.js";
+import type { Accessibility } from "./data/types.js";
 
 // ---------------------------------------------------------------------------
 // Inputs
@@ -35,7 +36,7 @@ export interface AccessibilityOptions {
 let cachedRules: Accessibility | undefined;
 
 function rulesFrom(options: AccessibilityOptions): Accessibility {
-  return options.rules ?? (cachedRules ??= loadAccessibility());
+  return options.rules ?? (cachedRules ??= storedAccessibility());
 }
 
 function isNamedSwatch(input: SwatchInput): input is { hex: string; name?: string } {
@@ -57,7 +58,7 @@ function toSwatch(input: SwatchInput): Swatch {
  */
 export function toSwatches(combination: CombinationInput): Swatch[] {
   if ("colors" in combination && !Array.isArray(combination)) {
-    const byIndex = new Map(loadColors().map((c) => [c.index, c]));
+    const byIndex = new Map(storedColors().map((c) => [c.index, c]));
     return combination.colors.map((index) => {
       const color = byIndex.get(index);
       if (!color) throw new RangeError(`No Wada color with index ${index}.`);

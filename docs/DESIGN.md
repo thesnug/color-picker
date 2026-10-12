@@ -52,12 +52,15 @@ Known issues to handle in a cleanup pass, keeping the original text as an alias:
   mid-gray and no override table exists for them.
 
 `scripts/build-data.ts` derives two committed files, and CI fails when they are
-stale. `assets/derived/colors.json` carries each color with its canonical name,
+stale. Since 0.6.0, `scripts/build-engine-data.ts` also bundles every asset the
+library reads as TypeScript modules in `src/data/generated/` (checked the same
+way), so the core and the engine read no files at run time; `assets/` stays the
+source of truth. `assets/derived/colors.json` carries each color with its canonical name,
 aliases (the source name always among them when it differs), slug, hex, RGB, CMYK,
 OKLab, OKLCH, and a neutral flag. `assets/derived/combinations.json` makes each
 combination a first-class object: ID, member colors, size, harmony label, average
 lightness, hue spread, and whether it contains a neutral. Everything derivable is
-precomputed and committed so runtime queries are file reads.
+precomputed and committed so runtime queries are lookups in the bundled data.
 
 ### Products (`assets/products/`)
 
@@ -128,6 +131,7 @@ any combination against these and returns pass/fail with reasons.
 | Entry point | Contents |
 | --- | --- |
 | `@thesnug/color-picker` | Color math, nearest match, combinations, recommendations, recolor plans |
+| `@thesnug/color-picker/engine` | The print legibility engine: ink measurement, the `ink-legibility-v2` verdict, garment ranking, recolor planning, pigment substitution, and the pure core they build on. No `node:` modules, no file reads |
 | `@thesnug/color-picker/data` | The JSON assets, typed |
 | `@thesnug/color-picker/render` | SVG, HTML, and terminal swatch renderers |
 | `@thesnug/color-picker/fingerprint` | Design fingerprints from image files, cached on disk |
@@ -137,7 +141,8 @@ any combination against these and returns pass/fail with reasons.
 
 Consumers: this session via the CLI and rendered cards; Claude Code, Codex, and POD
 agents via the MCP server; POD by direct import, including the Placement picker
-that replaced the standalone maker-method-picker.
+that replaced the standalone maker-method-picker, and by vendoring the engine
+entry point's closure byte for byte for its Creative color study.
 Agents in other projects learn when and how to call the server from the skill in
 `skills/color-picker/`, which pins the same tag as the README.
 
@@ -166,6 +171,19 @@ Decisions and their reasons:
   like the MCP SDK: it decodes PNG, WebP, and JPEG and applies EXIF orientation,
   which no small pure-JS decoder covers (WebP in particular). Callers without it
   pass their own decoder.
+- **One engine for chat and POD (0.6.0).** The color logic POD's Creative color
+  study needs (measurement, the legibility verdict, ranking, recolor planning,
+  substitution) lives in `src/engine/`, and the MCP tools call the same
+  functions. The entry point's import closure is pure, so POD vendors it at a
+  pinned tag. `tests/engine/parity.test.ts` checks that each tool answers what
+  the engine does; `tests/fixtures/engine/` records the answers for synthetic
+  print files, which POD vendors and its drift test compares its own answers
+  with. `ENGINE_VERSION` changes with any output, and re-recording a changed
+  answer under an unchanged version is refused. Decoding stays with the
+  caller: the engine fixes the geometry (`legibilitySampling`), and
+  `decodeForLegibility` and POD both follow it with `sharp`, so the same file
+  and content bounds give the same pixels when the `sharp` minor version
+  matches.
 - **The MCP server wraps the CLI's commands, not the library directly.** Each tool
   returns the same JSON the CLI's `--json` prints, plus the rendered card as `svg`
   and a `resultId`. `render_card` re-renders a recent result (the last 50, held in
@@ -227,6 +245,12 @@ constant combines them, and the components are returned so the score can be
 recomputed without re-analysis. Top ten go to Jev for mood fit. Each pick carries
 plain-language reasons, and a warning per vanishing color.
 
+Since 0.6.0 this score is the soft ranker inside the print legibility verdict
+(below): for a print file, the CLI and MCP rank with the engine's
+`rankGarments`, which puts the garments the verdict passes first and sets the
+vanish penalty to the share of ink the verdict calls lost, so a pale fill an
+outline frames costs nothing. Only legible picks go to Jev for mood fit.
+
 **Recommend shirts, with recoloring.** For each garment: find a combination containing
 a near match of the garment with enough other members; map the design's colors onto
 them preserving lightness order so hierarchy survives; Jev checks each swap's
@@ -238,15 +262,60 @@ than the design has colors tries every subset of the right size. One with fewer
 merges: the lightness-sorted design colors split into contiguous runs, one per
 ink, so neighbors in lightness share an ink. Within a garment, book beats harmony
 and enough members beats merging (then the most members wins); a plan whose new
-ink is within the print minimum distance of the garment is flagged and used only
-when nothing else exists. The score is contrast and vanish as for the unchanged
-recommendation, plus fidelity, 1 minus the coverage-weighted distance from each
-design color to its ink over 100, so the least disruptive recolor wins ties. The
-prompt is a template over the mapping, naming each design element when a vision
-description supplies one. Flat art is detected from the fingerprint (its palette
-covers at least 90% of the design) and then from the pixels (at most 5% farther
-than the print minimum from every mapped color); recoloring snaps each visible
-pixel to its nearest mapped color and keeps its alpha.
+ink will not read on the garment (under 3:1, or within the print minimum
+distance of it, as `inkOnGarment` judges an opaque ink; before 0.6.0 only the
+distance counted) is flagged and used only when nothing else exists. The score
+is contrast and vanish as for the unchanged recommendation, plus fidelity, 1
+minus the coverage-weighted distance from each design color to its ink over
+100, so the least disruptive recolor wins ties. The prompt is a template over
+the mapping, naming each design element when a vision description supplies
+one. Recoloring is pigment substitution (since 0.6.0): each mapped color binds
+to the design's measured ink within 5, and `substitutePigments` swaps exactly
+those pigments, keeping each pixel's offset from its pigment and its alpha.
+Art the measurement marks approximate, a mapping covering less than 90% of the
+ink, or more than 5% of the pixels matching no pigment is left to the prompt.
+Each plan also carries its substitution on the measured inks and the recolored
+design's legibility verdict on its garment.
+
+**Print legibility (`ink-legibility-v2`, the engine entry point).** POD's
+Creative color study gated pairs on this rule from 2026-10-12, and since 0.6.0
+it lives here so the skill and POD apply the same verdict. A print file is
+decoded under one contract (`legibilitySampling`: crop to its content bounds
+plus 1% when known and not EXIF-rotated, then fit inside 1024 px with
+nearest-neighbor sampling, so a 10 px outline of a 4500 px file survives).
+`measureInkPixels` quantizes it to up to twelve inks (merge distance 5),
+assigns every visible pixel above half alpha to its nearest ink so shares sum
+to one, records each ink's median alpha and spread, and counts 4-neighbor edges
+between inks and transparency, noting marks one ink alone surrounds. Art whose
+palette covers under 85% of the ink, or with over 20% of the ink 10 or more
+from every ink, is approximate (a gradient or photograph). On a garment, each
+ink is laid over the garment at its median alpha in linear light and is legible
+at 3:1 or better (WCAG 2.2 for large text and graphics) and at least 10 apart
+in OKLab. A faint ink is framed when legible ink draws at least 60% of its own
+boundary: marks it fully encloses are left out, boundary with another faint
+ink counts as far as that ink is framed (solved by Gauss–Seidel), and
+approximate art frames nothing. A pair fails when 20% or more of the ink is
+lost or less than 20% reads on its own. The verdict carries each ink's ratio,
+distance, framing, and loss, and a reason sentence.
+
+Ranking uses the verdict as the gate (above). Recolor planning offers two
+methods as pigment substitutions in POD's stored shape (a key, label,
+rationale, and up to six `from`/`to`/`tolerance` replacements): the legible-ink
+plan per garment family that needs one (`legibleInkNeeds`), in which each ink
+under 3:1 on the family's median garment keeps its OKLCH hue and moves darker
+or lighter to 4.5:1 there (and 3:1 on the hardest garment when it can), dropped
+if two distinct inks would merge; and the Wada mappings of the best unflagged
+recolor plans for the garments the design fails, grouped by mapping. Tolerances
+reach as far as an ink's spread (4 to 35) but stop short of every other ink.
+`planArtworkOptions` applies each on the measured pixels, measures and judges
+the result on every garment, keeps every legible-ink option that adds a
+legible garment, then at most three Wada options as a greedy cover of what is
+still missing. Keys are deterministic, so a rerun finds the same options.
+
+The port from POD is arithmetic-identical: every float operation keeps its
+order, so the same pixels give the same bytes. `ENGINE_VERSION` records any
+change to an engine output, and every verdict records `LEGIBILITY_PROTOCOL`.
+`check(print)` is unchanged and checks only that a palette's colors stay apart.
 
 **Web outputs.** From any chosen combination, assign roles by contrast rules
 (background, text, accent, through the accessibility checker's `roles`) and derive
@@ -380,7 +449,11 @@ in the repo.
 
 Original and approved alternate inks compete in one candidate pool. A candidate
 must be visually reviewed for legibility and subject recognition before batch
-selection; deterministic contrast alone cannot understand outlined fills.
+selection; per-color contrast alone cannot understand outlined fills. Since
+0.6.0 the print legibility verdict does, and MCP `batch_product_colors` refuses
+an approved color the artwork fails it on; subject recognition stays a visual
+review. `selectBatchColors`'s variety penalty is `withDiversityPenalty`, which
+the engine's `rankArtworkGarmentPairs` reuses unchanged.
 `selectBatchColors` and MCP `batch_product_colors` preserve the reviewed default,
 select eight distinct colors per design, and retain artwork/prepared-rendition
 assignments. Repetition of exact garments, near shades and families provides a

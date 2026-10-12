@@ -7,6 +7,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { defaultProduct, loadAccessibility } from "../src/data/index.js";
 import { applyRecolor, type Fingerprint, fingerprint, recolorPixels } from "../src/fingerprint/index.js";
+import { inkOnGarment } from "../src/engine/index.js";
 import {
   mapByLightness,
   RECOLOR_WEIGHTS,
@@ -155,7 +156,26 @@ describe("recolorPlans", () => {
     const normal = recolorPlans(navyBadge, everyColor);
     const firstFlagged = normal.findIndex((p) => p.flagged);
     if (firstFlagged >= 0) expect(normal.slice(firstFlagged).every((p) => p.flagged)).toBe(true);
-    for (const plan of normal) expect(plan.flagged).toBe(plan.components.vanish > 0);
+    for (const plan of normal) {
+      const unreadable = plan.mapping.some((m) => !inkOnGarment(m.to.hex, 1, plan.color.hex).legible);
+      expect(plan.flagged).toBe(plan.components.vanish > 0 || unreadable);
+    }
+  });
+
+  it("flags a new ink under 3:1 on the garment even when it clears the print minimum distance", () => {
+    const plans = recolorPlans(flatMark, everyColor);
+    const spruce = plans.find((p) => p.color.slug === "blue-spruce")!;
+    const ink = spruce.mapping.find((m) => m.to.hex === "#c3a55c")!;
+    const on = inkOnGarment(ink.to.hex, 1, spruce.color.hex);
+    expect(on.ratio).toBeLessThan(3);
+    expect(on.distance).toBeGreaterThanOrEqual(10);
+    expect(spruce.components.vanish).toBe(0);
+    expect(spruce.flagged).toBe(true);
+    expect(spruce.warnings).toContain(
+      `#e8836b, 51% of the design, becomes Isabella Color #c3a55c, only ${on.ratio}:1 on Blue Spruce, under 3:1; it will not read on the shirt.`,
+    );
+    // Flagged plans rank after every unflagged one.
+    expect(plans.indexOf(spruce)).toBeGreaterThan(plans.map((p) => p.flagged).lastIndexOf(false));
   });
 
   it("returns the score as the weighted sum of its exposed components, highest first", () => {
@@ -245,43 +265,59 @@ describe("applyRecolor", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it("writes the flat design with only the mapped colors plus transparency", async () => {
+  it("writes the flat design by pigment substitution, keeping alpha and antialiased edges", async () => {
     const [plan] = recolorPlans(flatMark, { n: 1 });
     const out = join(dir, "out.png");
-    const result = await applyRecolor(FLAT_MARK, plan!.mapping, { out, fingerprint: flatMark });
+    const result = await applyRecolor(FLAT_MARK, plan!.mapping, { out });
     expect(result).toMatchObject({ applicable: true, out, width: 256, height: 256 });
+    if (!result.applicable) return;
+    expect(result.replacements.map((r) => [r.from, r.to])).toEqual(plan!.mapping.map((m) => [m.from.hex, m.to.hex]));
+    expect(result.unmatched).toBeLessThan(0.05);
 
     const before = await sharp(FLAT_MARK).ensureAlpha().raw().toBuffer();
     const after = await sharp(out).ensureAlpha().raw().toBuffer();
-    const allowed = new Set(plan!.mapping.map((m) => m.to.hex));
     const hex = (d: Buffer, i: number) =>
       `#${[d[i]!, d[i + 1]!, d[i + 2]!].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-    const seen = new Set<string>();
+    const counts = new Map<string, number>();
     for (let i = 0; i < after.length; i += 4) {
       expect(after[i + 3]).toBe(before[i + 3]);
       if (after[i + 3] === 0) continue;
-      seen.add(hex(after, i));
+      // Each pigment's exact pixels take exactly its new ink.
+      const was = hex(before, i);
+      const swap = plan!.mapping.find((m) => m.from.hex === was);
+      if (swap) expect(hex(after, i)).toBe(swap.to.hex);
+      counts.set(hex(after, i), (counts.get(hex(after, i)) ?? 0) + 1);
     }
-    expect(seen).toEqual(allowed);
+    // The new inks fill the design; the old ones survive only in edge blends no pigment reaches.
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([h]) => h);
+    expect(new Set(top)).toEqual(new Set(plan!.mapping.map((m) => m.to.hex)));
   });
 
-  it("declines photographic art from the fingerprint and writes nothing", async () => {
+  it("declines photographic art, whose main colors cover too little of the ink, and writes nothing", async () => {
     const [plan] = recolorPlans(photo, { n: 1 });
     const out = join(dir, "photo.png");
-    const result = await applyRecolor(PHOTO, plan!.mapping, { out, fingerprint: photo });
+    const result = await applyRecolor(PHOTO, plan!.mapping, { out });
     expect(result.applicable).toBe(false);
-    if (!result.applicable) expect(result.reason).toMatch(/cover only 52%.*use the prompt instead/);
+    if (!result.applicable) expect(result.reason).toMatch(/cover only 50% of the design's ink.*use the prompt instead/);
     expect(existsSync(out)).toBe(false);
   });
 
-  it("declines when too many pixels match no mapped color", async () => {
+  it("declines a mapping that leaves an ink out", async () => {
     const [plan] = recolorPlans(flatMark, { n: 1 });
     const out = join(dir, "partial.png");
-    // Map only the coral ring; the cream disc matches nothing.
+    // Map only the coral ring; the cream disc would keep its ink.
     const coralOnly = plan!.mapping.filter((m) => m.from.hex === "#e8836b");
-    const result = await applyRecolor(FLAT_MARK, coralOnly, { out, fingerprint: flatMark });
+    const result = await applyRecolor(FLAT_MARK, coralOnly, { out });
     expect(result.applicable).toBe(false);
-    if (!result.applicable) expect(result.reason).toMatch(/farther than 10 from every mapped color/);
+    if (!result.applicable) expect(result.reason).toMatch(/cover only 51% of the design's ink/);
     expect(existsSync(out)).toBe(false);
+  });
+
+  it("declines a mapping color the design does not contain", async () => {
+    const result = await applyRecolor(FLAT_MARK, [{ from: { hex: "#00ff00" }, to: { hex: "#000000" } }], {
+      out: join(dir, "none.png"),
+    });
+    expect(result.applicable).toBe(false);
+    if (!result.applicable) expect(result.reason).toMatch(/matches none of the design's measured inks/);
   });
 });

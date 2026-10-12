@@ -13,20 +13,18 @@ import { check, type AccessibilityOptions } from "./accessibility.js";
 import { combinations, type GeneratedHarmony } from "./combinations.js";
 import { contrastRatio } from "./color/contrast.js";
 import { distance, type Hex, normalizeHex, toOklab } from "./color/convert.js";
+import { storedAccessibility, storedColors, storedDefaultProduct, storedProduct } from "./data/store.js";
 import {
   type Accessibility,
   type DerivedColor,
   hasHex,
-  loadAccessibility,
-  loadColors,
-  loadProduct,
-  loadProductIndex,
   type Product,
   type ProductColorWithHex,
-} from "./data/index.js";
+} from "./data/types.js";
+import { inkOnGarment } from "./engine/legibility.js";
 import { equivalentsFor } from "./equivalents.js";
 import { nearest } from "./nearest.js";
-import type { DesignSummary } from "./recommend.js";
+import type { DesignSummary, GarmentColor } from "./recommend.js";
 
 // ---------------------------------------------------------------------------
 // Options
@@ -129,8 +127,8 @@ export interface RecolorComponents {
   fidelity: number;
 }
 
-export interface RecolorPlan {
-  color: ProductColorWithHex;
+export interface RecolorPlan<C extends GarmentColor = ProductColorWithHex> {
+  color: C;
   combination: RecolorCombination;
   /** One entry per design color, in the design's palette order. */
   mapping: RecolorMapping[];
@@ -144,7 +142,10 @@ export interface RecolorPlan {
    * colors, so neighbors in lightness share an ink.
    */
   merged: boolean;
-  /** True when a new ink vanishes into the garment. Flagged plans rank last. */
+  /**
+   * True when a new ink will not read on the garment: under 3:1, or within the
+   * print minimum distance of it (`inkOnGarment`). Flagged plans rank last.
+   */
   flagged: boolean;
   reasons: string[];
   warnings: string[];
@@ -159,11 +160,10 @@ const percent = (share: number) => `${Math.round(share * 100)}%`;
 
 const RANK_WORDS = ["", "nearest", "second nearest", "third nearest"];
 
-let cachedRules: Accessibility | undefined;
 let wadaByIndex: Map<number, DerivedColor> | undefined;
 
 function wadaColor(index: number): DerivedColor {
-  wadaByIndex ??= new Map(loadColors().map((c) => [c.index, c]));
+  wadaByIndex ??= new Map(storedColors().map((c) => [c.index, c]));
   const color = wadaByIndex.get(index);
   if (!color) throw new RangeError(`No Wada color with index ${index}.`);
   return color;
@@ -172,18 +172,20 @@ function wadaColor(index: number): DerivedColor {
 const ref = (c: DerivedColor): WadaRef => ({ index: c.index, name: c.name, hex: c.hex as Hex });
 
 function resolveProduct(product: RecolorOptions["product"]): Product {
-  if (product === undefined) return loadProduct(loadProductIndex().default);
-  return typeof product === "string" ? loadProduct(product) : product;
+  if (product === undefined) return storedDefaultProduct();
+  return typeof product === "string" ? storedProduct(product) : product;
 }
 
 /**
- * The garment's equivalents: the committed ones when the product is indexed,
- * else a live nearest match, as `recommendProductColors` falls back.
+ * The garment's equivalents: the committed ones when the product is indexed
+ * and they were computed from this hex, else a live nearest match, as
+ * `recommendProductColors` falls back.
  */
-function garmentEquivalents(product: Product, color: ProductColorWithHex, within: number): RecolorEquivalent[] {
+function garmentEquivalents(productId: string, color: GarmentColor, within: number): RecolorEquivalent[] {
   let stored: { index: number; name: string; distance: number }[] | undefined;
   try {
-    stored = equivalentsFor(product, color.slug)?.matches;
+    const equivalents = equivalentsFor(productId, color.slug);
+    if (equivalents?.hex && normalizeHex(equivalents.hex) === normalizeHex(color.hex)) stored = equivalents.matches;
   } catch {
     // A product passed in directly may not be in the index.
   }
@@ -325,8 +327,8 @@ function combinationPhrase(combination: RecolorCombination): string {
 // ---------------------------------------------------------------------------
 // recolorPlans
 
-interface Scored {
-  plan: RecolorPlan;
+interface Scored<C extends GarmentColor> {
+  plan: RecolorPlan<C>;
   /** Preference tier within a garment: lower wins. */
   tier: number;
   /** Design colors beyond the inks available, 0 unless merged: fewer wins within a tier. */
@@ -334,7 +336,7 @@ interface Scored {
 }
 
 /** Whether `a` is strictly better than `b` within one garment. */
-function better(a: Scored, b: Scored): boolean {
+function better<C extends GarmentColor>(a: Scored<C>, b: Scored<C>): boolean {
   if (a.tier !== b.tier) return a.tier < b.tier;
   if (a.shortfall !== b.shortfall) return a.shortfall < b.shortfall;
   return a.plan.score > b.plan.score;
@@ -358,22 +360,44 @@ function better(a: Scored, b: Scored): boolean {
  * score, so as few design colors as possible share an ink.
  *
  * With more members than design colors, every subset of the right size is
- * tried. A plan where any new ink is within the print minimum distance of the
- * garment is flagged, and used only when the garment has no other plan.
- * Garments are ranked unflagged first, then by score.
+ * tried. A plan where any new ink will not read on the garment, under 3:1 or
+ * within the print minimum distance of it, is flagged, and used only when the
+ * garment has no other plan. Garments are ranked unflagged first, then by
+ * score.
  *
  * @throws {RangeError} when the design has no colors, or `n` is not a positive integer.
  * @throws {Error} when the product ID is unknown.
  */
 export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}): RecolorPlan[] {
+  const product = resolveProduct(options.product);
+  const availableOnly = options.availableOnly ?? true;
+  const colors = product.colors.filter(hasHex).filter((color) => !availableOnly || color.available);
+  return recolorPlansFor(design, colors, { ...options, product });
+}
+
+export type RecolorGarmentsOptions = Omit<RecolorOptions, "availableOnly">;
+
+/**
+ * `recolorPlans` for any garment colors: a product's, a subset, or another
+ * catalog's colors with their own hexes. `product` names the catalog whose
+ * stored Wada equivalents apply to a garment whose hex they were computed
+ * from; other garments use their nearest Wada colors.
+ *
+ * @throws {RangeError} when the design has no colors, or `n` is not a positive integer.
+ * @throws {Error} when the product ID is unknown.
+ */
+export function recolorPlansFor<C extends GarmentColor>(
+  design: DesignSummary,
+  garments: readonly C[],
+  options: RecolorGarmentsOptions = {},
+): RecolorPlan<C>[] {
   const n = options.n ?? RECOLOR_PLAN_DEFAULTS.n;
   if (!(Number.isInteger(n) && n > 0)) throw new RangeError(`n must be a positive integer, got ${n}`);
   if (design.palette.length === 0) {
     throw new RangeError("The design has no visible colors to recolor.");
   }
-  const rules = options.rules ?? (cachedRules ??= loadAccessibility());
+  const rules = options.rules ?? storedAccessibility();
   const product = resolveProduct(options.product);
-  const availableOnly = options.availableOnly ?? true;
   const within = options.within ?? RECOLOR_PLAN_DEFAULTS.within;
   const target = rules.wcag.body.AA;
   const weights = options.weights ?? RECOLOR_WEIGHTS;
@@ -392,17 +416,16 @@ export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}
   });
 
   const cache = new Map<number, Candidate[]>();
-  const best: Scored[] = [];
-  for (const color of product.colors) {
-    if (!hasHex(color) || (availableOnly && !color.available)) continue;
-    let chosen: Scored | undefined;
-    for (const equivalent of garmentEquivalents(product, color, within)) {
+  const best: Scored<C>[] = [];
+  for (const color of garments) {
+    let chosen: Scored<C> | undefined;
+    for (const equivalent of garmentEquivalents(product.id, color, within)) {
       for (const candidate of candidatesFor(equivalent, cache)) {
         const merged = candidate.inks.length < entries.length;
         const inkSets = merged ? [candidate.inks] : subsets(candidate.inks, entries.length);
         for (const inks of inkSets) {
           const plan = buildPlan(color, candidate.combination, entries, inks, merged, { rules, target, weights });
-          const scored: Scored = {
+          const scored: Scored<C> = {
             plan,
             tier: (plan.flagged ? 4 : 0) + (merged ? 2 : 0) + (candidate.combination.source === "harmony" ? 1 : 0),
             shortfall: Math.max(0, entries.length - inks.length),
@@ -423,14 +446,14 @@ export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}
     .map((s) => s.plan);
 }
 
-function buildPlan(
-  color: ProductColorWithHex,
+function buildPlan<C extends GarmentColor>(
+  color: C,
   combination: RecolorCombination,
   entries: readonly DesignEntry[],
   inks: readonly DerivedColor[],
   merged: boolean,
   { rules, target, weights }: { rules: Accessibility; target: number; weights: RecolorWeights },
-): RecolorPlan {
+): RecolorPlan<C> {
   const garment = color.name;
   const assigned = mapByLightness(entries, inks);
   const mapping: RecolorMapping[] = entries.map((e) => {
@@ -451,6 +474,13 @@ function buildPlan(
   );
   const crowded = printed.pairs.filter(
     (p) => p.tooClose && p.background.hex !== normalizeHex(color.hex) && p.foreground.hex !== normalizeHex(color.hex),
+  );
+  // New inks clear of the garment that still will not read on it, by the legibility rule.
+  const unreadable = new Map(
+    used
+      .filter((ink) => !vanishing.has(ink.hex))
+      .map((ink) => [ink.hex, inkOnGarment(ink.hex, 1, color.hex)] as const)
+      .filter(([, on]) => !on.legible),
   );
 
   const ratios = mapping.map((m) => round(contrastRatio(m.to.hex, color.hex), 2));
@@ -499,6 +529,14 @@ function buildPlan(
         `${m.from.hex}, ${percent(m.from.share)} of the design, becomes ${m.to.name} ${m.to.hex}, ` +
         `within the print minimum of ${minimum} of ${garment}; it will vanish into the shirt.`,
     );
+  for (const m of mapping) {
+    const on = unreadable.get(m.to.hex);
+    if (!on) continue;
+    const why = on.ratio < 3 ? `only ${on.ratio}:1 on ${garment}, under 3:1` : `only ${on.distance} from ${garment}, under 10`;
+    warnings.push(
+      `${m.from.hex}, ${percent(m.from.share)} of the design, becomes ${m.to.name} ${m.to.hex}, ${why}; it will not read on the shirt.`,
+    );
+  }
   // Each unordered pair appears twice among the ordered pairs.
   for (const p of crowded.filter((p) => p.foreground.hex < p.background.hex)) {
     warnings.push(
@@ -517,7 +555,7 @@ function buildPlan(
     score: scoreRecolor(components, weights),
     components,
     merged,
-    flagged: vanishing.size > 0,
+    flagged: vanishing.size > 0 || unreadable.size > 0,
     reasons,
     warnings,
   };

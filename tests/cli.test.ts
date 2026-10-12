@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { EmbedResult } from "../src/cli/embed.js";
 import { HELP, packageVersion, run, stackSvg } from "../src/cli/index.js";
+import { ENGINE_VERSION } from "../src/engine/index.js";
 
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
 const NAVY_BADGE = join(import.meta.dirname, "fixtures", "designs", "navy-badge.png");
@@ -238,10 +239,18 @@ describe("cli", () => {
       expect(out).toContain("design colors clear 4.5:1 on");
     });
 
-    it("prints warnings for colors that vanish", async () => {
-      const c = capture();
-      await run(["recommend", NAVY_BADGE, "-n", "70"], c.io);
-      expect(c.out()).toMatch(/Warning: #4f5060 .* from Navy;/);
+    it("prints warnings for ink that is lost, and none for a faint band legible ink frames", async () => {
+      const lost = capture();
+      await run(["recommend", FLAT_MARK, "-n", "70"], lost.io);
+      expect(lost.out()).toMatch(/^\d+\. Denim · score [\d.]+ · illegible$/m);
+      expect(lost.out()).toMatch(
+        /Warning: #e8836b, 51% of the ink, is 2\.\d\d:1 on Denim, under 3:1, and no legible ink frames it/,
+      );
+      // The near-Navy band vanishes into Navy, but the cream around it draws its edges.
+      const framed = capture();
+      await run(["recommend", NAVY_BADGE, "-n", "70"], framed.io);
+      expect(framed.out()).toMatch(/^\d+\. Navy · score [\d.]+ · legible$/m);
+      expect(framed.out()).not.toMatch(/Warning: .* Navy/);
     });
 
     it("prints the picks as JSON", async () => {
@@ -252,6 +261,10 @@ describe("cli", () => {
       expect(json.design.palette).toHaveLength(2);
       expect(json.picks).toHaveLength(5);
       expect(Object.keys(json.picks[0].components)).toEqual(["contrast", "vanish", "inkFit", "bookPairing"]);
+      expect(json.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+      expect(json.measurement.protocol).toBe("ink-legibility-v2");
+      expect(json.picks[0]).toMatchObject({ vanishBasis: "lost-ink", legibility: { pass: true } });
+      expect(json.picks[0].components.vanish).toBe(json.picks[0].legibility.lostShare);
     });
 
     it("writes each pick as a product card with the design's colors as chips", async () => {
@@ -306,6 +319,46 @@ describe("cli", () => {
           expect(plan.applied).toMatchObject({ applicable: true, out: join(dir, `flat-mark-${plan.color.slug}.png`) });
         }
         expect(readdirSync(dir)).toHaveLength(2);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe("legibility", () => {
+    it("prints the verdict for each named garment color", async () => {
+      const c = capture();
+      expect(await run(["legibility", FLAT_MARK, "--colors", "Black, Denim"], c.io)).toBe(0);
+      const out = c.out();
+      expect(out.split("\n")[1]).toBe(`ink-legibility-v2, engine ${ENGINE_VERSION}: the ink reads on 1 of 2 garment colors.`);
+      expect(out).toContain("Legible: Black #1f1d1e\n  100% of the ink reads at 3:1 or better on Black");
+      expect(out).toMatch(/Illegible: Denim #[0-9a-f]{6}\n {2}#e8836b \(51% of the ink\) is 2\.\d\d:1 on Denim/);
+    });
+
+    it("prints the verdicts as JSON, cropping to the content bounds", async () => {
+      const c = capture();
+      const wide = join(import.meta.dirname, "fixtures", "engine", "wide-outlined-panel.png");
+      expect(await run(["legibility", wide, "--json", "--bounds", "0.25,0.2917,0.4583,0.3333", "--colors", "Ivory"], c.io)).toBe(0);
+      const json = JSON.parse(c.out());
+      expect(json.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+      expect(json.measurement.sampledWidth).toBe(1024);
+      expect(json.measurement.sampledHeight).toBeLessThan(1024);
+      expect(json.verdicts).toHaveLength(1);
+      expect(json.verdicts[0]).toMatchObject({ colorName: "Ivory", pass: true });
+    });
+  });
+
+  describe("options", () => {
+    it("plans artwork options that add legible garments and writes them with --apply", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "cli-options-"));
+      try {
+        const c = capture();
+        expect(await run(["options", FLAT_MARK, "--count", "8", "--apply", dir, "--json"], c.io)).toBe(0);
+        const json = JSON.parse(c.out());
+        expect(json.colorCount).toBe(8);
+        expect(json.options[0].plan.key).toBe("legible-dark-ink-v1");
+        expect(json.applied.map((a: { key: string }) => a.key)).toEqual(json.options.map((o: { plan: { key: string } }) => o.plan.key));
+        expect(readdirSync(dir).sort()).toEqual(json.options.map((o: { plan: { key: string } }) => `flat-mark-${o.plan.key}.png`).sort());
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
@@ -374,6 +427,8 @@ describe("cli", () => {
       [["recommend", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
       [["recolor", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["recolor", FLAT_MARK, "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
+      [["legibility", FLAT_MARK, "--colors", "Chartreuse"], 'unknown color "Chartreuse" for comfort-colors-1717'],
+      [["options", "no/such/design.png"], 'no such design file "no/such/design.png"'],
       [["palettes", "Chartreuse"], 'has no color named "Chartreuse". Colors: Banana, Bay,'],
       [["palettes", "Blue Spruce", "--product", "no-such-shirt"], 'Unknown product "no-such-shirt"'],
     ])("exits 1 for %j", async (argv, message) => {
@@ -391,11 +446,20 @@ describe("cli", () => {
       [["combos", "red", "--limit", "2.5"], "--limit must be a positive integer"],
       [["nearest", "red", "--size", "3"], "--size applies only to combos and palettes"],
       [["combos", "red", "-k", "3"], "-k applies only to nearest"],
-      [["combos", "red", "--product", "comfort-colors-1717"], "--product applies only to recommend, recolor, and palettes"],
+      [
+        ["combos", "red", "--product", "comfort-colors-1717"],
+        "--product applies only to recommend, recolor, palettes, legibility, and options",
+      ],
       [["nearest", "red", "-n", "3"], "-n applies only to recommend"],
       [["recommend"], "recommend takes one design file"],
       [["recolor"], "recolor takes one design file"],
-      [["recommend", FLAT_MARK, "--apply", "out"], "--apply applies only to recolor"],
+      [["legibility"], "legibility takes one design file"],
+      [["options", FLAT_MARK, FLAT_MARK], "options takes one design file"],
+      [["recommend", FLAT_MARK, "--apply", "out"], "--apply applies only to recolor and options"],
+      [["recommend", FLAT_MARK, "--count", "8"], "--count applies only to options"],
+      [["palettes", "Pepper", "--colors", "Black"], "--colors applies only to recommend, legibility, and options"],
+      [["legibility", FLAT_MARK, "--bounds", "0.1,0.2,0"], "--bounds must be x,y,w,h fractions from 0 to 1"],
+      [["legibility", FLAT_MARK, "--colors", " , "], "--colors needs at least one color name"],
       [["recommend", FLAT_MARK, "--vet"], "--vet applies only to recolor"],
       [["recolor", FLAT_MARK, "--include-implausible"], "--include-implausible applies only with --vet"],
       [["palettes"], "palettes needs a product color name"],

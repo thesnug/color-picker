@@ -25,7 +25,7 @@ package's reviewed garment data.
 Claude Code:
 
 ```bash
-claude mcp add --scope user color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx -y -p github:thesnug/color-picker#v0.5.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp
+claude mcp add --scope user color-picker -e TYPESAFE_API_KEY="$TYPESAFE_API_KEY" -- npx -y -p github:thesnug/color-picker#v0.6.0 -p "sharp@^0.35.4" -p "@typesafe-ai/sdk@^0.6.0" -p @modelcontextprotocol/sdk -p zod color-picker-mcp
 ```
 
 Codex, in `~/.codex/config.toml`:
@@ -33,7 +33,7 @@ Codex, in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.color-picker]
 command = "npx"
-args = ["-y", "-p", "github:thesnug/color-picker#v0.5.0", "-p", "sharp@^0.35.4", "-p", "@typesafe-ai/sdk@^0.6.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
+args = ["-y", "-p", "github:thesnug/color-picker#v0.6.0", "-p", "sharp@^0.35.4", "-p", "@typesafe-ai/sdk@^0.6.0", "-p", "@modelcontextprotocol/sdk", "-p", "zod", "color-picker-mcp"]
 startup_timeout_sec = 120
 env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 ```
@@ -41,7 +41,7 @@ env_vars = ["TYPESAFE_API_KEY", "OPENROUTER_API_KEY"]
 When `mood` or `vet` invokes a configured vision provider, the design image may
 leave this machine. A request to analyze the supplied design authorizes reading
 it; ask only if the intended provider use is outside the user's request. For
-`recolor_plans`, omit `outDir` when planning only. If applying recolors, choose
+`recolor_plans` and `artwork_options`, omit `outDir` when planning only. If applying recolors, choose
 an output directory where writing PNGs is appropriate; existing files there may
 be overwritten.
 
@@ -68,7 +68,9 @@ deterministically, and the reply's `mood` or `vet` field says why.
 | Palettes for a color, hex, or name | `combinations` |
 | Palettes for a shirt color by name ("what goes with Pepper") | `palettes_for_product_color` |
 | Which shirt colors suit an existing design, including a draft | `recommend_product_colors` |
+| Whether a design's ink reads on given shirts, before proposing, approving, or publishing | `check_print_legibility` |
 | The design's colors changed to suit each shirt | `recolor_plans` |
+| Alternate inks so a design reads on the shirts it fails | `artwork_options` |
 | The Wada name for a hex, or the closest book colors | `nearest_colors` |
 | Site or app colors | `theme` |
 | A verdict on colors they already have | `check_accessibility` (`print` for fabric, `web-text` or `web-ui` for screens) |
@@ -90,7 +92,25 @@ Defaults:
   Jev is unavailable, inspect the reply's `mood` or `vet` reason and use the
   deterministic result with that limitation stated.
 - **Designs:** `designPath` as an absolute path on this machine. Use
-  `designBase64` when bytes are supplied without a usable path.
+  `designBase64` when bytes are supplied without a usable path. Pass
+  `contentBounds` when the project has measured the print's visible content
+  (POD does), so the measurement matches POD's.
+
+## Legibility
+
+Whether a print reads on a shirt comes from one rule, the ink-legibility-v2
+verdict, in every tool that judges it and in POD's Creative color study, which
+runs the same engine: each ink laid on the garment must reach 3:1 and sit 10
+apart in OKLab, unless legible ink frames it (a pale fill inside a dark
+outline); a garment fails when a fifth of the ink is lost or less than a fifth
+reads. `recommend_product_colors` ranks the garments a design passes first,
+and each pick's `legibility` gives the verdict and its reason.
+`check_print_legibility` judges chosen garments, `artwork_options` plans
+pigment substitutions that add legible garments, and `recolor_plans` reports
+each plan's verdict on its garment. Replies carry `engine` (version and
+protocol): cite it when comparing with POD's study evidence.
+`check_accessibility` with `print` checks only that a palette's colors stay
+distinct from each other; it is not a legibility verdict.
 
 ## Batch apparel and publication
 
@@ -123,9 +143,10 @@ another format.
    Calamine Blue, combination 176." Name garments by their product name
    ("Graphite"), and a design's own colors by the Wada names the reply gives
    them (`wada.name`): "an Apricot Orange ring on a Sulphur Yellow center."
-3. **Carry relevant warnings.** Explain what the reply flags: design colors that
-   would vanish into a shirt, garment colors the provider does not stock,
-   failed contrast pairs, and the `mood` or `vet` reason when Jev did not run.
+3. **Carry relevant warnings.** Explain what the reply flags: ink the
+   legibility verdict calls lost on a shirt, garment colors the provider does
+   not stock, failed contrast pairs, and the `mood` or `vet` reason when Jev
+   did not run. Never present an illegible pick as a recommendation.
 
 For palette and garment recommendations, pair hex codes with color names. If
 the user asks for machine-readable codes, provide them in the requested format.
