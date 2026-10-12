@@ -410,8 +410,11 @@ judgeLegibility(analysis.measurement, { colorName: "Ivory", hex: "#fff7e7" }).re
 - **Rank.** `rankGarments` puts the garments the design passes first, then
   ranks by the recommendation score with `vanish` set to the share of ink the
   verdict calls lost. `rankArtworkGarmentPairs` orders artwork and garment
-  pairs for inspection: legible pairs only, each color's best artwork first,
-  colors chosen with the batch variety penalty.
+  pairs for inspection, as POD's Creative color study explores them: legible
+  pairs only; each color led by the artwork that departs least from the
+  approved art (the original, then a hue-keeping option, then a Wada repaint);
+  the original's colors first, then the colors only an option reads on; within
+  each, by score with the batch variety penalty.
 - **Recolor.** `planLegibleInkOptions` moves each faint ink darker or lighter
   in its own hue until it reads on a garment family. `toSubstitutionPlan` turns
   a Wada `RecolorPlan` into pigment substitutions on the measured inks.
@@ -511,6 +514,8 @@ color-picker palettes "Black" --mood --design art/light-ink.png
 color-picker recolor art/flat-mark.png --apply out/  # with recoloring
 color-picker recolor art/strawberry.png --vet  # drop recolors Jev finds implausible
 color-picker options art/lettering.png --apply out/  # inks that read on more shirts
+color-picker pairs art/lettering.png --option legible-ink:out/lettering-legible-dark-ink-v1.png
+                                              # the order POD's study tries them in
 color-picker theme 348                        # a web theme from a combination
 color-picker theme "hermosa pink" --format css
 color-picker theme "#1a1a40" --mode dark --format tailwind
@@ -624,6 +629,7 @@ To run it without installing it in a project, as the
 | `check_print_legibility` | Judge whether a print file's ink reads on garment colors (`ink-legibility-v2`) |
 | `recolor_plans` | Plan a recolor of a design for each garment, with each plan's legibility, and optionally write the PNGs |
 | `artwork_options` | Plan pigment substitutions that make a design read on the garments it fails |
+| `rank_artwork_pairs` | Order a design's and its Artwork Options' garment pairs as POD's Creative color study explores them |
 | `theme` | Build a light or dark web theme, with CSS, Tailwind, and design tokens |
 | `check_accessibility` | Check colors for WCAG and APCA contrast, print separation between colors, and color-vision safety |
 | `list_products` | List products, or one product's colors and stock |
@@ -643,7 +649,7 @@ Design tools take `designPath`, a file on the server's machine, or
 visible content as fractions of the canvas. Fingerprints are cached by file
 hash, so repeat calls about the same design skip decoding. The tools that
 measure a print (`recommend_product_colors`, `check_print_legibility`,
-`recolor_plans`, `artwork_options`) call the engine entry point and carry
+`recolor_plans`, `artwork_options`, `rank_artwork_pairs`) call the engine entry point and carry
 `engine: { version, protocol }` and the `measurement` in their replies.
 
 The Jev judgments are opt-in. `recommend_product_colors` and

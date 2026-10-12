@@ -365,6 +365,41 @@ describe("cli", () => {
     });
   });
 
+  describe("pairs", () => {
+    it("orders the design and its written Artwork Options as the study explores them", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "cli-pairs-"));
+      try {
+        const planned = capture();
+        expect(await run(["options", FLAT_MARK, "--apply", dir, "--json"], planned.io)).toBe(0);
+        const options = JSON.parse(planned.out()).options as { plan: { key: string }; source: string }[];
+        const c = capture();
+        const argv = ["pairs", FLAT_MARK, "--count", "4", "--preferred", "black", "--json"];
+        for (const o of options) argv.push("--option", `${o.source}:${join(dir, `flat-mark-${o.plan.key}.png`)}`);
+        expect(await run(argv, c.io)).toBe(0);
+        const json = JSON.parse(c.out());
+        expect(json.colorCount).toBe(4);
+        expect(json.artworks.map((a: { artworkId: string }) => a.artworkId)).toEqual([
+          "original",
+          ...options.map((o) => `flat-mark-${o.plan.key}`),
+        ]);
+        expect(json.pairs[0]).toMatchObject({ colorName: "Black", artworkId: "original", source: "original" });
+        expect(json.pairs[0].reason).toMatch(/^Pick 1 of 4 \(the preferred color\): Black with the original artwork original/);
+        expect(json.pairs.some((p: { source: string }) => p.source === "legible-ink")).toBe(true);
+        const text = capture();
+        expect(await run(argv.filter((a) => a !== "--json"), text.io)).toBe(0);
+        expect(text.out().split("\n")[3]).toMatch(/^1\. Black · original \(original\) · score /);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects a malformed --option", async () => {
+      const c = capture();
+      expect(await run(["pairs", FLAT_MARK, "--option", "repaint:x.png"], c.io)).toBe(2);
+      expect(c.err()).toContain("--option must be legible-ink:<file> or wada:<file>");
+    });
+  });
+
   describe("palettes", () => {
     it("lists palettes for a garment color, the garment first", async () => {
       const c = capture();
@@ -448,7 +483,7 @@ describe("cli", () => {
       [["combos", "red", "-k", "3"], "-k applies only to nearest"],
       [
         ["combos", "red", "--product", "comfort-colors-1717"],
-        "--product applies only to recommend, recolor, palettes, legibility, and options",
+        "--product applies only to recommend, recolor, palettes, legibility, options, and pairs",
       ],
       [["nearest", "red", "-n", "3"], "-n applies only to recommend"],
       [["recommend"], "recommend takes one design file"],
@@ -456,8 +491,8 @@ describe("cli", () => {
       [["legibility"], "legibility takes one design file"],
       [["options", FLAT_MARK, FLAT_MARK], "options takes one design file"],
       [["recommend", FLAT_MARK, "--apply", "out"], "--apply applies only to recolor and options"],
-      [["recommend", FLAT_MARK, "--count", "8"], "--count applies only to options"],
-      [["palettes", "Pepper", "--colors", "Black"], "--colors applies only to recommend, legibility, and options"],
+      [["recommend", FLAT_MARK, "--count", "8"], "--count applies only to options and pairs"],
+      [["palettes", "Pepper", "--colors", "Black"], "--colors applies only to recommend, legibility, options, and pairs"],
       [["legibility", FLAT_MARK, "--bounds", "0.1,0.2,0"], "--bounds must be x,y,w,h fractions from 0 to 1"],
       [["legibility", FLAT_MARK, "--colors", " , "], "--colors needs at least one color name"],
       [["recommend", FLAT_MARK, "--vet"], "--vet applies only to recolor"],

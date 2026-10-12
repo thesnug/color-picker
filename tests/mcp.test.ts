@@ -25,6 +25,7 @@ const TOOLS = [
   "check_print_legibility",
   "recolor_plans",
   "artwork_options",
+  "rank_artwork_pairs",
   "theme",
   "check_accessibility",
   "list_products",
@@ -301,6 +302,40 @@ describe("mcp over stdio", () => {
     }
     expect(readdirSync(outDir)).toHaveLength(reply.options.length);
     expectSvg(reply);
+  });
+
+  it("rank_artwork_pairs over the design and the options artwork_options wrote", async () => {
+    const outDir = join(scratch, "pair-options");
+    const planned = (await call("artwork_options", { designPath: FLAT_MARK, outDir })).json();
+    const reply = (
+      await call("rank_artwork_pairs", {
+        artworks: [
+          { artworkId: "original", designPath: FLAT_MARK, source: "original" },
+          ...planned.options.map((o: any) => ({
+            artworkId: o.plan.key,
+            designPath: planned.applied.find((a: any) => a.key === o.plan.key).out,
+            source: o.source,
+          })),
+        ],
+        colorCount: 4,
+      })
+    ).json();
+    expect(reply.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+    expect(reply.pairs.every((p: any) => p.legibility.pass)).toBe(true);
+    // The original leads every color it reads on, and those colors come first.
+    const leads = reply.pairs.filter((p: any, i: number) => reply.pairs.findIndex((q: any) => q.colorName === p.colorName) === i);
+    const firstOption = leads.findIndex((p: any) => p.source !== "original");
+    expect(firstOption).toBeGreaterThan(0);
+    expect(leads.slice(firstOption).every((p: any) => p.source !== "original")).toBe(true);
+    expectSvg(reply);
+    const duplicate = await call("rank_artwork_pairs", {
+      artworks: [
+        { artworkId: "a", designPath: FLAT_MARK, source: "original" },
+        { artworkId: "a", designPath: FLAT_MARK, source: "wada" },
+      ],
+    });
+    expect(duplicate.isError).toBe(true);
+    expect(duplicate.text).toContain('two artworks share the ID "a"');
   });
 
   it("recolor_plans refuses includeImplausible without vet", async () => {

@@ -5,7 +5,9 @@
  *
  * - Legible ink: each ink under 3:1 on a garment family's median color keeps
  *   its hue and moves darker (for light garments) or lighter (for dark ones)
- *   until it reads. Ported unchanged from POD's `ink-legibility-v2`.
+ *   until it reads. Ported from POD's `ink-legibility-v2`; since engine 1.1.0
+ *   each tolerance reaches halfway to the nearest other ink, not just the
+ *   ink's spread, so distressed pixels change with their ink.
  * - Wada: the design's colors mapped onto a book combination or harmony
  *   around a garment's Wada equivalent, keeping their lightness order
  *   (`recolorPlans`).
@@ -79,7 +81,13 @@ export function validateSubstitutionPlan<T extends SubstitutionPlan>(plan: T): T
 
 const chebyshev = (a: Rgb, b: Rgb) => Math.max(...a.map((v, i) => Math.abs(v - b[i]!)));
 
-/** The largest tolerance that recolors the ink's pixels without reaching another ink's. */
+/**
+ * The largest tolerance, up to `ceiling`, that recolors the ink's pixels without reaching
+ * another ink's: just under half the per-channel gap to the nearest other measured ink. Two
+ * inks' tolerances so computed never overlap. The engine's own plans pass the 35 ceiling, so
+ * every pixel nearer the ink than halfway to its neighbor changes, distressed and textured
+ * pixels included; the ink's spread (its 90th percentile) would leave a tenth of them behind.
+ */
 function recolorTolerance(cluster: InkCluster, measurement: InkMeasurement, ceiling: number) {
   const rgb = hexToRgb(cluster.hex);
   const gap = Math.min(
@@ -161,11 +169,7 @@ export function planLegibleInkOptions(input: {
       replacements.push({
         from: cluster.hex,
         to,
-        tolerance: recolorTolerance(
-          cluster,
-          input.measurement,
-          Math.min(R.recolorMaximumTolerance, Math.max(4, cluster.spread)),
-        ),
+        tolerance: recolorTolerance(cluster, input.measurement, R.recolorMaximumTolerance),
       });
     }
     if (!replacements.length) continue;
@@ -224,10 +228,10 @@ export function snapSubstitutionPlan(plan: SubstitutionPlan, measurement: InkMea
 /**
  * Pigment substitutions for a from-to color mapping (a `RecolorPlan`'s
  * `mapping`) on a measured design: each `from` binds to the measured ink
- * within 5 of it, with a tolerance as wide as the ink's spread (4 to 35) but
- * clear of every other ink. Mappings that keep their ink are left out unless
- * `keepIdentity` is set. Null when a `from` matches no measured ink, or two
- * map one ink apart.
+ * within 5 of it, with a tolerance reaching just under halfway to the nearest
+ * other measured ink (at most 35), so it never reaches another ink's pixels.
+ * Mappings that keep their ink are left out unless `keepIdentity` is set.
+ * Null when a `from` matches no measured ink, or two map one ink apart.
  */
 export function substitutionReplacements(
   mapping: ReadonlyArray<{ from: { hex: string }; to: { hex: string } }>,
@@ -251,11 +255,7 @@ export function substitutionReplacements(
     }
     bound.set(cluster.hex, to);
     if (to === cluster.hex && !options.keepIdentity) continue;
-    replacements.push({
-      from: cluster.hex,
-      to,
-      tolerance: recolorTolerance(cluster, measurement, Math.min(R.recolorMaximumTolerance, Math.max(4, cluster.spread))),
-    });
+    replacements.push({ from: cluster.hex, to, tolerance: recolorTolerance(cluster, measurement, R.recolorMaximumTolerance) });
   }
   return replacements;
 }

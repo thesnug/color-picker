@@ -15,7 +15,7 @@ tools and POD's Creative color study call the same functions.
 
 ### Engine
 
-- New entry point `@thesnug/color-picker/engine` (`ENGINE_VERSION` 1.0.0,
+- New entry point `@thesnug/color-picker/engine` (`ENGINE_VERSION` 1.1.0,
   `LEGIBILITY_PROTOCOL` `ink-legibility-v2`): `legibilitySampling`,
   `measureInkPixels`, `analyzeDesign`, `inkOnGarment`, `judgeLegibility`,
   `garmentFamily`, `legibleInkNeeds`, `garmentsFromProduct`, `rankGarments`,
@@ -24,10 +24,22 @@ tools and POD's Creative color study call the same functions.
   `substitutePigments`, and `RecolorPigmentError`, plus re-exports of the pure
   core. Its import closure has no `node:` modules or file reads, so POD can
   vendor it; CI checks that after the build (`npm run engine:purity`).
-- `tests/fixtures/engine/` records what the MCP tools answer for seven
-  synthetic print files. A test fails when an answer changes, and re-recording
-  a changed answer without bumping `ENGINE_VERSION` is refused. POD vendors the
+- `tests/fixtures/engine/` records what the MCP tools answer for eight
+  synthetic print files, including the exploration order over each file and
+  its Artwork Options. A test fails when an answer changes, and re-recording a
+  changed answer without bumping `ENGINE_VERSION` is refused. POD vendors the
   fixtures for its drift test.
+- `rankArtworkGarmentPairs` takes each artwork's `source` (`original`,
+  `legible-ink`, or `wada`) and orders by departure from the approved art
+  before score: each color leads with the original where it reads, then a
+  hue-keeping option, then a Wada repaint, and colors come in that order of
+  departure. A Wada repaint scores higher on most garments, and ranking by
+  score alone put repaints ahead of the approved art.
+- Engine recolor tolerances reach just under halfway to the nearest other ink
+  (at most 35) instead of stopping at the ink's 90th-percentile spread, which
+  left about a tenth of a distressed ink's pixels in the old color.
+  `substitutePigments` also returns `unmatched`, the alpha-weighted share of
+  visible pixels no replacement reached.
 
 ### Behavior changes
 
@@ -46,12 +58,17 @@ tools and POD's Creative color study call the same functions.
 - **`applyRecolor`, `recolor_plans` `outDir`, and `recolor --apply`** substitute
   pigments instead of snapping every pixel to its nearest mapped color:
   antialiased edges keep their blend, and only mapped inks change. The result
-  adds `replacements` and `changed`; `unmatched` is now the share of visible
-  pixels no pigment matched. Art the measurement marks approximate, or a
-  mapping that covers less than 90% of the ink, is left to the prompt;
-  `tolerance` is no longer read.
-- **`recolor_plans`** plans carry `substitution` (null for a plan that merges
-  inks) and `legibility`, the recolored design's verdict on its garment.
+  adds `replacements` and `changed`; `unmatched` is the alpha-weighted share
+  of visible pixels no pigment matched, so near-transparent residue around a
+  print barely counts. Art the measurement marks approximate, or a mapping
+  that covers less than 90% of the ink, is left to the prompt; `tolerance` is
+  no longer read.
+- **`recolor_plans`** plans from the engine's measured inks, as
+  `artwork_options` and POD do, rather than the 512 px fingerprint palette, so
+  every plan binds to the measured inks. Plans carry `substitution` (null for a
+  plan that merges inks) and `legibility`, the recolored design's verdict on
+  its garment. With `vet`, the description's elements name the measured ink
+  nearest their color. `design` is the measured summary.
 - **`batch_product_colors`** refuses an approved color the artwork fails the
   verdict on.
 - Stored Wada equivalents name a garment only when they were computed from its
@@ -60,9 +77,11 @@ tools and POD's Creative color study call the same functions.
 ### CLI and MCP
 
 - New tools `check_print_legibility` (verdicts for product colors or garments
-  given by hex) and `artwork_options` (pigment substitutions that add legible
-  garments, optionally written as PNGs), and CLI commands `legibility` and
-  `options`, with `--colors`, `--bounds`, and `--count`.
+  given by hex), `artwork_options` (pigment substitutions that add legible
+  garments, optionally written as PNGs), and `rank_artwork_pairs` (the order
+  POD's Creative color study explores a design and its Artwork Options in), and
+  CLI commands `legibility`, `options`, and `pairs`, with `--colors`,
+  `--bounds`, `--count`, `--option`, and `--preferred`.
 - `check_accessibility` says that `print` checks palette separation only.
 
 ### Library

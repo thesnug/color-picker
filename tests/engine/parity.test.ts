@@ -20,11 +20,12 @@ import {
   LEGIBILITY_PROTOCOL,
   legibleInkNeeds,
   planArtworkOptions,
+  rankArtworkGarmentPairs,
   rankGarments,
   recolorPlans,
   toSubstitutionPlan,
 } from "../../src/engine/index.js";
-import { decodeForLegibility, fingerprint } from "../../src/fingerprint/index.js";
+import { decodeForLegibility } from "../../src/fingerprint/index.js";
 import { ResultStore, type ToolDefinition, toolDefinitions } from "../../src/mcp/tools.js";
 
 const manifest = readManifest();
@@ -91,10 +92,30 @@ describe.each(manifest.fixtures)("MCP tools equal the engine for $file", (fixtur
     );
   });
 
-  it("recolor_plans", async () => {
+  it("rank_artwork_pairs", async () => {
+    const reply = await call("rank_artwork_pairs", {
+      artworks: [{ artworkId: "original", designPath, source: "original", ...bounds }],
+      product: manifest.product,
+      colorCount: manifest.colorCount,
+    });
+    const { analysis, garments } = await engine();
+    expect(reply.pairs).toEqual(
+      wire(
+        rankArtworkGarmentPairs({
+          artworks: [{ artworkId: "original", analysis, source: "original" }],
+          garments,
+          colorCount: manifest.colorCount,
+          product: manifest.product,
+        }),
+      ),
+    );
+  });
+
+  it("recolor_plans, planned from the measured inks artwork_options and POD plan from", async () => {
     const reply = await call("recolor_plans", { ...args, n: 5 });
     const { analysis, pixels } = await engine();
-    const plans = recolorPlans(await fingerprint(designPath, { cache: false }), { product: manifest.product, n: 5 });
+    const plans = recolorPlans(analysis.summary, { product: manifest.product, n: 5 });
+    expect(reply.plans.map((p: any) => p.mapping)).toEqual(wire(plans.map((p) => p.mapping)));
     expect(reply.plans.map((p: any) => p.color.slug)).toEqual(plans.map((p) => p.color.slug));
     reply.plans.forEach((plan: any, i: number) => {
       expect(plan.substitution).toEqual(wire(toSubstitutionPlan(plans[i]!, analysis.measurement)));

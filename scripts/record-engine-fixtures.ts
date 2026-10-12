@@ -5,7 +5,9 @@
  * - `measurement`: the ink measurement (`check_print_legibility`).
  * - `verdicts`: the ink-legibility-v2 verdict on every stocked garment color.
  * - `ranking`: `recommend_product_colors` over every stocked color, in order.
- * - `pairs`: `rankArtworkGarmentPairs` for the file as the only artwork.
+ * - `pairs`: `rank_artwork_pairs` over the file (artwork `original`) and each
+ *   Artwork Option as `artwork_options` writes it (artwork `<plan key>`): the
+ *   order POD's Creative color study explores them in.
  * - `artworkOptions`: `artwork_options` for the manifest's color count.
  * - `substitutedSha256`: for each option, the SHA-256 of the RGBA pixels of the
  *   full-size file after `substitutePigments`, as POD's recolor writes them.
@@ -29,16 +31,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import sharp from "sharp";
 
 import {
+  type ArtworkGarmentPair,
   type ArtworkOption,
+  type ArtworkSource,
   ENGINE_VERSION,
   type InkMeasurement,
   LEGIBILITY_PROTOCOL,
   type LegibilityVerdict,
-  rankArtworkGarmentPairs,
-  garmentsFromProduct,
   substitutePigments,
 } from "../src/engine/index.js";
-import { analyzeDesignFile } from "../src/fingerprint/index.js";
 import { ResultStore, toolDefinitions } from "../src/mcp/tools.js";
 import type { FixtureManifest } from "./make-engine-fixtures.js";
 
@@ -56,7 +57,15 @@ export interface ExpectedOutputs {
   measurement: InkMeasurement;
   verdicts: LegibilityVerdict[];
   ranking: { colorName: string; pass: boolean; score: number; lostShare: number }[];
-  pairs: { artworkId: string; colorName: string; score: number; pass: boolean; lostShare: number; reason: string }[];
+  pairs: {
+    artworkId: string;
+    source: ArtworkSource;
+    colorName: string;
+    score: number;
+    pass: boolean;
+    lostShare: number;
+    reason: string;
+  }[];
   artworkOptions: { colorCount: number; legibleColors: string[]; needs: string[]; options: ArtworkOption[] };
   substitutedSha256: Record<string, string>;
 }
@@ -111,16 +120,25 @@ export async function recordAll(): Promise<ExpectedOutputs[]> {
 
       const legibility = await call("check_print_legibility", common);
       const recommended = await call("recommend_product_colors", { ...common, n: 100 });
-      const options = await call("artwork_options", { ...common, colorCount: manifest.colorCount });
+      const outDir = join(cardDir, fixture.file.replace(/\.png$/, ""));
+      const options = await call("artwork_options", { ...common, colorCount: manifest.colorCount, outDir });
 
-      // Pairs have no tool of their own; the study calls the engine directly.
-      const { analysis } = await analyzeDesignFile(bytes, { contentBounds: fixture.contentBounds });
-      const pairs = rankArtworkGarmentPairs({
-        artworks: [{ artworkId: "original", analysis, original: true }],
-        garments: garmentsFromProduct(manifest.product),
-        colorCount: manifest.colorCount,
+      // The study's exploration order over the original and every option, each from its written file.
+      const written = options.applied as { key: string; out: string }[];
+      const ranked = await call("rank_artwork_pairs", {
+        artworks: [
+          { artworkId: "original", designPath, source: "original", ...bounds },
+          ...(options.options as ArtworkOption[]).map((option) => ({
+            artworkId: option.plan.key,
+            designPath: written.find((w) => w.key === option.plan.key)!.out,
+            source: option.source,
+            ...bounds,
+          })),
+        ],
         product: manifest.product,
+        colorCount: manifest.colorCount,
       });
+      const pairs = ranked.pairs as ArtworkGarmentPair[];
 
       // The full-size file as POD's recolor decodes it: no resize, sRGB, alpha.
       const { data, info } = await sharp(bytes).toColorspace("srgb").ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -148,6 +166,7 @@ export async function recordAll(): Promise<ExpectedOutputs[]> {
         })),
         pairs: pairs.map((p) => ({
           artworkId: p.artworkId,
+          source: p.source,
           colorName: p.colorName,
           score: p.score,
           pass: p.legibility.pass,

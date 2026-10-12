@@ -71,6 +71,7 @@ deterministically, and the reply's `mood` or `vet` field says why.
 | Whether a design's ink reads on given shirts, before proposing, approving, or publishing | `check_print_legibility` |
 | The design's colors changed to suit each shirt | `recolor_plans` |
 | Alternate inks so a design reads on the shirts it fails | `artwork_options` |
+| Which colors and inks POD's Creative color study tries first, for a design and its Artwork Options | `rank_artwork_pairs` |
 | The Wada name for a hex, or the closest book colors | `nearest_colors` |
 | Site or app colors | `theme` |
 | A verdict on colors they already have | `check_accessibility` (`print` for fabric, `web-text` or `web-ui` for screens) |
@@ -107,8 +108,13 @@ reads. `recommend_product_colors` ranks the garments a design passes first,
 and each pick's `legibility` gives the verdict and its reason.
 `check_print_legibility` judges chosen garments, `artwork_options` plans
 pigment substitutions that add legible garments, and `recolor_plans` reports
-each plan's verdict on its garment. Replies carry `engine` (version and
-protocol): cite it when comparing with POD's study evidence.
+each plan's verdict on its garment. `rank_artwork_pairs` gives the order POD's
+study explores the approved art and its Artwork Options in: each color keeps
+the original where it reads, then a hue-keeping legible-ink option, and a Wada
+repaint leads only where neither reads; the original's colors come first.
+Give it the exact print files (`artwork_options` with `outDir` writes the
+options). Replies carry `engine` (version and protocol): cite it when comparing
+with POD's study evidence.
 `check_accessibility` with `print` checks only that a palette's colors stay
 distinct from each other; it is not a legibility verdict.
 

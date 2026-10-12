@@ -33,6 +33,12 @@ export interface SubstitutedPixels {
   pixels: RgbaPixels;
   /** Visible pixels that changed pigment. */
   changed: number;
+  /**
+   * Share of the visible pixels no replacement reached, weighted by alpha, 0
+   * to 1 to four places. Near-transparent residue around a print counts for
+   * almost nothing, as it prints.
+   */
+  unmatched: number;
 }
 
 /** Furthest a lighter or darker printing may move toward white or black and still count as the pigment. */
@@ -73,8 +79,12 @@ export function substitutePigments(
     toRgb: rgb(v.to),
   }));
   let changed = 0;
+  // Alpha sums: every visible pixel's, and those of the pixels a replacement reached.
+  let visibleAlpha = 0;
+  let changedAlpha = 0;
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] === 0) continue;
+    visibleAlpha += data[i + 3]!;
     let matches = replacements.filter(
       (v) => Math.max(...v.fromRgb.map((c, k) => Math.abs(data[i + k]! - c))) <= v.tolerance,
     );
@@ -90,7 +100,12 @@ export function substitutePigments(
     for (let k = 0; k < 3; k++)
       data[i + k] = Math.max(0, Math.min(255, match.toRgb[k]! + data[i + k]! - match.fromRgb[k]!));
     changed++;
+    changedAlpha += data[i + 3]!;
   }
   if (!changed) throw new RecolorPigmentError("absent", "Recolor pigment is absent from the approved artwork.");
-  return { pixels: { data, width: pixels.width, height: pixels.height }, changed };
+  return {
+    pixels: { data, width: pixels.width, height: pixels.height },
+    changed,
+    unmatched: Number(((visibleAlpha - changedAlpha) / visibleAlpha).toFixed(4)),
+  };
 }

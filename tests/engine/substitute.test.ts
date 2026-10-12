@@ -21,6 +21,17 @@ describe("substitutePigments", () => {
     expect([...input.data.subarray(0, 4)]).toEqual([251, 119, 129, 255]);
   });
 
+  it("weights the unmatched share by alpha, so near-transparent residue barely counts", () => {
+    const plan = { replacements: [{ from: "#808080", to: "#204060", tolerance: 6 }] };
+    // One opaque ink pixel, and three residue pixels of another color at alpha 3.
+    const residue = [255, 0, 0, 3];
+    const { unmatched, changed } = substitutePigments(pixels([128, 128, 128, 255], residue, residue, residue), plan);
+    expect(changed).toBe(1);
+    expect(unmatched).toBe(Number((9 / 264).toFixed(4)));
+    // An opaque pixel no pigment reaches counts in full.
+    expect(substitutePigments(pixels([128, 128, 128, 255], [0, 255, 0, 255]), plan).unmatched).toBe(0.5);
+  });
+
   it("keeps a pixel's offset from its pigment within tolerance, so shading survives", () => {
     const plan = { replacements: [{ from: "#808080", to: "#204060", tolerance: 6 }] };
     const { pixels: out } = substitutePigments(pixels([133, 128, 124, 255]), plan);

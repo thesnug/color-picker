@@ -360,7 +360,10 @@ export type AppliedRecolor =
       replacements: PigmentReplacement[];
       /** Visible pixels a pigment matched, kept inks included. */
       changed: number;
-      /** Share of visible pixels no pigment's tolerance or tint reached, left as they were. */
+      /**
+       * Share of the visible pixels no pigment's tolerance or tint reached,
+       * left as they were, weighted by alpha (`substitutePigments`).
+       */
       unmatched: number;
     }
   | {
@@ -382,7 +385,8 @@ export type AppliedRecolor =
  * mapping color that matches no measured ink, when the mapped inks cover
  * less than `minCoverage` of the ink (default 0.9: a photograph's few main
  * colors, or a mapping that leaves an ink out), when more than
- * `maxUnmatched` of the visible pixels match no pigment (default 0.05), and
+ * `maxUnmatched` of the visible pixels, weighted by alpha, match no pigment
+ * (default 0.05; near-transparent residue around a print barely counts), and
  * for pigments whose tolerances overlap.
  *
  * `tolerance`, `fingerprint`, and `cache` are accepted for compatibility and
@@ -449,16 +453,14 @@ export async function applyRecolor(
     if (!(error instanceof RecolorPigmentError)) throw error;
     return { applicable: false, reason: `${error.message} Use the prompt instead.` };
   }
-  const { data } = substituted.pixels;
-  let visible = 0;
-  for (let i = 3; i < data.length; i += 4) if (data[i] !== 0) visible++;
-  const unmatched = visible ? Number(((visible - substituted.changed) / visible).toFixed(4)) : 0;
+  // Weighted by alpha, as it prints: near-transparent residue around the art barely counts.
+  const { unmatched } = substituted;
   if (unmatched > maxUnmatched) {
     return {
       applicable: false,
       reason:
-        `${Math.round(unmatched * 100)}% of the design's visible pixels match no mapped pigment, above ${Math.round(maxUnmatched * 100)}%; ` +
-        `it is not flat enough to recolor exactly, so use the prompt instead.`,
+        `${Math.round(unmatched * 100)}% of the design's visible ink, weighted by alpha, matches no mapped pigment, ` +
+        `above ${Math.round(maxUnmatched * 100)}%; it is not flat enough to recolor exactly, so use the prompt instead.`,
     };
   }
 

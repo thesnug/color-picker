@@ -63,6 +63,37 @@ function render(width: number, height: number, paint: Paint, samples = 1): Buffe
 const inRect = (x: number, y: number, left: number, top: number, w: number, h: number) =>
   x >= left && x < left + w && y >= top && y < top + h;
 
+/** A deterministic hash of a pixel and a channel to [0, 1), the same on every platform. */
+function noise(x: number, y: number, k: number): number {
+  let h = Math.imul(Math.floor(x) + 0x9e3779b9, 0x85ebca6b) ^ Math.imul(Math.floor(y) + 0x7f4a7c15, 0xc2b2ae35);
+  h = Math.imul(h ^ Math.imul(k + 1, 0x27d4eb2f), 0x165667b1);
+  h ^= h >>> 15;
+  h = Math.imul(h, 0x2c1b3c6d);
+  h ^= h >>> 12;
+  return (h >>> 0) / 0x100000000;
+}
+
+/**
+ * An ink as a distressed screen print carries it: about a third of its pixels a little
+ * lighter or darker in each channel (up to 14), one in twelve worn through to transparency,
+ * and one in twenty half-transparent.
+ */
+function distressed(value: string, x: number, y: number): Rgba | null {
+  const [r, g, b] = hex(value);
+  const wear = noise(x, y, 0);
+  if (wear < 1 / 12) return null;
+  const alpha = wear < 1 / 12 + 1 / 20 ? 100 + Math.floor(noise(x, y, 1) * 100) : 255;
+  if (noise(x, y, 2) > 1 / 3) return [r, g, b, alpha];
+  const shift = (c: number, k: number) => Math.max(0, Math.min(255, c + Math.round((noise(x, y, k) * 2 - 1) * 14)));
+  return [shift(r, 3), shift(g, 4), shift(b, 5), alpha];
+}
+
+/** The near-transparent residue export tools leave around art: alpha 1 to 6, any color, on half the canvas. */
+function residue(x: number, y: number): Rgba | null {
+  if (noise(x, y, 6) < 0.5) return null;
+  return [Math.floor(noise(x, y, 7) * 256), Math.floor(noise(x, y, 8) * 256), Math.floor(noise(x, y, 9) * 256), 1 + Math.floor(noise(x, y, 10) * 6)];
+}
+
 interface Fixture {
   file: string;
   description: string;
@@ -159,6 +190,19 @@ export const FIXTURES: Fixture[] = [
       return hex("#fff7e7");
     },
     contentBounds: { x: 600 / 2400, y: 700 / 2400, w: 1100 / 2400, h: 800 / 2400 },
+  },
+  {
+    file: "distressed-lettering.png",
+    description:
+      "The two-tone lettering distressed: a third of each ink's pixels shifted up to 14 per channel, worn and half-transparent pixels, and alpha 1 to 6 residue of any color over half the canvas. Every pixel of a replaced ink must change, and the residue must not count against a recolor.",
+    width: 480,
+    height: 180,
+    paint: (x, y) => {
+      for (let i = 0; i < 6; i++) if (inRect(x, y, 20 + i * 50, 20, 30, 120)) return distressed("#fb7781", x, y) ?? residue(x, y);
+      for (let i = 0; i < 2; i++) if (inRect(x, y, 340 + i * 60, 20, 40, 130)) return distressed("#3164de", x, y) ?? residue(x, y);
+      return residue(x, y);
+    },
+    contentBounds: null,
   },
 ];
 

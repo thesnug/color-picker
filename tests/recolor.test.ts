@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -6,8 +6,8 @@ import sharp from "sharp";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { defaultProduct, loadAccessibility } from "../src/data/index.js";
-import { applyRecolor, type Fingerprint, fingerprint, recolorPixels } from "../src/fingerprint/index.js";
-import { inkOnGarment } from "../src/engine/index.js";
+import { applyRecolor, decodeForLegibility, type Fingerprint, fingerprint, recolorPixels } from "../src/fingerprint/index.js";
+import { analyzeDesign, inkOnGarment } from "../src/engine/index.js";
 import {
   mapByLightness,
   RECOLOR_WEIGHTS,
@@ -311,6 +311,34 @@ describe("applyRecolor", () => {
     expect(result.applicable).toBe(false);
     if (!result.applicable) expect(result.reason).toMatch(/cover only 51% of the design's ink/);
     expect(existsSync(out)).toBe(false);
+  });
+
+  it("recolors distressed art with near-transparent residue over half its canvas, as it prints", async () => {
+    // Pink and blue lettering, a third of its pixels shifted up to 14 per channel, worn and
+    // half-transparent pixels, and alpha 1 to 6 residue of any color on half the canvas.
+    const DISTRESSED = join(import.meta.dirname, "fixtures", "engine", "distressed-lettering.png");
+    const [plan] = recolorPlans(analyzeDesign(await decodeForLegibility(readFileSync(DISTRESSED)), "x").summary, { n: 1 });
+    const out = join(dir, "distressed.png");
+    const result = await applyRecolor(DISTRESSED, plan!.mapping, { out });
+    expect(result).toMatchObject({ applicable: true, out });
+    if (!result.applicable) return;
+    // Counted pixel by pixel, the residue alone is over a third of the visible pixels.
+    const before = await sharp(DISTRESSED).ensureAlpha().raw().toBuffer();
+    let visible = 0;
+    let residue = 0;
+    for (let i = 3; i < before.length; i += 4) {
+      if (before[i] === 0) continue;
+      visible++;
+      if (before[i]! <= 6) residue++;
+    }
+    expect(residue / visible).toBeGreaterThan(0.35);
+    expect(result.unmatched).toBeLessThan(0.05);
+    // Every opaque pixel of a mapped ink took its new ink: no speckles of the old one remain.
+    const after = await sharp(out).ensureAlpha().raw().toBuffer();
+    for (let i = 0; i < after.length; i += 4) {
+      if (before[i + 3]! <= 127) continue;
+      expect([after[i], after[i + 1], after[i + 2]], `pixel ${i / 4}`).not.toEqual([before[i], before[i + 1], before[i + 2]]);
+    }
   });
 
   it("declines a mapping color the design does not contain", async () => {

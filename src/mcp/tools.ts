@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { comparePrintFiles } from "../fingerprint/index.js";
 import { repetitionReport, selectBatchColors, type BatchDesign, type GarmentUse } from "../batch.js";
-import type { ContentBounds } from "../engine/index.js";
+import type { ArtworkSource, ContentBounds } from "../engine/index.js";
 
 import {
   artworkOptionsView,
@@ -27,6 +27,7 @@ import {
   InputError,
   legibilityView,
   nearestView,
+  pairsView,
   palettesView,
   recolorView,
   type RecommendPick,
@@ -303,7 +304,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "ink-legibility-v2 verdict on rank first (each pick's legibility says why), then by score; the vanish " +
         "penalty counts only ink the verdict calls lost, so a pale fill inside a dark outline is not penalized. " +
         "Each pick carries its score, plain-language reasons, and a warning for each lost ink. Use recolor_plans " +
-        "or artwork_options alongside it when alternate inks may open more garment options.",
+        "or artwork_options alongside it when alternate inks may open more garment options, and rank_artwork_pairs " +
+        "for the order POD's Creative color study tries colors and Artwork Options in.",
       inputSchema: {
         designPath,
         designBase64,
@@ -411,6 +413,71 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
             ...(maxPalettePlans !== undefined && { maxPalettePlans: maxPalettePlans as number }),
             ...(bounds !== undefined && { contentBounds: bounds as ContentBounds }),
             ...(outDir !== undefined && { apply: outDir as string }),
+          }),
+        );
+      },
+    },
+    {
+      name: "rank_artwork_pairs",
+      description:
+        "Order artwork and garment color pairs exactly as POD's Creative color study explores them, for the " +
+        "approved artwork and any Artwork Options (for example the files artwork_options writes). Only pairs the " +
+        "ink-legibility-v2 verdict passes appear. Each color leads with the artwork that departs least from the " +
+        "approved art: the original, else a hue-keeping legible-ink option, else a Wada repaint. Colors a " +
+        "hue-keeping artwork reads on come before colors only a Wada repaint reads on, each chosen by score less a " +
+        "variety penalty, with the preferred color first when it reads. Use this to see which colors and inks a " +
+        "study will try first; recommend_product_colors ranks one artwork's garments instead.",
+      inputSchema: {
+        artworks: z
+          .array(
+            z.object({
+              artworkId: z.string().min(1).describe("The ID the pairs name this artwork by."),
+              designPath: designPath.describe("Path to this artwork's print file. Give this or designBase64."),
+              designBase64: designBase64.describe("This artwork's print file as base64. Give this or designPath."),
+              source: z
+                .enum(["original", "legible-ink", "wada"])
+                .describe(
+                  "original for the approved art; legible-ink for an option that keeps every ink's hue; wada for a " +
+                    "Wada recolor that repaints the inks.",
+                ),
+              contentBounds,
+            }),
+          )
+          .min(1)
+          .describe("The approved artwork and its Artwork Options, each as the exact print file."),
+        product,
+        colors: productColors,
+        colorCount: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe(`How many garment colors the assortment wants; later picks are fallbacks. Default ${DEFAULT_COLOR_COUNT}.`),
+        preferred: z.string().min(1).optional().describe("A product color to place first when any artwork reads on it."),
+        recent: z.array(garmentUse).optional().describe("Recent garment use, for the variety penalty."),
+      },
+      handler: async ({ artworks, product: productId, colors, colorCount, preferred, recent }) => {
+        const inputs = artworks as {
+          artworkId: string;
+          designPath?: string;
+          designBase64?: string;
+          source: ArtworkSource;
+          contentBounds?: ContentBounds;
+        }[];
+        return reply(
+          await pairsView({
+            artworks: inputs.map((a) => ({
+              artworkId: a.artworkId,
+              ...designInput(a.designPath, a.designBase64),
+              source: a.source,
+              ...(a.contentBounds && { contentBounds: a.contentBounds }),
+            })),
+            ...(productId !== undefined && { product: productId as string }),
+            ...(colors !== undefined && { colors: colors as string[] }),
+            ...(colorCount !== undefined && { colorCount: colorCount as number }),
+            ...(preferred !== undefined && { preferred: preferred as string }),
+            ...(recent !== undefined && { recent: recent as GarmentUse[] }),
           }),
         );
       },

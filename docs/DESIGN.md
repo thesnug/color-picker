@@ -305,12 +305,38 @@ plan per garment family that needs one (`legibleInkNeeds`), in which each ink
 under 3:1 on the family's median garment keeps its OKLCH hue and moves darker
 or lighter to 4.5:1 there (and 3:1 on the hardest garment when it can), dropped
 if two distinct inks would merge; and the Wada mappings of the best unflagged
-recolor plans for the garments the design fails, grouped by mapping. Tolerances
-reach as far as an ink's spread (4 to 35) but stop short of every other ink.
+recolor plans for the garments the design fails, grouped by mapping. Each
+tolerance reaches just under halfway to the nearest other measured ink (at most
+35), so every distressed or textured pixel nearer the ink than its neighbor
+changes with it, and two inks' ranges never overlap. (Engine 1.0.0 stopped at
+the ink's 90th-percentile spread, which left about a tenth of a distressed
+ink's pixels in the old color.)
 `planArtworkOptions` applies each on the measured pixels, measures and judges
 the result on every garment, keeps every legible-ink option that adds a
 legible garment, then at most three Wada options as a greedy cover of what is
 still missing. Keys are deterministic, so a rerun finds the same options.
+
+Exploration order (`rankArtworkGarmentPairs`, MCP `rank_artwork_pairs`, CLI
+`pairs`) follows the same principle: an Artwork Option fills what the approved
+art cannot. Each artwork carries its source (`original`, `legible-ink` for any
+hue-keeping substitution, or `wada`). Each color leads with the legible artwork
+that departs least from the approved art, and colors come in that order of
+departure: those the original reads on, then those only a hue-keeping option
+reads on, then those only a Wada repaint reads on. Score, less the batch
+variety penalty, orders colors within each band. A Wada repaint is built
+around a garment's Wada equivalent, so it outscores the original on most
+garments; ranking by score alone put repaints first on colors the approved art
+already read on. POD's study explores in this order and stops once it has its
+assortment, so the order is what keeps the approved art in it.
+
+`applyRecolor` (and `recolor_plans` with `outDir`) refuses art when more than
+5% of its visible pixels, weighted by alpha, match no pigment. Print files
+often carry near-transparent residue (alpha 1 to 7) over much of the canvas;
+counted pixel by pixel it refused flat art, while it barely prints.
+`recolor_plans` plans from the engine's measured summary, the inks
+`artwork_options` and POD plan from, so its mappings bind to the measured inks
+exactly; a vision description of the fingerprint names the measured ink
+nearest each described color when one is within the print minimum distance.
 
 The port from POD is arithmetic-identical: every float operation keeps its
 order, so the same pixels give the same bytes. `ENGINE_VERSION` records any

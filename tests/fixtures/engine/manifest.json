@@ -48,6 +48,12 @@
         "w": 0.4583333333333333,
         "h": 0.3333333333333333
       }
+    },
+    {
+      "file": "distressed-lettering.png",
+      "expected": "distressed-lettering.expected.json",
+      "description": "The two-tone lettering distressed: a third of each ink's pixels shifted up to 14 per channel, worn and half-transparent pixels, and alpha 1 to 6 residue of any color over half the canvas. Every pixel of a replaced ink must change, and the residue must not count against a recolor.",
+      "contentBounds": null
     }
   ]
 }

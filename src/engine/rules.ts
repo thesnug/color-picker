@@ -11,7 +11,7 @@
  * under an unchanged version, so consumers that pin a version (POD's drift
  * test) can trust it.
  */
-export const ENGINE_VERSION = "1.0.0";
+export const ENGINE_VERSION = "1.1.0";
 
 /**
  * The legibility protocol. v2 judges framing on each ink's own boundary

@@ -51,6 +51,8 @@ export {
 export { type CatalogGarment, garmentColor, type GarmentInput, garmentSlug, garmentsFromProduct } from "./garments.js";
 export {
   type ArtworkGarmentPair,
+  type ArtworkSource,
+  type PairArtwork,
   rankArtworkGarmentPairs,
   type RankArtworkGarmentPairsInput,
   type RankedGarment,

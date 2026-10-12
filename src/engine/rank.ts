@@ -137,9 +137,22 @@ export function rankGarments(
     .map(({ ranked }) => ranked);
 }
 
+/**
+ * Where an artwork came from, which sets how far it departs from the approved
+ * art: the approved `original`; a `legible-ink` option, which keeps every
+ * ink's hue (any hue-keeping pigment substitution counts as one); or a `wada`
+ * recolor, which repaints the inks onto a Wada combination.
+ */
+export type ArtworkSource = "original" | "legible-ink" | "wada";
+
+/** Least departure first: the original, then hue-keeping options, then Wada repaints. */
+const DEPARTURE: Record<ArtworkSource, number> = { original: 0, "legible-ink": 1, wada: 2 };
+
 /** An artwork and a garment color worth inspecting together. */
 export interface ArtworkGarmentPair {
   artworkId: string;
+  /** The artwork's source, as given. */
+  source: ArtworkSource;
   colorName: string;
   /** The pair's recommendation score, before the variety penalty. */
   score: number;
@@ -148,9 +161,16 @@ export interface ArtworkGarmentPair {
   reason: string;
 }
 
+/** One artwork version to consider for each color. */
+export interface PairArtwork {
+  artworkId: string;
+  analysis: DesignAnalysis;
+  source: ArtworkSource;
+}
+
 export interface RankArtworkGarmentPairsInput {
-  /** The artwork versions to consider for each color: the supplied art and any Artwork Options. */
-  artworks: ReadonlyArray<{ artworkId: string; analysis: DesignAnalysis; original?: boolean }>;
+  /** The artwork versions to consider for each color: the approved art and any Artwork Options. */
+  artworks: readonly PairArtwork[];
   garments: readonly GarmentInput[];
   /** How many colors the assortment wants. Picks beyond it are fallbacks. */
   colorCount: number;
@@ -174,12 +194,23 @@ const words = (counts: { exact: number; near: number; family: number }) =>
 
 /**
  * Order artwork and garment pairs for inspection. Only pairs that pass the
- * legibility verdict appear. Each color's best artwork comes first (highest
- * score, then least ink lost, then the original), with colors chosen
- * greedily by that score less the batch variety penalty against recent use
- * and the colors already chosen, so near shades fall later; `preferred`
- * leads when it reads. Then the other legible artworks for each color, in the
- * same color order.
+ * legibility verdict appear.
+ *
+ * Each color leads with the artwork that departs least from the approved art
+ * and reads on it: the original, else a hue-keeping (`legible-ink`) option,
+ * else a Wada repaint; score, then least ink lost, then input order break
+ * ties within a source. So a Wada repaint leads only on colors no
+ * hue-keeping artwork reads on, however well it scores elsewhere.
+ *
+ * Colors follow in the same order of departure: first every color the
+ * original reads on, then the colors only a hue-keeping option reads on,
+ * then the colors only a Wada repaint reads on. An Artwork Option fills what
+ * the approved art cannot, so it never pushes the original out of the first
+ * picks, however well it scores. Within each band colors are chosen greedily
+ * by their lead's score less the batch variety penalty against recent use
+ * and the colors already chosen, so near shades fall later; `preferred` leads
+ * when any artwork reads on it. Then the other legible artworks for each
+ * color, in the same color order.
  *
  * @throws {RangeError} when `colorCount` is not a positive integer.
  */
@@ -190,32 +221,36 @@ export function rankArtworkGarmentPairs(input: RankArtworkGarmentPairsInput): Ar
   const product = input.product ?? storedProductIndex().default;
   const options: RankGarmentsOptions = { product, ...(input.weights && { weights: input.weights }) };
 
-  type Entry = { artworkId: string; order: number; original: boolean; ranked: RankedGarment };
+  type Entry = { artworkId: string; source: ArtworkSource; order: number; ranked: RankedGarment };
   const byColor = new Map<string, Entry[]>();
   const colorOrder: string[] = [];
   for (const garment of input.garments) {
     if (!colorOrder.includes(garment.colorName)) colorOrder.push(garment.colorName);
   }
   input.artworks.forEach((artwork, order) => {
+    if (!(artwork.source in DEPARTURE)) throw new TypeError(`Unknown artwork source ${JSON.stringify(artwork.source)}`);
     if (artwork.analysis.summary.palette.length === 0) return;
     judgeAndScore(artwork.analysis, input.garments, options).forEach((ranked) => {
       if (!ranked.legibility.pass) return;
       const list = byColor.get(ranked.garment.colorName) ?? [];
-      list.push({ artworkId: artwork.artworkId, order, original: artwork.original === true, ranked });
+      list.push({ artworkId: artwork.artworkId, source: artwork.source, order, ranked });
       byColor.set(ranked.garment.colorName, list);
     });
   });
   for (const list of byColor.values()) {
     list.sort(
       (a, b) =>
+        DEPARTURE[a.source] - DEPARTURE[b.source] ||
         b.ranked.score - a.ranked.score ||
         a.ranked.legibility.lostShare - b.ranked.legibility.lostShare ||
-        Number(b.original) - Number(a.original) ||
         a.order - b.order,
     );
   }
 
   const remaining = colorOrder.filter((name) => byColor.has(name));
+  const lead = (name: string) => byColor.get(name)![0]!;
+  /** How far the color's lead departs from the approved art: 0 the original, 1 hue-keeping, 2 Wada. */
+  const band = (name: string) => DEPARTURE[lead(name).source];
   const history: GarmentUse[] = (input.recent ?? []).filter((u) => u.product === product);
   const use = (entry: Entry): GarmentUse => ({
     product,
@@ -233,18 +268,27 @@ export function rankArtworkGarmentPairs(input: RankArtworkGarmentPairsInput): Ar
   const chosen: string[] = [];
   const pair = (entry: Entry, reason: string): ArtworkGarmentPair => ({
     artworkId: entry.artworkId,
+    source: entry.source,
     colorName: entry.ranked.garment.colorName,
     score: entry.ranked.score,
     legibility: entry.ranked.legibility,
     reason: reason.slice(0, 2000),
   });
+  const artworkWords = (entry: Entry) =>
+    entry.source === "original"
+      ? `the original artwork ${entry.artworkId}`
+      : entry.source === "legible-ink"
+        ? `artwork ${entry.artworkId}, which keeps the design's hues, since the original does not read on it`
+        : `artwork ${entry.artworkId}, a Wada repaint, since no artwork keeping the design's hues reads on it`;
 
   while (remaining.length) {
     let pick = 0;
     if (!(chosen.length === 0 && input.preferred !== undefined && remaining.includes(input.preferred))) {
+      const firstBand = Math.min(...remaining.map(band));
       let best = -Infinity;
       remaining.forEach((name, i) => {
-        const adjusted = withDiversityPenalty(byColor.get(name)![0]!.ranked.score, color(byColor.get(name)![0]!), history);
+        if (band(name) !== firstBand) return;
+        const adjusted = withDiversityPenalty(lead(name).ranked.score, color(lead(name)), history);
         if (adjusted > best) {
           best = adjusted;
           pick = i;
@@ -254,7 +298,7 @@ export function rankArtworkGarmentPairs(input: RankArtworkGarmentPairsInput): Ar
       pick = remaining.indexOf(input.preferred);
     }
     const name = remaining.splice(pick, 1)[0]!;
-    const entry = byColor.get(name)![0]!;
+    const entry = lead(name);
     const counts = diversityCounts(color(entry), history);
     const variety = words(counts);
     const place =
@@ -265,7 +309,7 @@ export function rankArtworkGarmentPairs(input: RankArtworkGarmentPairsInput): Ar
     pairs.push(
       pair(
         entry,
-        `${place}${preferred}: ${name} with artwork ${entry.artworkId}, score ${entry.ranked.score}. ` +
+        `${place}${preferred}: ${name} with ${artworkWords(entry)}, score ${entry.ranked.score}. ` +
           `${entry.ranked.legibility.reason}` +
           (variety ? ` Variety penalty for ${variety} already chosen or recent.` : ""),
       ),
@@ -279,7 +323,7 @@ export function rankArtworkGarmentPairs(input: RankArtworkGarmentPairsInput): Ar
       pairs.push(
         pair(
           entry,
-          `Alternate artwork for ${name}: ${entry.artworkId}, score ${entry.ranked.score}. ${entry.ranked.legibility.reason}`,
+          `Alternate artwork for ${name}: ${entry.artworkId} (${entry.source}), score ${entry.ranked.score}. ${entry.ranked.legibility.reason}`,
         ),
       );
     }

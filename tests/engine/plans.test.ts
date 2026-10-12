@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
+import { ENGINE_FIXTURES } from "../../scripts/record-engine-fixtures.js";
+import { decodeForLegibility } from "../../src/fingerprint/index.js";
 import {
   analyzeDesign,
   contrastRatio,
@@ -227,5 +232,38 @@ describe("planArtworkOptions", () => {
     expect(planArtworkOptions({ ...input, maxPalettePlans: 0 }).every((o) => o.source === "legible-ink")).toBe(true);
     expect(planArtworkOptions({ ...input, maxPalettePlans: 1 }).filter((o) => o.source === "wada").length).toBeLessThanOrEqual(1);
     expect(planArtworkOptions({ ...input, needs: [] })).toEqual([]);
+  });
+
+  it("recolors every distressed pixel of a replaced ink, not just those within its spread", async () => {
+    const pixels = await decodeForLegibility(readFileSync(join(ENGINE_FIXTURES, "distressed-lettering.png")));
+    const analysis = analyzeDesign(pixels, "e".repeat(64));
+    const { clusters } = analysis.measurement;
+    // A third of each ink's pixels are shifted up to 14 per channel, past its 90th-percentile spread.
+    expect(clusters.map((c) => c.spread)).toEqual([12, 12]);
+    const legible = new Set(catalog.filter((g) => judgeLegibility(analysis.measurement, g).pass).map((g) => g.colorName));
+    const options = planArtworkOptions({
+      analysis,
+      pixels,
+      garments: catalog,
+      needs: legibleInkNeeds({ garments: catalog, legibleColors: legible, colorCount: 8 }),
+      legibleColors: legible,
+    });
+    expect(options.map((o) => o.source)).toEqual(["legible-ink", "wada", "wada"]);
+    for (const option of options) {
+      // Each tolerance reaches halfway to the other ink, at most 35.
+      for (const r of option.plan.replacements) expect(r.tolerance, option.plan.key).toBe(35);
+      const { pixels: after, unmatched } = substitutePigments(pixels, option.plan);
+      expect(unmatched, option.plan.key).toBeLessThan(0.02);
+      const replaced = new Set(option.plan.replacements.map((r) => r.from));
+      let kept = 0;
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        if (pixels.data[i + 3]! <= 127) continue;
+        const nearest = clusters
+          .map((c) => ({ hex: c.hex, d: distance(c.hex, `#${[0, 1, 2].map((k) => pixels.data[i + k]!.toString(16).padStart(2, "0")).join("")}`) }))
+          .sort((a, b) => a.d - b.d)[0]!.hex;
+        if (replaced.has(nearest) && [0, 1, 2].every((k) => after.data[i + k] === pixels.data[i + k])) kept++;
+      }
+      expect(kept, `${option.plan.key}: opaque pixels left in a replaced ink`).toBe(0);
+    }
   });
 });

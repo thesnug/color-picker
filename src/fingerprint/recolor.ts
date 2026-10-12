@@ -30,9 +30,9 @@ export interface RecolorPixelOptions {
 /** Flatness limits for `applyRecolor`. Since 0.6.0 it ignores `tolerance`. */
 export interface ApplyRecolorOptions extends RecolorPixelOptions {
   /**
-   * Largest share of visible pixels that may match no mapped pigment before
-   * the art counts as not flat and nothing is written. Default 0.05, which
-   * absorbs antialiased edges between two inks.
+   * Largest share of visible pixels, weighted by alpha, that may match no
+   * mapped pigment before the art counts as not flat and nothing is written.
+   * Default 0.05, which absorbs antialiased edges between two inks.
    */
   maxUnmatched?: number;
   /**

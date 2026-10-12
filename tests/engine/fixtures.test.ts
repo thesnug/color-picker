@@ -34,4 +34,24 @@ describe("recorded engine fixtures", () => {
     for (const light of ["Ivory", "White", "Butter", "Blossom"]) expect(pass(outlined, light), light).toBe(true);
     expect(pass(outlined, "Navy")).toBe(false);
   });
+
+  it("record the study's order over the original and its options: the original first, repaints last", () => {
+    for (const fixture of ["two-tone-lettering.png", "distressed-lettering.png"]) {
+      const { pairs, artworkOptions } = JSON.parse(
+        readFileSync(join(ENGINE_FIXTURES, fixture.replace(/\.png$/, ".expected.json")), "utf8"),
+      ) as ExpectedOutputs;
+      expect(artworkOptions.options.map((o) => o.source), fixture).toEqual(["legible-ink", "wada", "wada"]);
+      expect(new Set(pairs.map((p) => p.artworkId)), fixture).toEqual(
+        new Set(["original", ...artworkOptions.options.map((o) => o.plan.key)]),
+      );
+      const leads = pairs.filter((p, i) => pairs.findIndex((q) => q.colorName === p.colorName) === i);
+      expect(leads.slice(0, 2).map((p) => [p.colorName, p.artworkId]).sort(), fixture).toEqual([
+        ["Black", "original"],
+        ["True Navy", "original"],
+      ]);
+      const order = { original: 0, "legible-ink": 1, wada: 2 } as const;
+      expect(leads.map((p) => order[p.source]), fixture).toEqual(leads.map((p) => order[p.source]).sort());
+      expect(leads.slice(0, artworkOptions.colorCount + 1).some((p) => p.source === "wada"), fixture).toBe(false);
+    }
+  });
 });
