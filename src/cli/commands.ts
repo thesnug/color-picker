@@ -3,22 +3,59 @@
  * text, and SVG sections, so every command supports every output flag.
  */
 
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 
 import { combinations, type Palette } from "../combinations.js";
 import { contrastRatio } from "../color/contrast.js";
-import { isHex } from "../color/convert.js";
-import { hasHex, loadColors, loadCombinations, loadProduct, loadProductIndex, type Product } from "../data/index.js";
+import { distance, isHex, normalizeHex } from "../color/convert.js";
 import {
+  hasHex,
+  loadColors,
+  loadCombinations,
+  loadProduct,
+  loadProductIndex,
+  type Product,
+  type ProductColorWithHex,
+} from "../data/index.js";
+import {
+  type ArtworkGarmentPair,
+  type ArtworkOption,
+  type ArtworkSource,
+  type ContentBounds,
+  type DesignColor,
+  ENGINE_VERSION,
+  garmentsFromProduct,
+  type GarmentInput,
+  type GarmentUse,
+  judgeLegibility,
+  judgeRecolor,
+  LEGIBILITY_PROTOCOL,
+  LEGIBILITY_RULES,
+  legibleInkNeeds,
+  type LegibilityVerdict,
+  planArtworkOptions,
+  rankArtworkGarmentPairs,
+  type RankedGarment,
+  rankGarments,
+  substitutePigments,
+  toSubstitutionPlan,
+} from "../engine/index.js";
+import {
+  type AnalyzedDesignFile,
+  analyzeDesignFile,
   type AppliedRecolor,
   applyRecolor,
   defaultVisionProviders,
+  type DesignDescription,
   describeDesign,
   fingerprint,
   type Fingerprint,
+  labelPalette,
+  sharpDecoder,
   type VisionProvider,
   VisionUnavailableError,
+  writePng,
 } from "../fingerprint/index.js";
 import {
   jevAvailability,
@@ -27,6 +64,7 @@ import {
   type MoodFields,
   type MoodRerank,
   MOOD_TOP,
+  MOOD_WEIGHT,
   rerankByMood,
   type SystemOneClient,
   type VetOptions,
@@ -34,9 +72,8 @@ import {
   vettedRecolorPlans,
 } from "../jev/index.js";
 import { nearest, type ResolvedQuery } from "../nearest.js";
-import { palettesForProductColor, type ProductPalette } from "../palettes.js";
+import { findProductColor, palettesForProductColor, type ProductPalette } from "../palettes.js";
 import { type RecolorPlan, recolorPlans } from "../recolor.js";
-import { type ProductColorRecommendation, recommendProductColors } from "../recommend.js";
 import {
   type HtmlSection,
   renderAnsi,
@@ -289,44 +326,90 @@ export interface RecommendArgs extends DesignArgs {
   product?: string;
   /** Re-rank the picks by how well each garment suits the design's mood, with Jev. */
   mood?: boolean | MoodSetup;
+  /** Only these product colors, by name, slug, or alias. Default every stocked color. */
+  colors?: readonly string[];
+  /** The print's visible content, for the measurement. */
+  contentBounds?: ContentBounds | null;
 }
 
-export async function recommendView({ file, bytes, n, product: productId, mood }: RecommendArgs): Promise<View> {
-  let product: Product;
-  try {
-    product = loadProduct(productId ?? loadProductIndex().default);
-  } catch (error) {
-    throw new InputError((error as Error).message);
-  }
+/** A recommendation: the engine's ranked garment, with its catalog color for cards and batches. */
+export type RecommendPick = RankedGarment & { color: ProductColorWithHex };
 
-  let design = await fingerprintDesign(file, bytes);
+/** The engine version and legibility protocol every engine-backed result carries. */
+export const ENGINE_INFO = { version: ENGINE_VERSION, protocol: LEGIBILITY_PROTOCOL } as const;
+
+const NO_MOOD: MoodFields = { moodScore: null, confidence: null, moodLevel: null, deterministicScore: null, combinedScore: null };
+
+/**
+ * Garment colors ranked by the engine (`rankGarments`): those the design
+ * passes the ink legibility verdict on first, then by score. With `mood`,
+ * Jev re-ranks the leading legible picks; illegible ones stay after them.
+ */
+export async function recommendView({
+  file,
+  bytes,
+  n,
+  product: productId,
+  mood,
+  colors,
+  contentBounds,
+}: RecommendArgs): Promise<View> {
+  const product = productFor(productId);
+  const garments = productGarments(product, colors);
+  const design = await analyzeForView(file, bytes, contentBounds);
+  if (design.analysis.summary.palette.length === 0) {
+    throw new InputError(`${file} has no visible ink to recommend a garment for`);
+  }
   const setup = moodSetup(mood);
 
-  const ranked = recommendProductColors(design, { product, n: setup ? Math.max(n, MOOD_TOP) : n });
-  let picks: (ProductColorRecommendation & Partial<MoodFields>)[] = ranked.slice(0, n);
+  const bySlug = new Map(product.colors.filter(hasHex).map((c) => [c.slug, c]));
+  const ranked: RecommendPick[] = rankGarments(design.analysis, garments, { product: product.id }).map((r) => ({
+    color: bySlug.get(r.garment.slug)!,
+    ...r,
+  }));
+  let picks: (RecommendPick & Partial<MoodFields>)[] = ranked;
   let moodStatus: MoodStatus | undefined;
+  let description: Fingerprint["description"];
   if (setup) {
-    const reranked = await moodRerank(ranked, design, bytes ?? file, setup);
-    design = reranked.design;
-    picks = reranked.rerank.candidates.slice(0, n);
-    moodStatus = statusOf(reranked.rerank);
+    const legible = ranked.filter((p) => p.legibility.pass);
+    const illegible = ranked.filter((p) => !p.legibility.pass).map((p) => ({ ...p, ...NO_MOOD }));
+    if (legible.length === 0) {
+      picks = illegible;
+      moodStatus = {
+        requested: true,
+        applied: false,
+        weight: MOOD_WEIGHT,
+        reason: "The ink reads on none of these garment colors, so there is nothing to re-rank by mood.",
+      };
+    } else {
+      const reranked = await moodRerank(legible, await fingerprintDesign(file, bytes), bytes ?? file, setup);
+      description = reranked.design.description;
+      picks = [...reranked.rerank.candidates, ...illegible];
+      moodStatus = statusOf(reranked.rerank);
+    }
   }
+  picks = picks.slice(0, n);
 
+  const { summary } = design.analysis;
   const title = `${product.brand} ${product.model} colors for ${file}`;
-  const chips: Swatch[] = design.palette.map((entry, i) => ({
+  const chips: Swatch[] = summary.palette.map((entry, i) => ({
     hex: entry.hex,
     name: `${Math.round(entry.share * 100)}% · near ${picks[0]?.designColors[i]?.wada.name ?? entry.hex}`,
   }));
   const heading = (i: number) =>
-    `${i + 1}. ${picks[i]!.color.name} · score ${fmt(picks[i]!.score, 3)}${moodSuffix(picks[i]!)}`;
+    `${i + 1}. ${picks[i]!.color.name} · score ${fmt(picks[i]!.score, 3)} · ${picks[i]!.legibility.pass ? "legible" : "illegible"}${moodSuffix(picks[i]!)}`;
 
-  const designLine = `Design: ${chips.map((c) => `${c.hex} ${c.name}`).join(", ")}; ink luminance ${fmt(design.inkLuminance)}`;
-  const header = [designLine, ...(moodStatus ? [moodLine(moodStatus, file)] : [])].join("\n");
+  const legibleCount = ranked.filter((p) => p.legibility.pass).length;
+  const designLine = `Design: ${chips.map((c) => `${c.hex} ${c.name}`).join(", ")}; ink luminance ${fmt(summary.inkLuminance)}`;
+  const legibilityLine = `Legibility (${LEGIBILITY_PROTOCOL}, engine ${ENGINE_VERSION}): the ink reads on ${legibleCount} of ${ranked.length} garment colors.`;
+  const header = [designLine, legibilityLine, ...(moodStatus ? [moodLine(moodStatus, file)] : [])].join("\n");
   return {
     title,
     json: {
+      engine: ENGINE_INFO,
       product: { id: product.id, name: product.name },
-      design,
+      design: { ...designJson(design), ...(description && { description }) },
+      measurement: design.analysis.measurement,
       picks,
       ...(moodStatus && { mood: moodStatus }),
     },
@@ -363,8 +446,18 @@ export interface RecolorArgs extends DesignArgs {
   vet?: boolean | VetSetup;
   /** With `vet`, keep implausible plans, marked, instead of dropping them. */
   includeImplausible?: boolean;
+  /** The print's visible content, for the legibility measurement. */
+  contentBounds?: ContentBounds | null;
 }
 
+/**
+ * Recolor plans per garment (`recolorPlans` on the engine's measured summary,
+ * the inks `artwork_options` and POD plan from), each with its pigment
+ * substitution on the measured inks (`toSubstitutionPlan`; null for a plan
+ * that merges inks) and how the recolored design reads on its garment
+ * (`judgeRecolor`). With `vet`, the vision description of the fingerprint
+ * names the measured inks it matches (`measuredRecolorDesign`).
+ */
 export async function recolorView({
   file,
   bytes,
@@ -373,42 +466,63 @@ export async function recolorView({
   apply,
   vet,
   includeImplausible,
+  contentBounds,
 }: RecolorArgs): Promise<View> {
-  let product: Product;
-  try {
-    product = loadProduct(productId ?? loadProductIndex().default);
-  } catch (error) {
-    throw new InputError((error as Error).message);
+  const product = productFor(productId);
+  const measured = await analyzeForView(file, bytes, contentBounds);
+  if (measured.analysis.summary.palette.length === 0) {
+    throw new InputError(`${file} has no visible ink to recolor`);
   }
-
-  let design = await fingerprintDesign(file, bytes);
+  let design: RecolorDesign = { ...designJson(measured) };
 
   let plans: (RecolorPlan | VettedPlan)[];
   let vetStatus: VetStatus | undefined;
   if (vet) {
     const setup = vet === true ? {} : vet;
-    const vetted = await vetPlans(design, bytes ?? file, { product, n, includeImplausible: includeImplausible ?? false }, setup);
+    const vetted = await vetPlans(
+      await fingerprintDesign(file, bytes),
+      design,
+      bytes ?? file,
+      { product, n, includeImplausible: includeImplausible ?? false },
+      setup,
+    );
     design = vetted.design;
     plans = vetted.plans;
     vetStatus = vetted.status;
   } else {
     plans = recolorPlans(design, { product, n });
   }
+  const { measurement } = measured.analysis;
+  const evidence = plans.map((plan) => ({
+    substitution: toSubstitutionPlan(plan, measurement),
+    legibility: judgeRecolor({
+      measurement,
+      pixels: measured.pixels,
+      mapping: plan.mapping,
+      garment: { colorName: plan.color.name, hex: plan.color.hex },
+    }),
+  }));
   const applied: (AppliedRecolor | undefined)[] = [];
   if (apply !== undefined) {
     await mkdir(apply, { recursive: true });
     const stem = basename(file, extname(file));
     for (const plan of plans) {
       const out = join(apply, `${stem}-${plan.color.slug}.png`);
-      applied.push(await applyRecolor(bytes ?? file, plan.mapping, { out, fingerprint: design }));
+      applied.push(
+        await applyRecolor(measured.bytes, plan.mapping, { out, ...(contentBounds && { contentBounds }) }),
+      );
     }
   }
 
   const title = `${product.brand} ${product.model} colors for ${file}, recolored`;
+  const legibilityNote = (i: number) => {
+    const verdict = evidence[i]!.legibility;
+    return verdict === null ? " · legibility unknown" : verdict.pass ? " · legible" : " · illegible";
+  };
   const heading = (i: number) => {
     const plan = plans[i]!;
     const via = plan.combination.source === "book" ? `combination ${plan.combination.id}` : `${plan.combination.harmony} harmony`;
-    return `${i + 1}. ${plan.color.name} · ${via} · score ${fmt(plan.score, 3)}${plan.flagged ? " · flagged" : ""}${plausibilityNote(plan)}`;
+    return `${i + 1}. ${plan.color.name} · ${via} · score ${fmt(plan.score, 3)}${plan.flagged ? " · flagged" : ""}${legibilityNote(i)}${plausibilityNote(plan)}`;
   };
   const vetLines = vetStatus
     ? [
@@ -423,9 +537,11 @@ export async function recolorView({
   return {
     title,
     json: {
+      engine: ENGINE_INFO,
       product: { id: product.id, name: product.name },
       design,
-      plans: plans.map((plan, i) => (applied[i] ? { ...plan, applied: applied[i] } : plan)),
+      measurement,
+      plans: plans.map((plan, i) => ({ ...plan, ...evidence[i]!, ...(applied[i] && { applied: applied[i] }) })),
       ...(vetStatus && { vet: vetStatus }),
     },
     text: (color) =>
@@ -443,6 +559,7 @@ export async function recolorView({
             ),
             `  Prompt: ${plan.prompt}`,
             ...plan.reasons.map((r) => `  ${r}`),
+            ...legibilityLines(evidence[i]!.legibility).map((line) => `  ${line}`),
             ...plan.warnings.map((w) => `  Warning: ${w}`),
             ...appliedLine(applied[i]).map((line) => `  ${line}`),
           ].join("\n") + "\n",
@@ -460,10 +577,355 @@ export async function recolorView({
       caption: [
         plan.prompt,
         ...plan.reasons,
+        ...legibilityLines(evidence[i]!.legibility),
         ...plan.warnings.map((w) => `Warning: ${w}`),
         ...appliedLine(applied[i]),
       ].join(" "),
     })),
+  };
+}
+
+function legibilityLines(verdict: LegibilityVerdict | null): string[] {
+  if (verdict === null) return ["Recolored legibility: the mapping cannot be substituted exactly in the measured inks."];
+  return [`Recolored legibility: ${verdict.reason}`];
+}
+
+// ---------------------------------------------------------------------------
+// Print legibility
+
+export interface LegibilityArgs extends DesignArgs {
+  product?: string;
+  /** Product colors by name, slug, or alias. Default every stocked color. */
+  colors?: readonly string[];
+  /** Garment colors given directly, judged after `colors`. */
+  garments?: readonly GarmentInput[];
+  contentBounds?: ContentBounds | null;
+}
+
+/** The `ink-legibility-v2` verdict of a print file on each garment color (`judgeLegibility`). */
+export async function legibilityView({
+  file,
+  bytes,
+  product: productId,
+  colors,
+  garments: given,
+  contentBounds,
+}: LegibilityArgs): Promise<View> {
+  const product = productFor(productId);
+  const garments = [
+    ...(colors !== undefined || given === undefined ? productGarments(product, colors) : []),
+    ...(given ?? []).map((g) => ({ ...g, hex: normalizeHex(g.hex) })),
+  ];
+  const design = await analyzeForView(file, bytes, contentBounds);
+  const { measurement } = design.analysis;
+  const verdicts = garments.map((g) => judgeLegibility(measurement, { colorName: g.colorName, hex: g.hex }));
+  const passing = verdicts.filter((v) => v.pass).length;
+
+  const title = `Ink legibility of ${file} on ${product.brand} ${product.model}`;
+  const summary =
+    `${LEGIBILITY_PROTOCOL}, engine ${ENGINE_VERSION}: the ink reads on ${passing} of ${verdicts.length} garment colors` +
+    (measurement.approximate ? "; the art is gradient or photographic, so no ink counts as framed." : ".");
+  const inkLine = `Inks: ${measurement.clusters.map((c) => `${c.hex} ${Math.round(c.share * 100)}%`).join(", ") || "none"}`;
+  return {
+    title,
+    json: {
+      engine: ENGINE_INFO,
+      product: { id: product.id, name: product.name },
+      design: designJson(design),
+      measurement,
+      verdicts,
+    },
+    text: () =>
+      [
+        `${title}\n${summary}\n${inkLine}\n`,
+        ...verdicts.map((v) => `${v.pass ? "Legible:" : "Illegible:"} ${v.colorName} ${v.garmentHex}\n  ${v.reason}`),
+        "",
+      ].join("\n"),
+    sections: [
+      {
+        svg: renderSwatchGrid(
+          verdicts.map((v): Swatch => ({
+            hex: v.garmentHex,
+            name: v.colorName,
+            note: v.pass ? `legible · ${Math.round(v.lostShare * 100)}% lost` : `illegible · ${Math.round(v.lostShare * 100)}% lost`,
+          })),
+          { title, columns: 8 },
+        ),
+        caption: `${summary} ${inkLine}.`,
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Artwork options
+
+export interface ArtworkOptionsArgs extends DesignArgs {
+  product?: string;
+  /** Product colors by name, slug, or alias. Default every stocked color. */
+  colors?: readonly string[];
+  /** How many garment colors the assortment wants, for `legibleInkNeeds`. Default 8. */
+  colorCount?: number;
+  /** At most this many Wada options. Default 3. */
+  maxPalettePlans?: number;
+  contentBounds?: ContentBounds | null;
+  /** Directory to write each option's recolored PNG to, at full size. */
+  apply?: string;
+}
+
+export const DEFAULT_COLOR_COUNT = 8;
+
+/**
+ * Artwork Options for the garment families the design does not read on
+ * (`planArtworkOptions`): pigment substitutions, each screened on the
+ * measured pixels, with the garment colors it adds.
+ */
+export async function artworkOptionsView({
+  file,
+  bytes,
+  product: productId,
+  colors,
+  colorCount = DEFAULT_COLOR_COUNT,
+  maxPalettePlans,
+  contentBounds,
+  apply,
+}: ArtworkOptionsArgs): Promise<View> {
+  const product = productFor(productId);
+  const garments = productGarments(product, colors);
+  const design = await analyzeForView(file, bytes, contentBounds);
+  const { measurement } = design.analysis;
+  const legibleColors = garments
+    .filter((g) => judgeLegibility(measurement, { colorName: g.colorName, hex: g.hex }).pass)
+    .map((g) => g.colorName);
+  const legible = new Set(legibleColors);
+  const needs = legibleInkNeeds({ garments, legibleColors: legible, colorCount });
+  const options = planArtworkOptions({
+    analysis: design.analysis,
+    pixels: design.pixels,
+    garments,
+    needs,
+    legibleColors: legible,
+    product: product.id,
+    ...(maxPalettePlans !== undefined && { maxPalettePlans }),
+  });
+
+  const written: { key: string; out: string; changed: number }[] = [];
+  if (apply !== undefined && options.length) {
+    await mkdir(apply, { recursive: true });
+    const stem = basename(file, extname(file));
+    const full = await sharpDecoder(design.bytes, { maxDimension: Infinity });
+    for (const option of options) {
+      const { pixels, changed } = substitutePigments(full.pixels, option.plan);
+      const out = join(apply, `${stem}-${option.plan.key}.png`);
+      await writePng(pixels, out);
+      written.push({ key: option.plan.key, out, changed });
+    }
+  }
+
+  const title = `Artwork options for ${file} on ${product.brand} ${product.model}`;
+  const status =
+    needs.length === 0
+      ? `The ink reads on ${legibleColors.length} of ${garments.length} garment colors; no family needs another ink.`
+      : `The ink reads on ${legibleColors.length} of ${garments.length} garment colors; ${needs.join(" and ")} garments need another ink.`;
+  const byName = new Map(product.colors.filter(hasHex).map((c) => [c.name, c]));
+  const optionLines = (option: ArtworkOption) => [
+    `${option.plan.label} (${option.plan.key}, ${option.source})`,
+    ...option.plan.replacements.map((r) => `  ${r.from} -> ${r.to} (tolerance ${r.tolerance})`),
+    `  Adds ${option.addsColors.length}: ${option.addsColors.join(", ")}`,
+    `  ${option.plan.rationale}`,
+    ...written.filter((w) => w.key === option.plan.key).map((w) => `  Wrote ${w.out}`),
+  ];
+  return {
+    title,
+    json: {
+      engine: ENGINE_INFO,
+      product: { id: product.id, name: product.name },
+      design: designJson(design),
+      measurement,
+      colorCount,
+      legibleColors,
+      needs,
+      options,
+      ...(apply !== undefined && { applied: written }),
+    },
+    text: () =>
+      [`${title}\n${status}\n`, ...options.map((o) => optionLines(o).join("\n") + "\n"), options.length ? "" : "No options.\n"].join(
+        "\n",
+      ),
+    sections: options.map((option) => ({
+      title: `${option.plan.label} · adds ${option.addsColors.length}`,
+      svg: renderProductCard(byName.get(option.addsColors[0]!) ?? { hex: "#ffffff", name: option.addsColors[0]! }, {
+        recolor: option.plan.replacements.map((r) => ({ from: { hex: r.from, name: r.from }, to: { hex: r.to, name: r.to } })),
+      }),
+      caption: `${option.plan.rationale} Adds ${option.addsColors.join(", ")}.`,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Exploration order
+
+/** One artwork `pairsView` ranks: a print file and where it came from. */
+export interface PairArtworkArgs {
+  /** The ID the pairs name this artwork by. */
+  artworkId: string;
+  file: string;
+  bytes?: Uint8Array;
+  source: ArtworkSource;
+  contentBounds?: ContentBounds | null;
+}
+
+export interface PairsArgs {
+  /** The approved original and any Artwork Options, each as its own print file. */
+  artworks: readonly PairArtworkArgs[];
+  product?: string;
+  /** Product colors by name, slug, or alias. Default every stocked color. */
+  colors?: readonly string[];
+  /** How many garment colors the assortment wants. Default 8. */
+  colorCount?: number;
+  /** A product color, by name, slug, or alias, to place first when any artwork reads on it. */
+  preferred?: string;
+  /** Recent garment use, for the variety penalty. */
+  recent?: readonly GarmentUse[];
+}
+
+/**
+ * The order POD's Creative color study inspects artwork and garment pairs in
+ * (`rankArtworkGarmentPairs`): only pairs the verdict passes; each color led
+ * by the artwork that departs least from the approved art; colors a
+ * hue-keeping artwork leads before colors only a Wada repaint reads on; and
+ * within each, chosen greedily by score less the variety penalty.
+ */
+export async function pairsView({
+  artworks,
+  product: productId,
+  colors,
+  colorCount = DEFAULT_COLOR_COUNT,
+  preferred,
+  recent,
+}: PairsArgs): Promise<View> {
+  if (artworks.length === 0) throw new InputError("pairs needs at least one artwork");
+  const ids = artworks.map((a) => a.artworkId);
+  const duplicate = ids.find((id, i) => ids.indexOf(id) !== i);
+  if (duplicate !== undefined) throw new InputError(`two artworks share the ID ${JSON.stringify(duplicate)}`);
+  if (!(Number.isInteger(colorCount) && colorCount > 0)) throw new InputError(`colorCount must be a positive integer, got ${colorCount}`);
+  const product = productFor(productId);
+  const garments = productGarments(product, colors);
+  let preferredName: string | undefined;
+  if (preferred !== undefined) {
+    const found = findProductColor(product, preferred);
+    if (!found) throw new InputError(`unknown color ${JSON.stringify(preferred)} for ${product.id}`);
+    preferredName = found.name;
+  }
+  const analyzed: { artwork: PairArtworkArgs; design: AnalyzedDesignFile }[] = [];
+  for (const artwork of artworks) {
+    analyzed.push({ artwork, design: await analyzeForView(artwork.file, artwork.bytes, artwork.contentBounds) });
+  }
+  const pairs: ArtworkGarmentPair[] = rankArtworkGarmentPairs({
+    artworks: analyzed.map(({ artwork, design }) => ({
+      artworkId: artwork.artworkId,
+      analysis: design.analysis,
+      source: artwork.source,
+    })),
+    garments,
+    colorCount,
+    product: product.id,
+    ...(preferredName !== undefined && { preferred: preferredName }),
+    ...(recent !== undefined && { recent }),
+  });
+
+  const hexOf = new Map(garments.map((g) => [g.colorName, g.hex]));
+  const leads = pairs.filter((p, i) => pairs.findIndex((q) => q.colorName === p.colorName) === i);
+  const title = `Exploration order for ${artworks[0]!.file} on ${product.brand} ${product.model}`;
+  const status =
+    `${leads.length} of ${garments.length} garment colors read with at least one of ${artworks.length} ` +
+    `artwork${artworks.length === 1 ? "" : "s"}; ${pairs.length} legible pairs (${LEGIBILITY_PROTOCOL}, engine ${ENGINE_VERSION}).`;
+  return {
+    title,
+    json: {
+      engine: ENGINE_INFO,
+      product: { id: product.id, name: product.name },
+      colorCount,
+      artworks: analyzed.map(({ artwork, design }) => ({
+        artworkId: artwork.artworkId,
+        source: artwork.source,
+        design: designJson(design),
+      })),
+      pairs,
+    },
+    text: () =>
+      [
+        `${title}\n${status}\n`,
+        ...pairs.map((p, i) => `${i + 1}. ${p.colorName} · ${p.artworkId} (${p.source}) · score ${fmt(p.score, 3)}\n  ${p.reason}`),
+        "",
+      ].join("\n"),
+    sections: [
+      {
+        svg: renderSwatchGrid(
+          leads.map((p): Swatch => ({ hex: hexOf.get(p.colorName)!, name: p.colorName, note: `${p.artworkId} (${p.source})` })),
+          { title, columns: 8 },
+        ),
+        caption: status,
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Engine helpers
+
+function productFor(productId: string | undefined): Product {
+  try {
+    return loadProduct(productId ?? loadProductIndex().default);
+  } catch (error) {
+    throw new InputError((error as Error).message);
+  }
+}
+
+/** A product's stocked garment colors, or the named ones in the order given. */
+function productGarments(product: Product, colors: readonly string[] | undefined): GarmentInput[] {
+  const all = garmentsFromProduct(product.id, { availableOnly: colors === undefined });
+  if (colors === undefined) return all;
+  return colors.map((name) => {
+    const found = findProductColor(product, name);
+    const garment = found && all.find((g) => g.slug === found.slug);
+    if (!garment) {
+      const names = product.colors.filter(hasHex).map((c) => c.name).join(", ");
+      throw new InputError(`unknown color ${JSON.stringify(name)} for ${product.id}. Colors: ${names}.`);
+    }
+    return garment;
+  });
+}
+
+/** Read a design from its bytes or path and measure it for the engine. */
+async function analyzeForView(
+  file: string,
+  bytes: Uint8Array | undefined,
+  contentBounds: ContentBounds | null | undefined,
+): Promise<AnalyzedDesignFile & { bytes: Uint8Array }> {
+  let data: Uint8Array;
+  try {
+    data = bytes ?? (await readFile(file));
+  } catch (error) {
+    const { code, message } = error as NodeJS.ErrnoException;
+    throw new InputError(code === "ENOENT" ? `no such design file ${JSON.stringify(file)}` : `cannot read ${file}: ${message}`);
+  }
+  try {
+    return { ...(await analyzeDesignFile(data, { contentBounds: contentBounds ?? null })), bytes: data };
+  } catch (error) {
+    // An unsupported format, a corrupt file, or a missing `sharp`, as `fingerprintDesign` reports them.
+    throw new InputError(`cannot read ${file}: ${(error as Error).message}`);
+  }
+}
+
+/** The measured design as a result carries it. */
+function designJson(design: AnalyzedDesignFile) {
+  const { measurement, summary } = design.analysis;
+  return {
+    hash: design.hash,
+    palette: summary.palette,
+    inkLuminance: summary.inkLuminance,
+    approximate: measurement.approximate,
   };
 }
 
@@ -732,29 +1194,32 @@ export interface VetStatus {
  * spent on vetting that cannot happen; cached Jev answers still apply.
  */
 async function vetPlans(
-  design: Fingerprint,
+  print: Fingerprint,
+  measured: RecolorDesign,
   input: string | Uint8Array,
   options: { product: Product; n: number; includeImplausible: boolean },
   setup: VetSetup,
-): Promise<{ design: Fingerprint; plans: (RecolorPlan | VettedPlan)[]; status: VetStatus }> {
+): Promise<{ design: RecolorDesign; plans: (RecolorPlan | VettedPlan)[]; status: VetStatus }> {
   const jev = setup.client ? { available: true as const } : await jevAvailability();
-  const deterministic = (reason: string) => ({
+  const deterministic = (design: RecolorDesign, reason: string) => ({
+    design,
     plans: recolorPlans(design, { product: options.product, n: options.n }),
     status: { requested: true as const, applied: false, vetted: 0, dropped: [], reason: `Swaps were not vetted: ${reason}` },
   });
 
-  let described = design;
-  if (!design.description) {
+  let described = print;
+  if (!print.description) {
     try {
-      described = await describeDesign(design, input, {
+      described = await describeDesign(print, input, {
         providers: jev.available ? (setup.providers ?? defaultVisionProviders()) : [],
       });
     } catch (error) {
       if (!(error instanceof VisionUnavailableError)) throw error;
       const reason = jev.available ? error.message.replace(/\n+/g, " ") : new JevUnavailableError(jev.reason).message;
-      return { design, ...deterministic(reason) };
+      return deterministic(measured, reason);
     }
   }
+  const design = measuredRecolorDesign(measured, described.description!);
 
   const vetOptions: VetOptions = {};
   if (setup.client) vetOptions.client = setup.client;
@@ -762,9 +1227,9 @@ async function vetPlans(
   if (setup.threshold !== undefined) vetOptions.threshold = setup.threshold;
   let result;
   try {
-    result = await vettedRecolorPlans(described, { ...vetOptions, ...options });
+    result = await vettedRecolorPlans(design, { ...vetOptions, ...options });
   } catch (error) {
-    return { design: described, ...deterministic(`the request failed: ${(error as Error).message}`) };
+    return deterministic(design, `the request failed: ${(error as Error).message}`);
   }
   const status: VetStatus = {
     requested: true,
@@ -778,7 +1243,31 @@ async function vetPlans(
   };
   if (result.skipped) status.reason = result.skipped.note;
   if (result.model) status.model = result.model;
-  return { design: described, plans: result.plans, status };
+  return { design, plans: result.plans, status };
+}
+
+/** The measured design a recolor plans from: `designJson`, with the vision description once described. */
+export type RecolorDesign = ReturnType<typeof designJson> & {
+  palette: readonly DesignColor[];
+  description?: DesignDescription;
+};
+
+/**
+ * Bind a fingerprint's vision description to the engine's measured inks:
+ * each described element moves to the measured ink nearest its fingerprint
+ * color when that ink is within the print minimum distance (10), and each
+ * measured ink is labeled with the elements it paints. An element whose color
+ * no measured ink is near keeps its fingerprint hex and labels nothing.
+ */
+export function measuredRecolorDesign(measured: RecolorDesign, description: DesignDescription): RecolorDesign {
+  const elements = description.elements.map((element) => {
+    const nearestInk = measured.palette
+      .map((c) => ({ hex: normalizeHex(c.hex), d: distance(element.hex, c.hex) }))
+      .sort((a, b) => a.d - b.d)[0];
+    return nearestInk && nearestInk.d < LEGIBILITY_RULES.vanishDistance ? { ...element, hex: nearestInk.hex } : element;
+  });
+  const bound = { ...description, elements };
+  return { ...measured, palette: labelPalette(measured.palette, bound), description: bound };
 }
 
 /** ` · plausibility 0.83` or ` · implausible (0.12)` for a vetted plan; empty otherwise. */

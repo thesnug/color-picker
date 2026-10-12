@@ -1,0 +1,59 @@
+{
+  "product": "comfort-colors-1717",
+  "colorCount": 8,
+  "fixtures": [
+    {
+      "file": "two-tone-lettering.png",
+      "expected": "two-tone-lettering.expected.json",
+      "description": "Six pink letter strokes and two blue accents apart on transparency: the pink is under 3:1 on pastels and the blue on Navy.",
+      "contentBounds": null
+    },
+    {
+      "file": "outlined-fill.png",
+      "expected": "outlined-fill.expected.json",
+      "description": "A cream disc inside a dark brown ring: the cream vanishes on light garments but the ring frames it.",
+      "contentBounds": null
+    },
+    {
+      "file": "bare-fill.png",
+      "expected": "bare-fill.expected.json",
+      "description": "The same cream disc with no outline: lost on light garments.",
+      "contentBounds": null
+    },
+    {
+      "file": "outlined-panels.png",
+      "expected": "outlined-panels.expected.json",
+      "description": "Cream panels outlined in dark browns beside dark green leaves.",
+      "contentBounds": null
+    },
+    {
+      "file": "black-lettering-accent.png",
+      "expected": "black-lettering-accent.expected.json",
+      "description": "Black letter blocks with orange inlays: legible on light garments, lost on dark ones.",
+      "contentBounds": null
+    },
+    {
+      "file": "faded-ink.png",
+      "expected": "faded-ink.expected.json",
+      "description": "A black square at 55% opacity: laid over the garment it reads more faintly than solid black.",
+      "contentBounds": null
+    },
+    {
+      "file": "wide-outlined-panel.png",
+      "expected": "wide-outlined-panel.expected.json",
+      "description": "A 2400 px canvas with a pale panel in an 8 px black outline holding black lettering, measured with its content bounds: wider than 1024 px, so sampling and cropping are exercised.",
+      "contentBounds": {
+        "x": 0.25,
+        "y": 0.2916666666666667,
+        "w": 0.4583333333333333,
+        "h": 0.3333333333333333
+      }
+    },
+    {
+      "file": "distressed-lettering.png",
+      "expected": "distressed-lettering.expected.json",
+      "description": "The two-tone lettering distressed: a third of each ink's pixels shifted up to 14 per channel, worn and half-transparent pixels, and alpha 1 to 6 residue of any color over half the canvas. Every pixel of a replaced ink must change, and the residue must not count against a recolor.",
+      "contentBounds": null
+    }
+  ]
+}

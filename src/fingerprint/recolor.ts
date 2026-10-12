@@ -1,7 +1,11 @@
 /**
- * Deterministic recoloring of flat-color art from a recolor mapping. Pure: no
- * I/O, no decoder. `applyRecolor` in ./index.ts decodes the file, checks the
- * art is flat enough, calls `recolorPixels`, and writes the PNG. See
+ * Deterministic recoloring of flat-color art from a recolor mapping by snapping
+ * every pixel to its nearest mapped color. Pure: no I/O, no decoder.
+ *
+ * Since 0.6.0 `applyRecolor` in ./index.ts no longer calls this: it applies a
+ * mapping by pigment substitution (`substitutePigments` in the engine entry
+ * point), which keeps antialiasing and leaves unmapped inks exact. This stays
+ * for callers that want a snapped, mapped-colors-only result. See
  * docs/DESIGN.md, "Pipelines", "Recommend shirts, with recoloring".
  */
 
@@ -23,17 +27,18 @@ export interface RecolorPixelOptions {
   tolerance?: number;
 }
 
+/** Flatness limits for `applyRecolor`. Since 0.6.0 it ignores `tolerance`. */
 export interface ApplyRecolorOptions extends RecolorPixelOptions {
   /**
-   * Largest alpha-weighted share of visible pixels that may be unmatched before
-   * the art counts as not flat and nothing is written. Default 0.05, which
-   * absorbs antialiased edges between two inks.
+   * Largest share of visible pixels, weighted by alpha, that may match no
+   * mapped pigment before the art counts as not flat and nothing is written.
+   * Default 0.05, which absorbs antialiased edges between two inks.
    */
   maxUnmatched?: number;
   /**
-   * Smallest share of the design the fingerprint's palette must cover for the
-   * art to count as flat. Default 0.9: flat art is covered almost entirely by
-   * its few colors, a photograph is not.
+   * Smallest share of the design's measured ink the mapped colors must cover
+   * for the art to count as flat. Default 0.9: flat art is covered almost
+   * entirely by its few colors, a photograph is not.
    */
   minCoverage?: number;
 }

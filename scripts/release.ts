@@ -40,8 +40,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const UNRELEASED = /^## Unreleased[ \t]*\n/m;
 
-/** Every check CI runs, in CI's order, ending with the build that fills dist/. */
-const CHECKS = ["typecheck", "data:check", "products:check", "products:equivalents:check", "test", "build"];
+/**
+ * Every check CI runs, in CI's order: the build that fills dist/, then the
+ * check that the built engine entry point imports nothing outside itself.
+ */
+const CHECKS = ["typecheck", "data:check", "products:check", "products:equivalents:check", "test", "build", "engine:purity"];
 
 const USAGE = "Usage: npm run release -- <prepare|tag> <version> [--no-push | --push-existing]";
 

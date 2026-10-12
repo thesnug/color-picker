@@ -10,17 +10,23 @@
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { basename, extname } from "node:path";
 import { parseArgs } from "node:util";
 
 import { MOOD_TOP } from "../jev/mood.js";
 import { DEFAULT_NEAREST_K } from "../nearest.js";
 import { escapeXml, renderHtml } from "../render/index.js";
+import type { ContentBounds } from "../engine/index.js";
 import {
+  artworkOptionsView,
   combosView,
+  DEFAULT_COLOR_COUNT,
   DEFAULT_RECOLOR_N,
   DEFAULT_RECOMMEND_N,
   InputError,
+  legibilityView,
   nearestView,
+  pairsView,
   palettesView,
   recolorView,
   recommendView,
@@ -73,10 +79,17 @@ Commands:
   palettes <product-color>    Ranked palettes for a garment color by name,
                               the garment first, then the ink colors
   recommend <design>          Garment colors for a PNG, WebP, or JPEG design,
-                              printed as is
+                              printed as is: those its ink reads on first
+  legibility <design>         Whether the design's ink reads on each garment
+                              color (the ink-legibility-v2 verdict)
   recolor <design>            Garment colors for a design with recoloring:
                               a Wada combination per garment, the from-to
                               color mapping, and a prompt for the recolor
+  options <design>            Artwork options: pigment substitutions that make
+                              the design read on garments it fails
+  pairs <design>              The order POD's Creative color study inspects
+                              artwork and garment pairs in, for the design
+                              (artwork "original") and any --option files
   theme <hex|name|id>         A web theme: background, surface, text, muted
                               text, accent, and text on the accent, each pair
                               checked against WCAG AA. A bare number is a
@@ -87,10 +100,22 @@ Command options:
   --size <n>                  combos, palettes: only palettes with n colors
   --limit <n>                 combos, palettes: maximum palettes (default ${DEFAULT_COMBOS_LIMIT})
   -n <n>                      recommend, recolor: number of picks (default ${DEFAULT_RECOMMEND_N})
-  --product <id>              recommend, recolor, palettes: garment product
-                              (default Comfort Colors 1717)
-  --apply <dir>               recolor: write each recolored design as a PNG in
-                              dir; flat-color art only
+  --product <id>              recommend, recolor, palettes, legibility, options,
+                              pairs: garment product (default Comfort Colors 1717)
+  --colors <a,b,...>          recommend, legibility, options, pairs: only these
+                              product colors, by name, slug, or alias
+  --bounds <x,y,w,h>          recommend, recolor, legibility, options, pairs:
+                              the print's visible content as fractions of the
+                              canvas, to measure it as POD does
+  --count <n>                 options, pairs: garment colors the assortment
+                              wants (default ${DEFAULT_COLOR_COUNT})
+  --option <source>:<file>    pairs: an Artwork Option's print file, named by
+                              its file name without the extension; source is
+                              legible-ink or wada. Repeat for each option
+  --preferred <color>         pairs: a product color to place first when any
+                              artwork reads on it
+  --apply <dir>               recolor, options: write each recolored design as
+                              a PNG in dir; flat-color art only
   --mood                      recommend, palettes: re-rank the top ${MOOD_TOP} by how
                               well each suits the design's subject and mood,
                               with Jev (needs TYPESAFE_API_KEY and a vision
@@ -131,7 +156,7 @@ an unreadable design file, or a theme with no legible text and background,
 2 usage error. See https://github.com/thesnug/color-picker
 `;
 
-const COMMANDS = ["nearest", "combos", "show", "palettes", "recommend", "recolor", "theme"] as const;
+const COMMANDS = ["nearest", "combos", "show", "palettes", "recommend", "legibility", "recolor", "options", "pairs", "theme"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const RESERVED = ["check"] as const;
@@ -160,6 +185,11 @@ export async function run(argv: readonly string[], io: CliIo = defaultIo): Promi
         svg: { type: "string" },
         html: { type: "string" },
         product: { type: "string" },
+        colors: { type: "string" },
+        bounds: { type: "string" },
+        count: { type: "string" },
+        option: { type: "string", multiple: true },
+        preferred: { type: "string" },
         apply: { type: "string" },
         mood: { type: "boolean" },
         design: { type: "string" },
@@ -247,6 +277,11 @@ async function buildView(
     limit?: string;
     n?: string;
     product?: string;
+    colors?: string;
+    bounds?: string;
+    count?: string;
+    option?: string[];
+    preferred?: string;
     format?: string;
     mode?: string;
     apply?: string;
@@ -257,7 +292,24 @@ async function buildView(
   },
 ): Promise<View> {
   const only = (
-    flag: "k" | "size" | "limit" | "n" | "product" | "format" | "mode" | "apply" | "mood" | "design" | "vet" | "include-implausible",
+    flag:
+      | "k"
+      | "size"
+      | "limit"
+      | "n"
+      | "product"
+      | "colors"
+      | "bounds"
+      | "count"
+      | "option"
+      | "preferred"
+      | "format"
+      | "mode"
+      | "apply"
+      | "mood"
+      | "design"
+      | "vet"
+      | "include-implausible",
     ...allowed: Command[]
   ) => {
     if (values[flag] !== undefined && !allowed.includes(command)) {
@@ -270,8 +322,13 @@ async function buildView(
   only("size", "combos", "palettes");
   only("limit", "combos", "palettes");
   only("n", "recommend", "recolor");
-  only("product", "recommend", "recolor", "palettes");
-  only("apply", "recolor");
+  only("product", "recommend", "recolor", "palettes", "legibility", "options", "pairs");
+  only("colors", "recommend", "legibility", "options", "pairs");
+  only("bounds", "recommend", "recolor", "legibility", "options", "pairs");
+  only("count", "options", "pairs");
+  only("option", "pairs");
+  only("preferred", "pairs");
+  only("apply", "recolor", "options");
   only("mood", "recommend", "palettes");
   only("design", "palettes");
   only("vet", "recolor");
@@ -287,13 +344,51 @@ async function buildView(
     return showView(args.map((a) => positiveInt(a, "combination ID")));
   }
 
+  const designOptions = () => ({
+    ...(values.product !== undefined && { product: values.product }),
+    ...(values.colors !== undefined && { colors: colorList(values.colors) }),
+    ...(values.bounds !== undefined && { contentBounds: bounds(values.bounds) }),
+  });
+
   if (command === "recommend") {
     if (args.length !== 1) throw new UsageError("recommend takes one design file");
     return recommendView({
       file: args[0]!,
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOMMEND_N,
-      ...(values.product !== undefined && { product: values.product }),
+      ...designOptions(),
       ...(values.mood && { mood: true }),
+    });
+  }
+
+  if (command === "legibility") {
+    if (args.length !== 1) throw new UsageError("legibility takes one design file");
+    return legibilityView({ file: args[0]!, ...designOptions() });
+  }
+
+  if (command === "options") {
+    if (args.length !== 1) throw new UsageError("options takes one design file");
+    const count = optionalInt(values.count, "--count");
+    return artworkOptionsView({
+      file: args[0]!,
+      ...designOptions(),
+      ...(count !== undefined && { colorCount: count }),
+      ...(values.apply !== undefined && { apply: values.apply }),
+    });
+  }
+
+  if (command === "pairs") {
+    if (args.length !== 1) throw new UsageError("pairs takes one design file; give Artwork Options with --option");
+    const count = optionalInt(values.count, "--count");
+    const contentBounds = values.bounds !== undefined ? bounds(values.bounds) : null;
+    return pairsView({
+      artworks: [
+        { artworkId: "original", file: args[0]!, source: "original", contentBounds },
+        ...(values.option ?? []).map((value) => ({ ...artworkOption(value), contentBounds })),
+      ],
+      ...(values.product !== undefined && { product: values.product }),
+      ...(values.colors !== undefined && { colors: colorList(values.colors) }),
+      ...(count !== undefined && { colorCount: count }),
+      ...(values.preferred !== undefined && { preferred: values.preferred }),
     });
   }
 
@@ -303,6 +398,7 @@ async function buildView(
       file: args[0]!,
       n: optionalInt(values.n, "-n") ?? DEFAULT_RECOLOR_N,
       ...(values.product !== undefined && { product: values.product }),
+      ...(values.bounds !== undefined && { contentBounds: bounds(values.bounds) }),
       ...(values.apply !== undefined && { apply: values.apply }),
       ...(values.vet && { vet: true }),
       ...(values["include-implausible"] && { includeImplausible: true }),
@@ -361,6 +457,37 @@ function oneOf<T extends string>(value: string | undefined, flag: string, allowe
     throw new UsageError(`${flag} must be one of ${allowed.join(", ")}, got ${JSON.stringify(value)}`);
   }
   return value as T;
+}
+
+/** `--option wada:out/wada-b246-e12-i3-v1.png`: an Artwork Option's source and print file. */
+function artworkOption(value: string): { artworkId: string; file: string; source: "legible-ink" | "wada" } {
+  const colon = value.indexOf(":");
+  const source = value.slice(0, colon);
+  const file = value.slice(colon + 1);
+  if (colon < 1 || !file || (source !== "legible-ink" && source !== "wada")) {
+    throw new UsageError(`--option must be legible-ink:<file> or wada:<file>, got ${JSON.stringify(value)}`);
+  }
+  return { artworkId: basename(file, extname(file)), file, source };
+}
+
+/** `--colors "Black,Blue Jean"`: names separated by commas. */
+function colorList(value: string): string[] {
+  const names = value
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+  if (names.length === 0) throw new UsageError("--colors needs at least one color name");
+  return names;
+}
+
+/** `--bounds 0.25,0.3,0.5,0.2`: left, top, width, and height as fractions of the canvas. */
+function bounds(value: string): ContentBounds {
+  const parts = value.split(",").map((part) => Number(part.trim()));
+  const [x, y, w, h] = parts as [number, number, number, number];
+  if (parts.length !== 4 || parts.some((p) => !Number.isFinite(p) || p < 0 || p > 1) || w <= 0 || h <= 0) {
+    throw new UsageError(`--bounds must be x,y,w,h fractions from 0 to 1 with a positive width and height, got ${JSON.stringify(value)}`);
+  }
+  return { x, y, w, h };
 }
 
 function optionalInt(value: string | undefined, flag: string): number | undefined {

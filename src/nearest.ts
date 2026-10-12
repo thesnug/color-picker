@@ -18,7 +18,8 @@ import {
   type Hex,
   type Oklab,
 } from "./color/convert.js";
-import { loadColorNames, loadColors, type DerivedColor } from "./data/index.js";
+import { storedColorNames, storedColors } from "./data/store.js";
+import type { DerivedColor } from "./data/types.js";
 
 /** Default number of matches when neither `k` nor `within` is given. */
 export const DEFAULT_NEAREST_K = 3;
@@ -129,12 +130,10 @@ export function nameKey(name: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Cached lookups. The assets are read once, on first use.
+// Cached lookups, built once, on first use.
 
-let colorsCache: DerivedColor[] | undefined;
-
-function wadaColors(): DerivedColor[] {
-  return (colorsCache ??= loadColors());
+function wadaColors(): readonly DerivedColor[] {
+  return storedColors();
 }
 
 // The derived OKLab values are rounded to five places, which would put an exact
@@ -167,7 +166,7 @@ function nameIndexes(): [ResolvedVia, NameIndex][] {
   // normalizing ("blue green", "blue/green", "bluegreen") the spaced one wins.
   const dictionary = (source: "css" | "xkcd"): NameIndex => {
     const index: NameIndex = new Map();
-    for (const { name, hex } of loadColorNames(source).colors) {
+    for (const { name, hex } of storedColorNames(source).colors) {
       const key = nameKey(name);
       if (!index.has(key)) index.set(key, { name, hex: normalizeHex(hex) });
     }

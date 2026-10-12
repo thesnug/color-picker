@@ -93,3 +93,18 @@ dependency graph is kept truthful as work proceeds.
 - Garment images are referenced by public URL and SHA-256, never stored here.
 - Jev is used for semantic judgments only. Anything derivable is precomputed and
   committed.
+- `src/data/generated/` bundles `assets/` for the library and is never edited by
+  hand: run `npm run data:build` after changing any asset.
+
+## The engine
+
+- `src/engine/` is the color logic POD vendors byte for byte. Keep its import
+  closure pure (relative imports only, no `node:`, no file reads);
+  `npm run engine:purity` checks the build.
+- Any change to an engine output (measurement, verdict, ranking, plan,
+  substituted pixels) bumps `ENGINE_VERSION` in `src/engine/rules.ts` and
+  re-records `tests/fixtures/engine/` with `npm run engine:fixtures`, in the same
+  PR. The legibility arithmetic is shared with POD: never reorder its float
+  operations as a cleanup.
+- Fixtures are synthetic. Production artwork and production design names never
+  go in this public repo.

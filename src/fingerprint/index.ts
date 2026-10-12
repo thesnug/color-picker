@@ -35,7 +35,11 @@ import {
   type VisionProvider,
   writeDescriptionCache,
 } from "./describe.js";
-import { type ApplyRecolorOptions, RECOLOR_DEFAULTS, type RecolorSwap, recolorPixels } from "./recolor.js";
+import { type ApplyRecolorOptions, RECOLOR_DEFAULTS, type RecolorSwap } from "./recolor.js";
+import { analyzeDesign, type DesignAnalysis, measureInkPixels } from "../engine/measure.js";
+import { substitutionReplacements } from "../engine/plans.js";
+import { type ContentBounds, legibilitySampling } from "../engine/sampling.js";
+import { type PigmentReplacement, RecolorPigmentError, substitutePigments } from "../engine/substitute.js";
 
 export {
   codexProvider,
@@ -59,6 +63,8 @@ export {
   type VisionRequest,
   VisionUnavailableError,
 } from "./describe.js";
+
+export type { ContentBounds } from "../engine/sampling.js";
 
 export {
   type ApplyRecolorOptions,
@@ -347,7 +353,17 @@ export type AppliedRecolor =
       out: string;
       width: number;
       height: number;
-      /** Alpha-weighted share of visible pixels farther than `tolerance` from every `from` color. */
+      /**
+       * The pigment substitutions applied, bound to the design's measured inks,
+       * including any ink the mapping keeps as it is.
+       */
+      replacements: PigmentReplacement[];
+      /** Visible pixels a pigment matched, kept inks included. */
+      changed: number;
+      /**
+       * Share of the visible pixels no pigment's tolerance or tint reached,
+       * left as they were, weighted by alpha (`substitutePigments`).
+       */
       unmatched: number;
     }
   | {
@@ -357,16 +373,24 @@ export type AppliedRecolor =
     };
 
 /**
- * Recolor flat-color art by a recolor mapping and write the result as a PNG:
- * every visible pixel takes the `to` color of its nearest `from` color in
- * OKLab, keeping its alpha, so the output holds only the mapped colors plus
- * transparency. `mapping` is a `RecolorPlan`'s `mapping`.
+ * Recolor flat-color art by a recolor mapping and write the result as a PNG,
+ * by pigment substitution: the design's inks are measured as the legibility
+ * engine measures them, each `from` color binds to the measured ink within 5
+ * of it, and `substitutePigments` swaps exactly those pigments, keeping each
+ * pixel's offset from its pigment (antialiasing, shading) and its alpha.
+ * Every other pixel is unchanged. `mapping` is a `RecolorPlan`'s `mapping`.
  *
- * Photographic or heavily gradient art cannot be recolored this way. It is
- * detected first from the fingerprint, when its palette covers less than
- * `minCoverage` of the design, then from the pixels, when more than
- * `maxUnmatched` of them are farther than `tolerance` from every `from` color.
- * Either returns `{ applicable: false, reason }` and writes nothing.
+ * Returns `{ applicable: false, reason }` and writes nothing for art the
+ * measurement marks approximate (photographic or gradient-heavy), for a
+ * mapping color that matches no measured ink, when the mapped inks cover
+ * less than `minCoverage` of the ink (default 0.9: a photograph's few main
+ * colors, or a mapping that leaves an ink out), when more than
+ * `maxUnmatched` of the visible pixels, weighted by alpha, match no pigment
+ * (default 0.05; near-transparent residue around a print barely counts), and
+ * for pigments whose tolerances overlap.
+ *
+ * `tolerance`, `fingerprint`, and `cache` are accepted for compatibility and
+ * no longer read: tolerances come from the measured inks.
  *
  * @throws {Error} when `sharp` is missing.
  * @throws {TypeError} when the file is not PNG, WebP, or JPEG.
@@ -377,44 +401,151 @@ export async function applyRecolor(
   options: ApplyRecolorOptions & {
     /** Where to write the PNG. */
     out: string;
-    /** The design's fingerprint, when already computed. */
+    /** No longer read. */
     fingerprint?: Fingerprint;
-    /** As for `fingerprint`, when it is computed here. */
+    /** No longer read. */
     cache?: string | false;
+    /** The print's visible content, for the measurement (`legibilitySampling`). */
+    contentBounds?: ContentBounds | null;
   },
 ): Promise<AppliedRecolor> {
-  const { minCoverage, maxUnmatched, tolerance } = { ...RECOLOR_DEFAULTS, ...options };
   const bytes = file instanceof Uint8Array ? file : await readFile(file);
-  const print =
-    options.fingerprint ??
-    (await fingerprint(bytes, options.cache === undefined ? {} : { cache: options.cache }));
-
-  const coverage = print.palette.reduce((sum, c) => sum + c.share, 0);
+  const hash = createHash("sha256").update(bytes).digest("hex");
+  const measurement = measureInkPixels(
+    await decodeForLegibility(bytes, { contentBounds: options.contentBounds ?? null }),
+    hash,
+  );
+  if (measurement.approximate) {
+    return {
+      applicable: false,
+      reason:
+        `The design's ${measurement.clusters.length} measured inks cover ${Math.round(measurement.coverage * 100)}% of it ` +
+        `and ${Math.round(measurement.unmatchedShare * 100)}% of its ink is far from all of them; ` +
+        `it looks photographic or gradient-heavy, so use the prompt instead.`,
+    };
+  }
+  const replacements = substitutionReplacements(mapping, measurement, { keepIdentity: true });
+  if (!replacements) {
+    return {
+      applicable: false,
+      reason:
+        "A mapped color matches none of the design's measured inks within 5 (or two mapped colors share one ink), " +
+        "so the pigments cannot be substituted exactly; use the prompt instead.",
+    };
+  }
+  const { minCoverage, maxUnmatched } = { ...RECOLOR_DEFAULTS, ...options };
+  const mapped = new Set(replacements.map((r) => r.from));
+  const coverage = measurement.clusters.reduce((sum, c) => sum + (mapped.has(c.hex) ? c.share : 0), 0);
   if (coverage < minCoverage) {
     return {
       applicable: false,
       reason:
-        `The design's ${print.palette.length} main colors cover only ${Math.round(coverage * 100)}% of it, ` +
-        `below ${Math.round(minCoverage * 100)}%; it looks photographic or gradient-heavy, so use the prompt instead.`,
+        `The mapped colors cover only ${Math.round(coverage * 100)}% of the design's ink, below ${Math.round(minCoverage * 100)}%; ` +
+        `it looks photographic or gradient-heavy, or the mapping leaves an ink out, so use the prompt instead.`,
     };
   }
 
   const { width, height, pixels } = await sharpDecoder(bytes, { maxDimension: Infinity });
-  const result = recolorPixels(pixels, mapping, { tolerance });
-  if (result.unmatched > maxUnmatched) {
+  let substituted;
+  try {
+    substituted = substitutePigments(pixels, { replacements });
+  } catch (error) {
+    if (!(error instanceof RecolorPigmentError)) throw error;
+    return { applicable: false, reason: `${error.message} Use the prompt instead.` };
+  }
+  // Weighted by alpha, as it prints: near-transparent residue around the art barely counts.
+  const { unmatched } = substituted;
+  if (unmatched > maxUnmatched) {
     return {
       applicable: false,
       reason:
-        `${Math.round(result.unmatched * 100)}% of the design is farther than ${tolerance} from every mapped color, ` +
+        `${Math.round(unmatched * 100)}% of the design's visible ink, weighted by alpha, matches no mapped pigment, ` +
         `above ${Math.round(maxUnmatched * 100)}%; it is not flat enough to recolor exactly, so use the prompt instead.`,
     };
   }
 
-  const sharp = await loadSharp("Recoloring");
-  await sharp(result.pixels.data, { raw: { width: pixels.width, height: pixels.height, channels: 4 } })
+  await writePng(substituted.pixels, options.out);
+  return { applicable: true, out: options.out, width, height, replacements, changed: substituted.changed, unmatched };
+}
+
+// ---------------------------------------------------------------------------
+// Legibility
+
+/**
+ * Decode a print file exactly as the legibility engine samples it
+ * (`legibilitySampling` in the engine entry point): EXIF orientation applied,
+ * cropped to `contentBounds` plus a 1% margin when given (not for a file with
+ * an EXIF orientation), fit inside 1024 px with nearest-neighbor sampling, in
+ * sRGB with alpha. POD's Creative ink legibility gate decodes the same way,
+ * so its measurements match the MCP tools' for the same file and bounds.
+ *
+ * @throws {Error} when `sharp` is missing.
+ * @throws {TypeError} when the file is not PNG, WebP, or JPEG.
+ */
+export async function decodeForLegibility(
+  bytes: Uint8Array,
+  options: { contentBounds?: ContentBounds | null } = {},
+): Promise<RgbaPixels> {
+  const sharp = await loadSharp("Ink legibility");
+  const metadata = await sharp(bytes).metadata();
+  if (!FORMATS.has(metadata.format)) {
+    throw new TypeError(`Unsupported image format "${metadata.format}"; expected PNG, WebP, or JPEG.`);
+  }
+  const sampling = legibilitySampling({
+    width: metadata.width ?? 0,
+    height: metadata.height ?? 0,
+    oriented: (metadata.orientation ?? 1) > 1,
+    contentBounds: options.contentBounds ?? null,
+  });
+  let pipeline = sharp(bytes).autoOrient();
+  if (sampling.extract) pipeline = pipeline.extract(sampling.extract);
+  const { data, info } = await pipeline
+    .resize(sampling.resize)
+    .toColorspace("srgb")
+    .ensureAlpha()
+    .raw({ depth: "uchar" })
+    .toBuffer({ resolveWithObject: true });
+  if (info.channels !== 4) throw new Error("Ink legibility needs an RGBA print file.");
+  return { data: new Uint8Array(data.buffer, data.byteOffset, data.length), width: info.width, height: info.height };
+}
+
+/**
+ * Write RGBA pixels (straight alpha) as a PNG, as `applyRecolor` writes its
+ * output. For pixels from the engine's `substitutePigments`.
+ *
+ * @throws {Error} when `sharp` is missing.
+ */
+export async function writePng(pixels: RgbaPixels, out: string): Promise<void> {
+  const sharp = await loadSharp("Writing a PNG");
+  await sharp(pixels.data, { raw: { width: pixels.width, height: pixels.height, channels: 4 } })
     .png({ compressionLevel: 9 })
-    .toFile(options.out);
-  return { applicable: true, out: options.out, width, height, unmatched: result.unmatched };
+    .toFile(out);
+}
+
+/** A design file decoded and measured for the engine. */
+export interface AnalyzedDesignFile {
+  /** SHA-256 of the file bytes, lowercase hex: the measurement's `bytesChecksum`. */
+  hash: string;
+  /** The sampled pixels the analysis measured, for `planArtworkOptions`. */
+  pixels: RgbaPixels;
+  analysis: DesignAnalysis;
+}
+
+/**
+ * Decode a design file with `decodeForLegibility` and measure it with the
+ * engine's `analyzeDesign`. `file` is a path, a file URL, or the file's bytes.
+ *
+ * @throws {Error} when `sharp` is missing.
+ * @throws {TypeError} when the file is not PNG, WebP, or JPEG.
+ */
+export async function analyzeDesignFile(
+  file: string | URL | Uint8Array,
+  options: { contentBounds?: ContentBounds | null } = {},
+): Promise<AnalyzedDesignFile> {
+  const bytes = file instanceof Uint8Array ? file : await readFile(file);
+  const hash = createHash("sha256").update(bytes).digest("hex");
+  const pixels = await decodeForLegibility(bytes, options);
+  return { hash, pixels, analysis: analyzeDesign(pixels, hash) };
 }
 
 /** Compare decoded print pixels, including alpha, rather than file encoding or source appearance. */

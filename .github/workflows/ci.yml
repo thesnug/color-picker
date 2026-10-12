@@ -29,3 +29,4 @@ jobs:
       - run: npm run products:equivalents:check
       - run: npm test
       - run: npm run build
+      - run: npm run engine:purity

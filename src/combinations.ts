@@ -7,12 +7,8 @@
 import { contrastRatio } from "./color/contrast.js";
 import { toHex, toOklch, type ColorInput, type Oklch } from "./color/convert.js";
 import { analogous, complementary, hueArc, splitComplementary, triadic } from "./color/harmony.js";
-import {
-  loadColors,
-  loadCombinations,
-  type Combination,
-  type DerivedColor,
-} from "./data/index.js";
+import { storedColors, storedCombinations } from "./data/store.js";
+import type { Combination, DerivedColor } from "./data/types.js";
 import { nearest, type NearestMatch, type ResolvedQuery } from "./nearest.js";
 
 /** Defaults for `combinations`. */
@@ -351,17 +347,17 @@ function round(value: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Cached lookups. The assets are read once, on first use.
+// Cached lookups, built once, on first use.
 
 let colorsCache: Map<number, DerivedColor> | undefined;
 let combinationsCache: Map<number, Combination> | undefined;
 
 function colorsByIndex(): Map<number, DerivedColor> {
-  return (colorsCache ??= new Map(loadColors().map((c) => [c.index, c])));
+  return (colorsCache ??= new Map(storedColors().map((c) => [c.index, c])));
 }
 
 function combinationsById(): Map<number, Combination> {
-  return (combinationsCache ??= new Map(loadCombinations().map((c) => [c.id, c])));
+  return (combinationsCache ??= new Map(storedCombinations().map((c) => [c.id, c])));
 }
 
 /** The Wada colors flagged neutral in the derived data (chroma at or below 0.045). */

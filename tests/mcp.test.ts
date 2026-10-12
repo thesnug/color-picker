@@ -6,6 +6,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { ENGINE_VERSION } from "../src/engine/index.js";
 import { fingerprint } from "../src/fingerprint/index.js";
 import { descriptionCachePath, describePrompt, writeDescriptionCache } from "../src/fingerprint/describe.js";
 import { createServer, SERVER_NAME } from "../src/mcp/index.js";
@@ -13,6 +14,7 @@ import { RESULT_HISTORY, ResultStore, toolDefinitions } from "../src/mcp/tools.j
 
 const ROOT = join(import.meta.dirname, "..");
 const FLAT_MARK = join(import.meta.dirname, "fixtures", "designs", "flat-mark.png");
+const NAVY_BADGE = join(import.meta.dirname, "fixtures", "designs", "navy-badge.png");
 
 const TOOLS = [
   "batch_product_colors", "batch_repetition_report", "verify_print_rendition",
@@ -20,7 +22,10 @@ const TOOLS = [
   "combinations",
   "palettes_for_product_color",
   "recommend_product_colors",
+  "check_print_legibility",
   "recolor_plans",
+  "artwork_options",
+  "rank_artwork_pairs",
   "theme",
   "check_accessibility",
   "list_products",
@@ -167,12 +172,20 @@ describe("mcp over stdio", () => {
   });
 
   it("selects a reviewed batch with mappings and reports its repetition", async () => {
-    const recommendations = await call("recommend_product_colors", { designPath: FLAT_MARK, n: 50 });
-    const approvedSlugs = [...new Set([...recommendations.json().picks.map((p: any) => p.color.slug), "ivory", "true-navy", "pepper", "sage", "crimson", "butter", "lagoon-blue"])];
-    const batchReply = await call("batch_product_colors", {
-      designs: [{ id: "fixture", defaultSlug: approvedSlugs[0], desiredGroups: [{ name: "project choice", slugs: [approvedSlugs[1]] }, { name: "no reviewed match", slugs: ["not-in-catalog"] }], sizeAvailability: approvedSlugs.map((slug: string) => ({ slug, sizes: ["S", "M", "L", "XL", "2XL", "3XL"], checkedAt: "2026-09-27", source: "fixture provider catalog" })), artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: FLAT_MARK, approvedSlugs }] }],
-      recent: [],
-    });
+    const recommendations = await call("recommend_product_colors", { designPath: NAVY_BADGE, n: 50 });
+    const legibleSlugs: string[] = recommendations.json().picks.filter((p: any) => p.legibility.pass).map((p: any) => p.color.slug);
+    expect(legibleSlugs.length).toBeGreaterThanOrEqual(8);
+    const approvedSlugs = legibleSlugs;
+    const sizeAvailability = [...approvedSlugs, "ivory"].map((slug: string) => ({ slug, sizes: ["S", "M", "L", "XL", "2XL", "3XL"], checkedAt: "2026-09-27", source: "fixture provider catalog" }));
+    const design = (slugs: string[]) => ({ id: "fixture", defaultSlug: approvedSlugs[0], desiredGroups: [{ name: "project choice", slugs: [approvedSlugs[1]] }, { name: "no reviewed match", slugs: ["not-in-catalog"] }], sizeAvailability, artworks: [{ artworkId: "original", renditionId: "prepared-fixture", designPath: NAVY_BADGE, approvedSlugs: slugs }] });
+
+    // An approved color the print fails the legibility verdict on is refused.
+    expect(legibleSlugs).not.toContain("ivory");
+    const refused = await call("batch_product_colors", { designs: [design([...approvedSlugs, "ivory"])], recent: [] });
+    expect(refused.isError).toBe(true);
+    expect(refused.text).toMatch(/^fixture: approved color ivory fails ink legibility with original: /);
+
+    const batchReply = await call("batch_product_colors", { designs: [design(approvedSlugs)], recent: [] });
     expect(batchReply.isError, batchReply.text).toBe(false);
     const batch = batchReply.json();
     expect(batch.selections[0].picks).toHaveLength(8);
@@ -250,7 +263,79 @@ describe("mcp over stdio", () => {
     expect(reply.vet).toMatchObject({ requested: true, applied: false, vetted: 0, dropped: [] });
     expect(reply.vet.reason).toMatch(/TYPESAFE_API_KEY/);
     expect(reply.plans[0].plausibility).toBeNull();
+    // Each plan carries its pigment substitution and the recolored design's verdict on its garment.
+    expect(reply.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+    for (const plan of reply.plans) {
+      expect(plan.legibility).toMatchObject({ protocol: "ink-legibility-v2", colorName: plan.color.name });
+      if (!plan.merged) expect(plan.substitution.replacements.length).toBeGreaterThan(0);
+    }
     expectSvg(reply);
+  });
+
+  it("check_print_legibility on product colors and on garments given by hex", async () => {
+    const reply = (
+      await call("check_print_legibility", {
+        designPath: FLAT_MARK,
+        colors: ["Black", "Denim"],
+        garments: [{ colorName: "Provider Navy", hex: "#52525E" }],
+      })
+    ).json();
+    expect(reply.engine.protocol).toBe("ink-legibility-v2");
+    expect(reply.verdicts.map((v: any) => [v.colorName, v.garmentHex, v.pass])).toEqual([
+      ["Black", "#1f1d1e", true],
+      ["Denim", expect.stringMatching(/^#[0-9a-f]{6}$/), false],
+      ["Provider Navy", "#52525e", expect.any(Boolean)],
+    ]);
+    expect(reply.verdicts[1].reason).toMatch(/^#e8836b \(51% of the ink\) is 2\.\d\d:1 on Denim, under 3:1/);
+    expectSvg(reply);
+  });
+
+  it("artwork_options adds legible garments and writes each option", async () => {
+    const outDir = join(scratch, "options");
+    const reply = (await call("artwork_options", { designPath: FLAT_MARK, outDir })).json();
+    expect(reply.needs).toContain("light");
+    expect(reply.options.length).toBeGreaterThan(0);
+    for (const option of reply.options) {
+      expect(option.plan.key).toMatch(/^[a-z0-9-]{1,60}$/);
+      expect(option.addsColors.length).toBeGreaterThan(0);
+      for (const name of option.addsColors) expect(reply.legibleColors).not.toContain(name);
+    }
+    expect(readdirSync(outDir)).toHaveLength(reply.options.length);
+    expectSvg(reply);
+  });
+
+  it("rank_artwork_pairs over the design and the options artwork_options wrote", async () => {
+    const outDir = join(scratch, "pair-options");
+    const planned = (await call("artwork_options", { designPath: FLAT_MARK, outDir })).json();
+    const reply = (
+      await call("rank_artwork_pairs", {
+        artworks: [
+          { artworkId: "original", designPath: FLAT_MARK, source: "original" },
+          ...planned.options.map((o: any) => ({
+            artworkId: o.plan.key,
+            designPath: planned.applied.find((a: any) => a.key === o.plan.key).out,
+            source: o.source,
+          })),
+        ],
+        colorCount: 4,
+      })
+    ).json();
+    expect(reply.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+    expect(reply.pairs.every((p: any) => p.legibility.pass)).toBe(true);
+    // The original leads every color it reads on, and those colors come first.
+    const leads = reply.pairs.filter((p: any, i: number) => reply.pairs.findIndex((q: any) => q.colorName === p.colorName) === i);
+    const firstOption = leads.findIndex((p: any) => p.source !== "original");
+    expect(firstOption).toBeGreaterThan(0);
+    expect(leads.slice(firstOption).every((p: any) => p.source !== "original")).toBe(true);
+    expectSvg(reply);
+    const duplicate = await call("rank_artwork_pairs", {
+      artworks: [
+        { artworkId: "a", designPath: FLAT_MARK, source: "original" },
+        { artworkId: "a", designPath: FLAT_MARK, source: "wada" },
+      ],
+    });
+    expect(duplicate.isError).toBe(true);
+    expect(duplicate.text).toContain('two artworks share the ID "a"');
   });
 
   it("recolor_plans refuses includeImplausible without vet", async () => {
@@ -311,6 +396,9 @@ describe("mcp over stdio", () => {
       ["recommend_product_colors", {}, /designPath or designBase64/],
       ["recommend_product_colors", { designPath: join(scratch, "missing.png") }, /no such design file/],
       ["recommend_product_colors", { designBase64: "not base64!" }, /not valid base64/],
+      ["recommend_product_colors", { designPath: FLAT_MARK, colors: ["Chartreuse Dream"] }, /unknown color "Chartreuse Dream"/],
+      ["check_print_legibility", { designPath: join(scratch, "missing.png") }, /no such design file/],
+      ["artwork_options", {}, /designPath or designBase64/],
       ["check_accessibility", { combinationId: 9999 }, /unknown combination/],
       ["list_products", { product: "gildan-5000" }, /.+/],
       ["render_card", { resultId: "r9999" }, /no result/],

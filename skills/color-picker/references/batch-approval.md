@@ -16,13 +16,19 @@ evidence; label them provisional.
    composition, alpha, object colors needed for recognition, dimensions and placement.
    Completion: viable ink versions are identified and each has a traceable prepared file.
 2. Review legibility and subject recognition per artwork/color combination.
-   Distinguish lettering and unoutlined disappearing details from small outlined
-   fills. Ratios are evidence, not automatic rejection: a low-contrast fill may
-   remain readable when contrasting lettering and outlines define its subject. Vision
-   receives a visible backdrop; ink analysis uses original alpha. Disclose uncertain
-   recognition and visually inspect the art before approving any candidate.
-   Completion: each alternate has explicit reviewed color slugs, with contextual
-   explanations for warnings. Never label a candidate reviewed from score alone.
+   Run `check_print_legibility` on each prepared file for its candidate colors
+   (pass `contentBounds` when the project measured them). Its ink-legibility-v2
+   verdict is a hard gate, the same one POD's Creative color study applies:
+   `batch_product_colors` refuses an approved color the file fails on. The
+   verdict already distinguishes lettering and unoutlined details, which are lost
+   when faint, from a faint fill that legible outlines frame, which is not.
+   Subject recognition is still a visual judgment. Vision receives a visible
+   backdrop; ink analysis uses original alpha. Disclose uncertain recognition and
+   visually inspect the art before approving any candidate. When too few colors
+   pass, `artwork_options` plans alternate inks to review.
+   Completion: each alternate has explicit reviewed color slugs that pass the
+   verdict, with contextual explanations for warnings. Never label a candidate
+   reviewed from score alone.
 3. Check the provider's current variant availability for S, M, L, XL, 2XL and
    3XL for every candidate color. Give `batch_product_colors` a `sizeAvailability`
    entry per approved slug with `sizes`, `checkedAt` and `source`. A product's

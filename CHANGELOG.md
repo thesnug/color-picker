@@ -7,6 +7,99 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+## [0.6.0] - 2026-10-12
+
+One color engine for the chat skill and POD (INT-2711). POD's
+`ink-legibility-v2` gate becomes the verdict here, unchanged, and the MCP
+tools and POD's Creative color study call the same functions.
+
+### Engine
+
+- New entry point `@thesnug/color-picker/engine` (`ENGINE_VERSION` 1.1.0,
+  `LEGIBILITY_PROTOCOL` `ink-legibility-v2`): `legibilitySampling`,
+  `measureInkPixels`, `analyzeDesign`, `inkOnGarment`, `judgeLegibility`,
+  `garmentFamily`, `legibleInkNeeds`, `garmentsFromProduct`, `rankGarments`,
+  `rankArtworkGarmentPairs`, `planLegibleInkOptions`, `snapSubstitutionPlan`,
+  `toSubstitutionPlan`, `planArtworkOptions`, `judgeRecolor`,
+  `substitutePigments`, and `RecolorPigmentError`, plus re-exports of the pure
+  core. Its import closure has no `node:` modules or file reads, so POD can
+  vendor it; CI checks that after the build (`npm run engine:purity`).
+- `tests/fixtures/engine/` records what the MCP tools answer for eight
+  synthetic print files, including the exploration order over each file and
+  its Artwork Options. A test fails when an answer changes, and re-recording a
+  changed answer without bumping `ENGINE_VERSION` is refused. POD vendors the
+  fixtures for its drift test.
+- `rankArtworkGarmentPairs` takes each artwork's `source` (`original`,
+  `legible-ink`, or `wada`) and orders by departure from the approved art
+  before score: each color leads with the original where it reads, then a
+  hue-keeping option, then a Wada repaint, and colors come in that order of
+  departure. A Wada repaint scores higher on most garments, and ranking by
+  score alone put repaints ahead of the approved art.
+- Engine recolor tolerances reach just under halfway to the nearest other ink
+  (at most 35) instead of stopping at the ink's 90th-percentile spread, which
+  left about a tenth of a distressed ink's pixels in the old color.
+  `substitutePigments` also returns `unmatched`, the alpha-weighted share of
+  visible pixels no replacement reached.
+
+### Behavior changes
+
+- **`recommend_product_colors` and `color-picker recommend`** rank with the
+  engine: garments the design passes the legibility verdict on come first,
+  then by score, and the `vanish` component is the share of ink the verdict
+  calls lost (`vanishBasis: "lost-ink"`), so a pale fill inside a dark outline
+  is no longer penalized. Each pick adds `garment` and `legibility`; warnings
+  name lost ink, not every color near the garment. The reply adds `engine` and
+  `measurement`, and `design` is the measured summary (`hash`, `palette`,
+  `inkLuminance`, `approximate`, and `description` with `mood`) rather than the
+  fingerprint. With `mood`, only legible picks go to Jev. New inputs `colors`
+  and `contentBounds`; `n` goes up to 100.
+- **`recolorPlans` flags** a plan whose new ink is under 3:1 on the garment, not
+  only one within the print minimum distance, with a warning saying so.
+- **`applyRecolor`, `recolor_plans` `outDir`, and `recolor --apply`** substitute
+  pigments instead of snapping every pixel to its nearest mapped color:
+  antialiased edges keep their blend, and only mapped inks change. The result
+  adds `replacements` and `changed`; `unmatched` is the alpha-weighted share
+  of visible pixels no pigment matched, so near-transparent residue around a
+  print barely counts. Art the measurement marks approximate, or a mapping
+  that covers less than 90% of the ink, is left to the prompt; `tolerance` is
+  no longer read.
+- **`recolor_plans`** plans from the engine's measured inks, as
+  `artwork_options` and POD do, rather than the 512 px fingerprint palette, so
+  every plan binds to the measured inks. Plans carry `substitution` (null for a
+  plan that merges inks) and `legibility`, the recolored design's verdict on
+  its garment. With `vet`, the description's elements name the measured ink
+  nearest their color. `design` is the measured summary.
+- **`batch_product_colors`** refuses an approved color the artwork fails the
+  verdict on.
+- Stored Wada equivalents name a garment only when they were computed from its
+  hex; another hex for the same slug uses its nearest Wada colors.
+
+### CLI and MCP
+
+- New tools `check_print_legibility` (verdicts for product colors or garments
+  given by hex), `artwork_options` (pigment substitutions that add legible
+  garments, optionally written as PNGs), and `rank_artwork_pairs` (the order
+  POD's Creative color study explores a design and its Artwork Options in), and
+  CLI commands `legibility`, `options`, and `pairs`, with `--colors`,
+  `--bounds`, `--count`, `--option`, and `--preferred`.
+- `check_accessibility` says that `print` checks palette separation only.
+
+### Library
+
+- The assets are bundled as TypeScript modules in `src/data/generated/`
+  (`scripts/build-engine-data.ts`, run by `npm run data:build` and checked by
+  `npm run data:check`), so the core reads no files. The `data` loaders return
+  the same values as before, as fresh copies.
+- New `scoreGarments` and `recolorPlansFor` score and plan for any garment
+  colors; `diversityCounts` and `withDiversityPenalty` are the batch variety
+  penalty, unchanged; the fingerprint entry point adds `decodeForLegibility`,
+  `analyzeDesignFile`, and `writePng`.
+
+### Agents
+
+- The skill explains the legibility verdict and the new tools, and the batch
+  approval workflow gates approval on `check_print_legibility`.
+
 ## [0.5.0] - 2026-09-28
 
 - Let requesting projects supply optional batch assortment groups; remove the

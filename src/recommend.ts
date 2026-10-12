@@ -8,17 +8,14 @@
 import { allowsDarkInk, type AccessibilityOptions } from "./accessibility.js";
 import { contrastRatio } from "./color/contrast.js";
 import { distance, type Hex, normalizeHex } from "./color/convert.js";
+import { storedAccessibility, storedColors, storedDefaultProduct, storedProduct } from "./data/store.js";
 import {
   type Accessibility,
   type DerivedColor,
   hasHex,
-  loadAccessibility,
-  loadColors,
-  loadProduct,
-  loadProductIndex,
   type Product,
   type ProductColorWithHex,
-} from "./data/index.js";
+} from "./data/types.js";
 import { equivalentsFor } from "./equivalents.js";
 import { nearest } from "./nearest.js";
 
@@ -123,8 +120,15 @@ export interface DesignColorOnGarment {
   vanishes: boolean;
 }
 
-export interface ProductColorRecommendation {
-  color: ProductColorWithHex;
+/** A garment color to score: a product color, or any named color with a slug and a hex. */
+export interface GarmentColor {
+  name: string;
+  slug: string;
+  hex: string;
+}
+
+export interface ProductColorRecommendation<C extends GarmentColor = ProductColorWithHex> {
+  color: C;
   /** Weighted sum of `components`, rounded to three places. */
   score: number;
   components: ScoreComponents;
@@ -154,11 +158,10 @@ const count = (n: number) => COUNT_WORDS[n] ?? String(n);
 const percent = (share: number) => `${Math.round(share * 100)}%`;
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-let cachedRules: Accessibility | undefined;
 let wadaByIndex: Map<number, DerivedColor> | undefined;
 
 function wadaColor(index: number): DerivedColor {
-  wadaByIndex ??= new Map(loadColors().map((c) => [c.index, c]));
+  wadaByIndex ??= new Map(storedColors().map((c) => [c.index, c]));
   const color = wadaByIndex.get(index);
   if (!color) throw new RangeError(`No Wada color with index ${index}.`);
   return color;
@@ -168,20 +171,29 @@ function nearestWada(hex: string): DerivedColor {
   return nearest(hex, { k: 1 }).matches[0]!.color;
 }
 
-/** The stored equivalent when the product has one, so the answer matches `equivalentsFor`. */
-function garmentWada(product: Product, color: ProductColorWithHex): DerivedColor {
+/**
+ * The stored equivalent when the product has one for this slug, computed from
+ * this very hex, so the answer matches `equivalentsFor`; otherwise the nearest
+ * Wada color by the math.
+ */
+function garmentWada(productId: string | undefined, color: GarmentColor): DerivedColor {
   let stored: number | undefined;
-  try {
-    stored = equivalentsFor(product, color.slug)?.matches[0]?.index;
-  } catch {
-    // A product passed in directly may not be in the index; fall back to the math.
+  if (productId !== undefined) {
+    try {
+      const equivalents = equivalentsFor(productId, color.slug);
+      if (equivalents?.hex && normalizeHex(equivalents.hex) === normalizeHex(color.hex)) {
+        stored = equivalents.matches[0]?.index;
+      }
+    } catch {
+      // A product passed in directly may not be in the index; fall back to the math.
+    }
   }
   return stored === undefined ? nearestWada(color.hex) : wadaColor(stored);
 }
 
 function resolveProduct(product: RecommendOptions["product"]): Product {
-  if (product === undefined) return loadProduct(loadProductIndex().default);
-  return typeof product === "string" ? loadProduct(product) : product;
+  if (product === undefined) return storedDefaultProduct();
+  return typeof product === "string" ? storedProduct(product) : product;
 }
 
 function designName(color: DesignColorOnGarment): string {
@@ -253,20 +265,63 @@ function inkReason(
  * pairing bonus. `score` combines them with `weights`; `scoreComponents`
  * recombines them with other weights without re-running the analysis.
  *
+ * This ranks by score alone, from a palette summary. It cannot see outlines,
+ * so a fill framed by an outline still counts as vanishing. For a print file,
+ * rank with the engine's `rankGarments` on its measurement, which puts the
+ * garments the ink-legibility-v2 verdict passes first and counts only lost
+ * ink as vanishing; the MCP tool and the CLI do.
+ *
  * @throws {RangeError} when the design has no colors, or `n` is not a positive integer.
  * @throws {Error} when the product ID is unknown.
  */
 export function recommendProductColors(design: DesignSummary, options: RecommendOptions = {}): Recommendations {
   const n = options.n ?? 5;
   if (!(Number.isInteger(n) && n > 0)) throw new RangeError(`n must be a positive integer, got ${n}`);
+  const product = resolveProduct(options.product);
+  const availableOnly = options.availableOnly ?? true;
+  const colors = product.colors.filter(hasHex).filter((color) => !availableOnly || color.available);
+  const picks = scoreGarments(design, colors, {
+    product,
+    ...(options.rules && { rules: options.rules }),
+    ...(options.weights && { weights: options.weights }),
+  });
+  // Array sort is stable, so equal scores keep product file order.
+  return picks.sort((a, b) => b.score - a.score).slice(0, n);
+}
+
+export interface ScoreGarmentsOptions extends AccessibilityOptions {
+  /**
+   * The product the garments belong to: its stored Wada equivalents name each
+   * garment whose hex they were computed from, and its print method words the
+   * reasons. A product ID or a loaded product. Defaults to the index's default.
+   */
+  product?: string | Product;
+  /** Replaces `RECOMMEND_WEIGHTS`. */
+  weights?: RecommendWeights;
+}
+
+/**
+ * Score a design printed as is on each of the given garment colors, in their
+ * order, with the components, reasons, and warnings `recommendProductColors`
+ * gives. Any garment colors: a product's, a subset, or another catalog's
+ * colors with their own hexes. Not ranked or cut; the engine's `rankGarments`
+ * builds on this.
+ *
+ * @throws {RangeError} when the design has no colors.
+ * @throws {Error} when the product ID is unknown.
+ */
+export function scoreGarments<C extends GarmentColor>(
+  design: DesignSummary,
+  garments: readonly C[],
+  options: ScoreGarmentsOptions = {},
+): ProductColorRecommendation<C>[] {
   if (design.palette.length === 0) {
     throw new RangeError("The design has no visible colors to recommend a garment for.");
   }
 
-  const rules = options.rules ?? (cachedRules ??= loadAccessibility());
+  const rules = options.rules ?? storedAccessibility();
   const weights = options.weights ?? RECOMMEND_WEIGHTS;
   const product = resolveProduct(options.product);
-  const availableOnly = options.availableOnly ?? true;
   const target = rules.wcag.body.AA;
   const minimum = rules.print.minimumDistance.value;
   const cutoff = rules.print.darkInkGarmentLuminance.value;
@@ -281,72 +336,66 @@ export function recommendProductColors(design: DesignSummary, options: Recommend
   const dominant = palette.reduce((a, b) => (b.share > a.share ? b : a)).wada;
   const dominantCombos = new Set(dominant.combinations);
 
-  const picks = product.colors
-    .filter(hasHex)
-    .filter((color) => !availableOnly || color.available)
-    .map((color): ProductColorRecommendation => {
-      const garment = color.name;
-      const designColors = palette.map((c): DesignColorOnGarment => {
-        const gap = round(distance(c.hex, color.hex), 1);
-        return {
-          hex: c.hex,
-          share: round(c.share, 4),
-          wada: { index: c.wada.index, name: c.wada.name },
-          ratio: round(contrastRatio(c.hex, color.hex), 2),
-          distance: gap,
-          vanishes: gap < minimum,
-        };
-      });
-
-      const darkInkGarment = allowsDarkInk(color.hex, { rules });
-      const wada = garmentWada(product, color);
-      const sharedCombination = wada.combinations.find((id) => dominantCombos.has(id));
-
-      const components: ScoreComponents = {
-        contrast: round(
-          palette.reduce((sum, c, i) => sum + c.share * clamp01((designColors[i]!.ratio - 1) / (target - 1)), 0),
-          4,
-        ),
-        vanish: round(
-          palette.reduce((sum, c, i) => sum + (designColors[i]!.vanishes ? c.share : 0), 0),
-          4,
-        ),
-        inkFit: darkInkGarment === design.inkLuminance <= cutoff ? 1 : 0,
-        bookPairing: sharedCombination === undefined ? 0 : 1,
+  return garments.map((color): ProductColorRecommendation<C> => {
+    const garment = color.name;
+    const designColors = palette.map((c): DesignColorOnGarment => {
+      const gap = round(distance(c.hex, color.hex), 1);
+      return {
+        hex: c.hex,
+        share: round(c.share, 4),
+        wada: { index: c.wada.index, name: c.wada.name },
+        ratio: round(contrastRatio(c.hex, color.hex), 2),
+        distance: gap,
+        vanishes: gap < minimum,
       };
-
-      const reasons = [
-        contrastReason(designColors, garment, target),
-        inkReason(design.inkLuminance, darkInkGarment, garment, cutoff, product.printMethod),
-      ];
-      if (sharedCombination !== undefined) {
-        reasons.push(
-          wada.index === dominant.index
-            ? `${garment} is nearest to Wada's ${wada.name}, the same Wada color as the design's dominant color.`
-            : `${garment} is nearest to Wada's ${wada.name}, which the book pairs with ${dominant.name}, the design's dominant color, in combination ${sharedCombination}.`,
-        );
-      }
-      const warnings = designColors
-        .filter((c) => c.vanishes)
-        .map(
-          (c) =>
-            `${designName(c)}, ${percent(c.share)} of the design, is only ${c.distance} from ${garment}; ` +
-            `below the print minimum of ${minimum}, its edges will vanish into the shirt.`,
-        );
-
-      const pick: ProductColorRecommendation = {
-        color,
-        score: scoreComponents(components, weights),
-        components,
-        designColors,
-        wada: { index: wada.index, name: wada.name },
-        reasons,
-        warnings,
-      };
-      if (sharedCombination !== undefined) pick.sharedCombination = sharedCombination;
-      return pick;
     });
 
-  // Array sort is stable, so equal scores keep product file order.
-  return picks.sort((a, b) => b.score - a.score).slice(0, n);
+    const darkInkGarment = allowsDarkInk(color.hex, { rules });
+    const wada = garmentWada(product.id, color);
+    const sharedCombination = wada.combinations.find((id) => dominantCombos.has(id));
+
+    const components: ScoreComponents = {
+      contrast: round(
+        palette.reduce((sum, c, i) => sum + c.share * clamp01((designColors[i]!.ratio - 1) / (target - 1)), 0),
+        4,
+      ),
+      vanish: round(
+        palette.reduce((sum, c, i) => sum + (designColors[i]!.vanishes ? c.share : 0), 0),
+        4,
+      ),
+      inkFit: darkInkGarment === design.inkLuminance <= cutoff ? 1 : 0,
+      bookPairing: sharedCombination === undefined ? 0 : 1,
+    };
+
+    const reasons = [
+      contrastReason(designColors, garment, target),
+      inkReason(design.inkLuminance, darkInkGarment, garment, cutoff, product.printMethod),
+    ];
+    if (sharedCombination !== undefined) {
+      reasons.push(
+        wada.index === dominant.index
+          ? `${garment} is nearest to Wada's ${wada.name}, the same Wada color as the design's dominant color.`
+          : `${garment} is nearest to Wada's ${wada.name}, which the book pairs with ${dominant.name}, the design's dominant color, in combination ${sharedCombination}.`,
+      );
+    }
+    const warnings = designColors
+      .filter((c) => c.vanishes)
+      .map(
+        (c) =>
+          `${designName(c)}, ${percent(c.share)} of the design, is only ${c.distance} from ${garment}; ` +
+          `below the print minimum of ${minimum}, its edges will vanish into the shirt.`,
+      );
+
+    const pick: ProductColorRecommendation<C> = {
+      color,
+      score: scoreComponents(components, weights),
+      components,
+      designColors,
+      wada: { index: wada.index, name: wada.name },
+      reasons,
+      warnings,
+    };
+    if (sharedCombination !== undefined) pick.sharedCombination = sharedCombination;
+    return pick;
+  });
 }
