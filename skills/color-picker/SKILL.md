@@ -100,7 +100,7 @@ Defaults:
 ## Legibility
 
 Whether a print reads on a shirt comes from one rule, the ink-legibility-v2
-verdict, in every tool that judges it and in POD's Creative color study, which
+numerical verdict, in every tool that judges it and in POD's Creative color study, which
 runs the same engine: each ink laid on the garment must reach 3:1 and sit 10
 apart in OKLab, unless legible ink frames it (a pale fill inside a dark
 outline); a garment fails when a fifth of the ink is lost or less than a fifth
@@ -112,11 +112,18 @@ each plan's verdict on its garment. `rank_artwork_pairs` gives the order POD's
 study explores the approved art and its Artwork Options in: each color keeps
 the original where it reads, then a hue-keeping legible-ink option, and a Wada
 repaint leads only where neither reads; the original's colors come first.
-Give it the exact print files (`artwork_options` with `outDir` writes the
-options). Replies carry `engine` (version and protocol): cite it when comparing
+Give it the exact prepared production files; generated recolor options still need
+production preparation before final approval. Replies carry `engine` (version and protocol): cite it when comparing
 with POD's study evidence.
 `check_accessibility` with `print` checks only that a palette's colors stay
 distinct from each other; it is not a legibility verdict.
+
+For POD final approval, read [POD production-file approval](references/pod-production-approval.md).
+POD retains this numerical verdict and adds a separate production decision:
+pass, a narrow borderline warning requiring garment-proof review, or blocker.
+The MCP's raw `pass: false` alone cannot distinguish the warning from the blocker.
+Use the native production review export's decision on the same file and content
+bounds; preserve the measurements and disclose every warning.
 
 ## Batch apparel and publication
 

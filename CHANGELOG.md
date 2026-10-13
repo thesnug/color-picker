@@ -7,6 +7,9 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 ## Unreleased
 
+- Bind POD local color approval to native production files and packet hashes;
+  document narrow contrast warnings and unchanged numerical measurements (INT-2765).
+
 ## [0.6.0] - 2026-10-12
 
 One color engine for the chat skill and POD (INT-2711). POD's
