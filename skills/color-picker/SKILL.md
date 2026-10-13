@@ -99,8 +99,8 @@ Defaults:
 
 ## Legibility
 
-Whether a print reads on a shirt comes from one rule, the ink-legibility-v2
-numerical verdict, in every tool that judges it and in POD's Creative color study, which
+The shared numerical ink-contrast check is the ink-legibility-v2
+verdict, in every tool that judges it and in POD's Creative color study, which
 runs the same engine: each ink laid on the garment must reach 3:1 and sit 10
 apart in OKLab, unless legible ink frames it (a pale fill inside a dark
 outline); a garment fails when a fifth of the ink is lost or less than a fifth

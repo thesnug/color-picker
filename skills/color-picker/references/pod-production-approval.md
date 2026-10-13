@@ -62,8 +62,8 @@ changing its values:
   `severity: warning`, `numericalPass: false`, its exact reason, and unchanged
   measurements. Review wording, recognizable structure, and fit on the exact
   proof. A warning alone neither rejects nor approves it.
-- **Blocker:** the measurement fails beyond the narrow margin, artwork is empty,
-  or the measurement is approximate. Technical failures such as changed bytes,
+- **Blocker:** the numerical check fails beyond the narrow margin, artwork is empty,
+  or a failed numerical check has only an approximate measurement. Technical failures such as changed bytes,
   missing transparency, clipping, or incompatible geometry also block.
 
 Use the native export to classify warnings, especially when a near-threshold
