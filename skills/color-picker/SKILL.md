@@ -99,7 +99,7 @@ Defaults:
 
 ## Legibility
 
-Whether a print reads on a shirt comes from one rule, the ink-legibility-v2
+The shared numerical ink-contrast check is the ink-legibility-v2
 verdict, in every tool that judges it and in POD's Creative color study, which
 runs the same engine: each ink laid on the garment must reach 3:1 and sit 10
 apart in OKLab, unless legible ink frames it (a pale fill inside a dark
@@ -112,11 +112,18 @@ each plan's verdict on its garment. `rank_artwork_pairs` gives the order POD's
 study explores the approved art and its Artwork Options in: each color keeps
 the original where it reads, then a hue-keeping legible-ink option, and a Wada
 repaint leads only where neither reads; the original's colors come first.
-Give it the exact print files (`artwork_options` with `outDir` writes the
-options). Replies carry `engine` (version and protocol): cite it when comparing
+Give it the exact prepared production files; generated recolor options still need
+production preparation before final approval. Replies carry `engine` (version and protocol): cite it when comparing
 with POD's study evidence.
 `check_accessibility` with `print` checks only that a palette's colors stay
 distinct from each other; it is not a legibility verdict.
+
+For POD final approval, read [POD production-file approval](references/pod-production-approval.md).
+POD retains this numerical verdict and adds a separate production decision:
+pass, a narrow borderline warning requiring garment-proof review, or blocker.
+The MCP's raw `pass: false` alone cannot distinguish the warning from the blocker.
+Use the native production review export's decision on the same file and content
+bounds; preserve the measurements and disclose every warning.
 
 ## Batch apparel and publication
 
@@ -148,7 +155,7 @@ another format.
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name
    ("Graphite"), and a design's own colors by the Wada names the reply gives
-   them (`wada.name`): "an Apricot Orange ring on a Sulphur Yellow center."
+   them (`wada.name`): "an Apricot Orange ring on a Seashell Pink center."
 3. **Carry relevant warnings.** Explain what the reply flags: ink the
    legibility verdict calls lost on a shirt, garment colors the provider does
    not stock, failed contrast pairs, and the `mood` or `vet` reason when Jev

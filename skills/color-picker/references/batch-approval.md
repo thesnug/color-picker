@@ -5,6 +5,10 @@ preparing publication. Exploratory suggestions
 can use `recommend_product_colors` without prepared renditions or provider stock
 evidence; label them provisional.
 
+For POD publication, first read [POD production-file approval](pod-production-approval.md).
+Final approval uses prepared native production pixels, not the source file used
+for exploratory suggestions. Continue the same native run after review.
+
 1. Read each design's brief and latest decisions. Gather the original and existing
    approved alternate inks with their exact prepared production rendition IDs.
    Analyze the actual transparent production file, not an opaque imported source.
@@ -18,7 +22,7 @@ evidence; label them provisional.
 2. Review legibility and subject recognition per artwork/color combination.
    Run `check_print_legibility` on each prepared file for its candidate colors
    (pass `contentBounds` when the project measured them). Its ink-legibility-v2
-   verdict is a hard gate, the same one POD's Creative color study applies:
+   verdict is the numerical gate used by these tools:
    `batch_product_colors` refuses an approved color the file fails on. The
    verdict already distinguishes lettering and unoutlined details, which are lost
    when faint, from a faint fill that legible outlines frame, which is not.
@@ -26,6 +30,12 @@ evidence; label them provisional.
    backdrop; ink analysis uses original alpha. Disclose uncertain recognition and
    visually inspect the art before approving any candidate. When too few colors
    pass, `artwork_options` plans alternate inks to review.
+   For POD, inspect its production review export before treating a numerical
+   failure as a rejection: a borderline warning may proceed after the exact
+   garment proof passes visual review. Record that warning and retain the
+   approved file, placement, and garment choice. `batch_product_colors` still
+   requires numerical passes; use the native preserved packet for POD approval
+   when a visually accepted warning prevents this tool from selecting the batch.
    Completion: each alternate has explicit reviewed color slugs that pass the
    verdict, with contextual explanations for warnings. Never label a candidate
    reviewed from score alone.
@@ -67,6 +77,12 @@ evidence; label them provisional.
    the rendition, regenerate affected mockups/proofs, and obtain renewed approval
    when their appearance changes. Completion: all provider files match the approved
    production pixels and every affected mockup reflects the matched rendition.
+   For POD, bind local approval to the native packet hash or the explicit intake
+   rendition pins described in the POD reference. Resume the same approved run;
+   its unattended phase must reuse the reviewed production file. A missing or
+   changed file, geometry, or placement requires fresh review. Keep approved
+   colors and inks when a numerical warning arises; a blocker stops the run with
+   its exact measurement and proof rather than substituting an assortment.
 
 Carry `mood.reason`/`vet` explanations when semantic judgments cannot run.
 `batch_product_colors` applies deterministic scoring to reviewed candidates; it
