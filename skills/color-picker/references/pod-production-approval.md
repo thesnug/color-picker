@@ -44,7 +44,8 @@ by the primary native Design Asset ID. Its value is the exported
 `review.approval`, under a matching preserved Profile. It pins the Recipe Version,
 snapshot hash, placement, every ordered color's source and production rendition,
 and all managed geometries. Include its `primary` default rendition when every
-color uses an Artwork Option. These pins apply to ready native Assets; import
+color uses an Artwork Option on an unmanaged Product. Managed Products pin their
+enabled areas and geometries instead of an unused Product default. These pins apply to ready native Assets; import
 unimported files before preparation and review. Prefer resuming existing work
 over another intake of the same approved artwork.
 
