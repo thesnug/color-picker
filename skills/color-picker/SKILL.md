@@ -155,7 +155,7 @@ another format.
    with the hex after the name: "Hermosa Pink (#ffb3f0) with Seashell Pink and
    Calamine Blue, combination 176." Name garments by their product name
    ("Graphite"), and a design's own colors by the Wada names the reply gives
-   them (`wada.name`): "an Apricot Orange ring on a Sulphur Yellow center."
+   them (`wada.name`): "an Apricot Orange ring on a Seashell Pink center."
 3. **Carry relevant warnings.** Explain what the reply flags: ink the
    legibility verdict calls lost on a shirt, garment colors the provider does
    not stock, failed contrast pairs, and the `mood` or `vet` reason when Jev
