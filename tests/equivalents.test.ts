@@ -53,7 +53,7 @@ describe("buildEquivalents", () => {
   it("lists a color with no hex with an empty match list", () => {
     const input = {
       ...product,
-      colors: [{ ...base, slug: "emerald", name: "Emerald", hex: null, available: false }],
+      colors: [{ ...base, slug: "emerald", name: "Emerald", hex: null }],
     };
     expect(buildEquivalents(input, wada).colors["emerald"]).toEqual({
       name: "Emerald",

@@ -9,6 +9,7 @@ import {
   recommendProductColors,
   scoreComponents,
 } from "../../src/engine/index.js";
+import { defaultProduct } from "../../src/data/index.js";
 import { canvas } from "./helpers.js";
 
 const catalog = garmentsFromProduct();
@@ -101,5 +102,19 @@ describe("rankGarments", () => {
     expect(rankGarments(analysis, catalog, { n: 3 })).toHaveLength(3);
     expect(() => rankGarments(analysis, catalog, { n: 0 })).toThrow(RangeError);
     expect(() => rankGarments(analyzeDesign({ data: new Uint8Array(4), width: 1, height: 1 }, "e"), catalog)).toThrow(RangeError);
+  });
+});
+
+describe("garmentsFromProduct", () => {
+  it("returns every catalog color with a hex and carries no stock", () => {
+    const product = defaultProduct();
+    expect(catalog.map((g) => g.slug)).toEqual(product.colors.filter((c) => c.hex !== null).map((c) => c.slug));
+    for (const garment of catalog) expect(garment, garment.slug).not.toHaveProperty("available");
+  });
+
+  it("ranks only the garments the caller passes", () => {
+    const passed = catalog.filter((g) => ["Black", "Ivory"].includes(g.colorName));
+    const ranked = rankGarments(analyzeDesign(bareFill, "b".repeat(64)), passed);
+    expect(ranked.map((r) => r.garment.colorName).sort()).toEqual(["Black", "Ivory"]);
   });
 });

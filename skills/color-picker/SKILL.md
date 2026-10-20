@@ -78,10 +78,19 @@ deterministically, and the reply's `mood` or `vet` field says why.
 | A product's color range, or a color's exact name | `list_products` |
 | An earlier result as an HTML review page | `render_card` with its `resultId` and `format: "html"` |
 
-The package owns reviewed garment hex values, catalog availability, and Wada
-pairings. On a tool error, inspect its cause and fix the input or setup when
+The package owns reviewed garment hex values and Wada pairings. On a tool error, inspect its cause and fix the input or setup when
 possible. If the package remains unavailable, distinguish any general color
 advice from product-verified recommendations and say what could not be checked.
+
+## Stock
+
+This package holds no provider stock and checks none: its catalog lists every
+color the garment comes in, including colors the print provider has sold out or
+dropped. **For POD Products, use POD's tools, which check live stock.** Outside
+POD, when you have a live stock check, pass only the colors it found sellable as
+`colors`. Whenever a reply's `stock.checked` is false, say plainly with the
+suggestions that provider stock was not checked; never present a suggested
+color as available to order.
 
 Defaults:
 
@@ -130,8 +139,8 @@ bounds; preserve the measurements and disclose every warning.
 For exploratory garment ideas, including a provisional set of eight, use
 `recommend_product_colors` with a broad candidate range and review the artwork
 on varied shirts. Use `recolor_plans` to explore viable ink variations when
-needed. Label these suggestions provisional; product catalog availability does
-not prove S–3XL stock.
+needed. Label these suggestions provisional, and say that provider stock was not
+checked: these tools check none, let alone S–3XL.
 
 For a final eight-color assortment or publication work, read
 [Batch selection and production approval](references/batch-approval.md). That
@@ -157,8 +166,8 @@ another format.
    ("Graphite"), and a design's own colors by the Wada names the reply gives
    them (`wada.name`): "an Apricot Orange ring on a Seashell Pink center."
 3. **Carry relevant warnings.** Explain what the reply flags: ink the
-   legibility verdict calls lost on a shirt, garment colors the provider does
-   not stock, failed contrast pairs, and the `mood` or `vet` reason when Jev
+   legibility verdict calls lost on a shirt, that provider stock was not checked
+   (the reply's `stock.note`), failed contrast pairs, and the `mood` or `vet` reason when Jev
    did not run. Never present an illegible pick as a recommendation.
 
 For palette and garment recommendations, pair hex codes with color names. If

@@ -68,14 +68,27 @@ One JSON file per product plus an `index.json` naming the default product.
 **Comfort Colors 1717 is the default** when no product is named.
 
 Per product: id, brand, model, display name, print method, print areas. Per color:
-name, slug, hex, aliases, family, `available` flag, and provenance (`source` and a
-date). Optional per color: the public garment image URL and its SHA-256 (a pointer,
+name, slug, hex, aliases, family, and provenance (`source` and a date). Optional per color: the public garment image URL and its SHA-256 (a pointer,
 never the bytes), and a `pod` block holding the POD Color Asset Version ID for the
 picker's use.
 
-Ownership: this repo owns product facts (name, hex, availability, Wada equivalents).
+Ownership: this repo owns product facts (name, hex, Wada equivalents).
 The maker-method-picker and POD own the render pipeline (Shot, asset versions,
 mockups). This repo never decides which render version is current.
+
+**Stock is not a product fact here** (INT-2891, part of INT-2889). POD owns the
+one sellable-color verdict (`services/sellable-colors.ts`: the live Printify
+catalog plus the product-level flags publication reads), and every picker
+calls it. The catalog used to carry a color-level `available` flag, set by the
+import on 2026-09-24; on 2026-10-20 the chat tools still recommended nine
+colors Printify had dropped or sold out, because a static flag cannot track
+stock. So the catalog holds no stock, the engine has no stock option, and
+callers pass the garments to rank: POD passes only eligible garments to
+`rankGarments` and `rankArtworkGarmentPairs`. `batch_product_colors` takes
+stock only as the caller's per-color size evidence (`sizeAvailability`, with
+`checkedAt` and `source`). Every other tool that suggests garment colors
+returns `stock: { checked: false, note }` and says so, and its description
+sends POD Products to POD's tools, which check live stock.
 
 ### Hex provenance for Comfort Colors 1717
 
@@ -100,13 +113,13 @@ Why:
 
 Three rules follow:
 
-1. **Gap fill.** Colors on the 2026 retail chart that Printify does not stock
+1. **Gap fill.** Colors on the 2026 retail chart that Printify does not list
    (Emerald, Dusk, Rose Quartz, Neon Cantaloupe at the time of writing) enter with a
-   chart hex, `available: false`, `source` naming the chart, and the chart page as
+   chart hex, `source` naming the chart, and the chart page as
    `sourceUrl`. A color no chart publishes a hex for enters with `hex: null`. Emerald
    is listed without a hex on the 2026 chart; its value comes from an older
-   Comfort Colors chart and says so in `sourceNote`. Renderers mark unstocked
-   colors "not stocked" with a dashed outline.
+   Comfort Colors chart and says so in `sourceNote`. Like every catalog color,
+   they carry no stock; a caller's live check decides whether they are offered.
 2. **Review pass.** The first swatch card renders each hex tile beside its garment
    image so mismatches are corrected once. A corrected value gets `source: reviewed`
    and the import script never overwrites it. Regenerating a mockup is cheaper than
@@ -501,7 +514,7 @@ provisional choices without prepared renditions or provider size evidence;
 `batch_product_colors` is the final-assortment path and keeps those production
 inputs explicit.
 Every candidate must carry current provider evidence for S, M, L, XL, 2XL and
-3XL before selection. The catalog `available` flag cannot prove size availability.
+3XL before selection. The catalog holds no stock, so this evidence is the only stock input.
 Jev remains limited to
 semantic mood and recolor plausibility; deterministic size and group checks do
 not need Jev.

@@ -34,8 +34,6 @@ export interface RecolorOptions extends AccessibilityOptions {
   product?: string | Product;
   /** How many garments to return. Default 5. */
   n?: number;
-  /** Skip colors the print provider does not stock. Default true. */
-  availableOnly?: boolean;
   /**
    * Equivalents after the first contribute combinations only within this
    * distance of the garment hex. The nearest always contributes. Default 6, as
@@ -345,7 +343,9 @@ function better<C extends GarmentColor>(a: Scored<C>, b: Scored<C>): boolean {
 /**
  * For each garment, the best recolor plan: a Wada combination containing one
  * of the garment's equivalents, and the design's colors mapped onto its other
- * members by lightness.
+ * members by lightness. Every product color with a hex is planned for: the
+ * catalog holds no stock, so to plan only for the colors a print provider can
+ * fulfill, pass those to `recolorPlansFor`.
  *
  * Within a garment, plans are preferred in this order, and the highest score
  * wins within the first tier that has any:
@@ -370,12 +370,10 @@ function better<C extends GarmentColor>(a: Scored<C>, b: Scored<C>): boolean {
  */
 export function recolorPlans(design: DesignSummary, options: RecolorOptions = {}): RecolorPlan[] {
   const product = resolveProduct(options.product);
-  const availableOnly = options.availableOnly ?? true;
-  const colors = product.colors.filter(hasHex).filter((color) => !availableOnly || color.available);
-  return recolorPlansFor(design, colors, { ...options, product });
+  return recolorPlansFor(design, product.colors.filter(hasHex), { ...options, product });
 }
 
-export type RecolorGarmentsOptions = Omit<RecolorOptions, "availableOnly">;
+export type RecolorGarmentsOptions = RecolorOptions;
 
 /**
  * `recolorPlans` for any garment colors: a product's, a subset, or another

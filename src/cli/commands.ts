@@ -108,6 +108,23 @@ export interface View {
   sections: HtmlSection[];
 }
 
+/**
+ * What every result that suggests garment colors says about stock. The
+ * catalog holds none, and these results take no live availability, so some
+ * suggested colors may be sold out or discontinued at the print provider.
+ */
+export const STOCK_NOT_CHECKED = {
+  checked: false,
+  note:
+    "Provider stock was not checked: these colors come from the garment catalog, which holds no stock, so some " +
+    "may be sold out or discontinued. For POD Products, use POD's tools, which check live stock.",
+} as const;
+
+/** The `--html` section that carries `STOCK_NOT_CHECKED`, ahead of the cards. */
+const STOCK_SECTION: HtmlSection = { title: "Provider stock not checked", caption: STOCK_NOT_CHECKED.note };
+
+const STOCK_LINE = `Stock: ${STOCK_NOT_CHECKED.note}`;
+
 /** Input the user can fix: an unknown name, a malformed hex, an unknown ID. */
 export class InputError extends Error {}
 
@@ -273,21 +290,21 @@ export async function palettesView({
   const title = `Palettes for ${color.name} ${color.hex ?? "(no hex)"} · ${product.brand} ${product.model}`;
   const lines = [
     `Wada equivalents: ${result.equivalents.map((e) => `${e.name} (distance ${fmt(e.distance)})`).join(", ") || "none"}`,
-    ...(color.available ? [] : [`Warning: ${color.name} is not stocked by the print provider.`]),
+    STOCK_LINE,
     ...(moodStatus && designArgs ? [moodLine(moodStatus, designArgs.file)] : []),
   ];
   const heading = (p: ProductPalette & Partial<MoodFields>) =>
     `${productPaletteTitle(p)} · via ${p.equivalent.name} · contrast ${fmt(p.contrast)} (lowest ${fmt(p.minContrast)})${moodSuffix(p)}`;
   const inkSwatches = (p: ProductPalette): Swatch[] =>
     p.colors.slice(1).map((c) => ({ hex: c.hex, name: `${c.name} · ${fmt(contrastOn(p, c.hex))}:1` }));
-  const json = { ...result, ...(design && { design }), ...(moodStatus && { mood: moodStatus }) };
+  const json = { ...result, stock: STOCK_NOT_CHECKED, ...(design && { design }), ...(moodStatus && { mood: moodStatus }) };
 
   if (result.palettes.length === 0 || !hasHex(color)) {
     return {
       title,
       json,
       text: () => `${title}\n${lines.join("\n")}\n\n${result.reason ?? "No palettes."}\n`,
-      sections: [],
+      sections: [STOCK_SECTION],
     };
   }
   return {
@@ -300,12 +317,12 @@ export async function palettesView({
       ].join("\n"),
     // One card per palette: the garment, with its photo when the product has
     // one, and the ink colors beside it.
-    sections: result.palettes.map((p) => ({
+    sections: [STOCK_SECTION, ...result.palettes.map((p) => ({
       title: productPaletteTitle(p),
       ...moodBadge(p),
       svg: renderProductCard(color, { designColors: inkSwatches(p) }),
       caption: `via ${p.equivalent.name} · contrast ${fmt(p.contrast)}, lowest ${fmt(p.minContrast)}`,
-    })),
+    }))],
   };
 }
 
@@ -326,7 +343,7 @@ export interface RecommendArgs extends DesignArgs {
   product?: string;
   /** Re-rank the picks by how well each garment suits the design's mood, with Jev. */
   mood?: boolean | MoodSetup;
-  /** Only these product colors, by name, slug, or alias. Default every stocked color. */
+  /** Only these product colors, by name, slug, or alias. Default every catalog color. */
   colors?: readonly string[];
   /** The print's visible content, for the measurement. */
   contentBounds?: ContentBounds | null;
@@ -402,7 +419,7 @@ export async function recommendView({
   const legibleCount = ranked.filter((p) => p.legibility.pass).length;
   const designLine = `Design: ${chips.map((c) => `${c.hex} ${c.name}`).join(", ")}; ink luminance ${fmt(summary.inkLuminance)}`;
   const legibilityLine = `Legibility (${LEGIBILITY_PROTOCOL}, engine ${ENGINE_VERSION}): the ink reads on ${legibleCount} of ${ranked.length} garment colors.`;
-  const header = [designLine, legibilityLine, ...(moodStatus ? [moodLine(moodStatus, file)] : [])].join("\n");
+  const header = [designLine, legibilityLine, ...(moodStatus ? [moodLine(moodStatus, file)] : []), STOCK_LINE].join("\n");
   return {
     title,
     json: {
@@ -411,6 +428,7 @@ export async function recommendView({
       design: { ...designJson(design), ...(description && { description }) },
       measurement: design.analysis.measurement,
       picks,
+      stock: STOCK_NOT_CHECKED,
       ...(moodStatus && { mood: moodStatus }),
     },
     text: (color) =>
@@ -425,12 +443,15 @@ export async function recommendView({
           ].join("\n") + "\n",
         ),
       ].join("\n"),
-    sections: picks.map((pick, i) => ({
-      title: heading(i),
-      ...moodBadge(pick),
-      svg: renderProductCard(pick.color, { designColors: chips }),
-      caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
-    })),
+    sections: [
+      STOCK_SECTION,
+      ...picks.map((pick, i) => ({
+        title: heading(i),
+        ...moodBadge(pick),
+        svg: renderProductCard(pick.color, { designColors: chips }),
+        caption: [...pick.reasons, ...pick.warnings.map((w) => `Warning: ${w}`)].join(" "),
+      })),
+    ],
   };
 }
 
@@ -542,11 +563,12 @@ export async function recolorView({
       design,
       measurement,
       plans: plans.map((plan, i) => ({ ...plan, ...evidence[i]!, ...(applied[i] && { applied: applied[i] }) })),
+      stock: STOCK_NOT_CHECKED,
       ...(vetStatus && { vet: vetStatus }),
     },
     text: (color) =>
       [
-        `${title}\n`,
+        `${title}\n${STOCK_LINE}\n`,
         ...(vetLines.length ? [`${vetLines.join("\n")}\n`] : []),
         ...plans.map((plan, i) =>
           [
@@ -566,7 +588,7 @@ export async function recolorView({
         ),
       ].join("\n"),
     // Each garment card with the design's colors before and after.
-    sections: plans.map((plan, i) => ({
+    sections: [STOCK_SECTION, ...plans.map((plan, i) => ({
       title: heading(i),
       svg: renderProductCard(plan.color, {
         recolor: plan.mapping.map((m) => ({
@@ -581,7 +603,7 @@ export async function recolorView({
         ...plan.warnings.map((w) => `Warning: ${w}`),
         ...appliedLine(applied[i]),
       ].join(" "),
-    })),
+    }))],
   };
 }
 
@@ -595,7 +617,7 @@ function legibilityLines(verdict: LegibilityVerdict | null): string[] {
 
 export interface LegibilityArgs extends DesignArgs {
   product?: string;
-  /** Product colors by name, slug, or alias. Default every stocked color. */
+  /** Product colors by name, slug, or alias. Default every catalog color. */
   colors?: readonly string[];
   /** Garment colors given directly, judged after `colors`. */
   garments?: readonly GarmentInput[];
@@ -634,14 +656,16 @@ export async function legibilityView({
       design: designJson(design),
       measurement,
       verdicts,
+      stock: STOCK_NOT_CHECKED,
     },
     text: () =>
       [
-        `${title}\n${summary}\n${inkLine}\n`,
+        `${title}\n${summary}\n${inkLine}\n${STOCK_LINE}\n`,
         ...verdicts.map((v) => `${v.pass ? "Legible:" : "Illegible:"} ${v.colorName} ${v.garmentHex}\n  ${v.reason}`),
         "",
       ].join("\n"),
     sections: [
+      STOCK_SECTION,
       {
         svg: renderSwatchGrid(
           verdicts.map((v): Swatch => ({
@@ -662,7 +686,7 @@ export async function legibilityView({
 
 export interface ArtworkOptionsArgs extends DesignArgs {
   product?: string;
-  /** Product colors by name, slug, or alias. Default every stocked color. */
+  /** Product colors by name, slug, or alias. Default every catalog color. */
   colors?: readonly string[];
   /** How many garment colors the assortment wants, for `legibleInkNeeds`. Default 8. */
   colorCount?: number;
@@ -746,19 +770,20 @@ export async function artworkOptionsView({
       legibleColors,
       needs,
       options,
+      stock: STOCK_NOT_CHECKED,
       ...(apply !== undefined && { applied: written }),
     },
     text: () =>
-      [`${title}\n${status}\n`, ...options.map((o) => optionLines(o).join("\n") + "\n"), options.length ? "" : "No options.\n"].join(
+      [`${title}\n${status}\n${STOCK_LINE}\n`, ...options.map((o) => optionLines(o).join("\n") + "\n"), options.length ? "" : "No options.\n"].join(
         "\n",
       ),
-    sections: options.map((option) => ({
+    sections: [STOCK_SECTION, ...options.map((option) => ({
       title: `${option.plan.label} · adds ${option.addsColors.length}`,
       svg: renderProductCard(byName.get(option.addsColors[0]!) ?? { hex: "#ffffff", name: option.addsColors[0]! }, {
         recolor: option.plan.replacements.map((r) => ({ from: { hex: r.from, name: r.from }, to: { hex: r.to, name: r.to } })),
       }),
       caption: `${option.plan.rationale} Adds ${option.addsColors.join(", ")}.`,
-    })),
+    }))],
   };
 }
 
@@ -779,7 +804,7 @@ export interface PairsArgs {
   /** The approved original and any Artwork Options, each as its own print file. */
   artworks: readonly PairArtworkArgs[];
   product?: string;
-  /** Product colors by name, slug, or alias. Default every stocked color. */
+  /** Product colors by name, slug, or alias. Default every catalog color. */
   colors?: readonly string[];
   /** How many garment colors the assortment wants. Default 8. */
   colorCount?: number;
@@ -852,14 +877,16 @@ export async function pairsView({
         design: designJson(design),
       })),
       pairs,
+      stock: STOCK_NOT_CHECKED,
     },
     text: () =>
       [
-        `${title}\n${status}\n`,
+        `${title}\n${status}\n${STOCK_LINE}\n`,
         ...pairs.map((p, i) => `${i + 1}. ${p.colorName} · ${p.artworkId} (${p.source}) · score ${fmt(p.score, 3)}\n  ${p.reason}`),
         "",
       ].join("\n"),
     sections: [
+      STOCK_SECTION,
       {
         svg: renderSwatchGrid(
           leads.map((p): Swatch => ({ hex: hexOf.get(p.colorName)!, name: p.colorName, note: `${p.artworkId} (${p.source})` })),
@@ -882,9 +909,9 @@ function productFor(productId: string | undefined): Product {
   }
 }
 
-/** A product's stocked garment colors, or the named ones in the order given. */
+/** A product's catalog garment colors, or the named ones in the order given. */
 function productGarments(product: Product, colors: readonly string[] | undefined): GarmentInput[] {
-  const all = garmentsFromProduct(product.id, { availableOnly: colors === undefined });
+  const all = garmentsFromProduct(product.id);
   if (colors === undefined) return all;
   return colors.map((name) => {
     const found = findProductColor(product, name);

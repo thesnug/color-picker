@@ -52,9 +52,8 @@ function round(value: number, places: number): number {
 }
 
 /**
- * The product file schema requires a hex today. The gap fill for unstocked
- * colors (INT-2258) allows `hex: null` when `available` is false, so the
- * builder accepts it now.
+ * The product file schema allows `hex: null` for a color no source publishes
+ * a hex for, so the builder accepts it.
  */
 type ProductInput = Omit<Product, "colors"> & {
   colors: (Omit<Product["colors"][number], "hex"> & { hex: string | null })[];

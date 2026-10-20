@@ -42,7 +42,6 @@ function color(overrides: Partial<ProductColor>): ProductColor {
     hex: "#4f4b48",
     aliases: [],
     family: "neutral",
-    available: true,
     source: "printify",
     sourceDate: "2026-09-01",
     ...overrides,
@@ -60,7 +59,6 @@ describe("mergeColors", () => {
       hex: "#4f4b48",
       aliases: [],
       family: "neutral",
-      available: true,
       source: "printify",
       sourceDate: TODAY,
     });
@@ -83,31 +81,26 @@ describe("mergeColors", () => {
     expect(log).toEqual(["Pepper: reviewed #4a4644 kept; Printify now says #4f4b48"]);
   });
 
-  it("marks colors Printify no longer lists unavailable, logs it, and keeps them", () => {
+  it("keeps colors Printify no longer lists unchanged, with no stock flag, and logs it", () => {
     const gone = color({ name: "Emerald", slug: "emerald", hex: "#2f6b4f", family: "green" });
     const { colors, log } = mergeColors([gone], upstream, { today: TODAY });
-    expect(colors.find((c) => c.slug === "emerald")).toMatchObject({ available: false, hex: "#2f6b4f" });
-    expect(log).toEqual([
-      `Emerald: not in the Printify catalog for provider ${PRINT_PROVIDER_ID}; set available: false`,
-    ]);
-    // A second run does not log the same removal again.
-    expect(mergeColors(mergeColors([gone], upstream, { today: TODAY }).colors, upstream, { today: TODAY }).log).toEqual([]);
+    expect(colors.find((c) => c.slug === "emerald")).toEqual(gone);
+    expect(log).toEqual([`Emerald: not in the Printify catalog for provider ${PRINT_PROVIDER_ID}; kept`]);
+    for (const c of colors) expect(c).not.toHaveProperty("available");
   });
 
-  it("replaces a gap-filled retail chart color once Printify stocks it", () => {
-    const chart = color({ available: false, source: "retail-chart:comfort-colors-2026", hex: "#505050" });
+  it("replaces a gap-filled retail chart color once Printify lists it", () => {
+    const chart = color({ source: "retail-chart:comfort-colors-2026", hex: "#505050" });
     const { colors } = mergeColors([chart], upstream, { today: TODAY });
     expect(colors.find((c) => c.slug === "pepper")).toMatchObject({
       hex: "#4f4b48",
-      available: true,
       source: "printify",
       sourceDate: TODAY,
     });
   });
 
-  it("drops the chart URL and note once Printify stocks a chart color, and logs it", () => {
+  it("drops the chart URL and note once Printify lists a chart color, and logs it", () => {
     const chart = color({
-      available: false,
       source: "retail-chart:getcustom-store",
       hex: "#505050",
       sourceUrl: "https://example.com/chart",
@@ -117,16 +110,15 @@ describe("mergeColors", () => {
     const pepper = colors.find((c) => c.slug === "pepper")!;
     expect(pepper).not.toHaveProperty("sourceUrl");
     expect(pepper).not.toHaveProperty("sourceNote");
-    expect(log).toContain("Pepper: now stocked by Printify; chart hex #505050 replaced with #4f4b48");
+    expect(log).toContain("Pepper: now listed by Printify; chart hex #505050 replaced with #4f4b48");
   });
 
-  it("leaves a chart color Printify does not stock alone, chart fields included", () => {
+  it("leaves a chart color Printify does not list alone, chart fields included", () => {
     const chart = color({
       name: "Dusk",
       slug: "dusk",
       hex: "#735b6a",
       family: "red-pink",
-      available: false,
       source: "retail-chart:getcustom-store",
       sourceUrl: "https://example.com/chart",
     });
@@ -135,7 +127,6 @@ describe("mergeColors", () => {
       slug: "emerald",
       hex: null,
       family: "green",
-      available: false,
       source: "retail-chart:getcustom-store",
       sourceUrl: "https://example.com/chart",
       sourceNote: "No chart publishes a hex.",
@@ -148,7 +139,6 @@ describe("mergeColors", () => {
 
   it("leaves a chart color alone when Printify lists it without a swatch", () => {
     const chart = color({
-      available: false,
       source: "retail-chart:getcustom-store",
       hex: "#505050",
       sourceUrl: "https://example.com/chart",

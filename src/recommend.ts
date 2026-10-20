@@ -75,8 +75,6 @@ export interface RecommendOptions extends AccessibilityOptions {
   product?: string | Product;
   /** How many picks to return. Default 5. */
   n?: number;
-  /** Skip colors the print provider does not stock. Default true. */
-  availableOnly?: boolean;
   /** Replaces `RECOMMEND_WEIGHTS`. */
   weights?: RecommendWeights;
 }
@@ -257,7 +255,10 @@ function inkReason(
 // recommendProductColors
 
 /**
- * Rank a product's colors for a design printed as is.
+ * Rank a product's colors for a design printed as is. Every color with a hex
+ * is ranked: the catalog holds no stock, so to rank only the colors a print
+ * provider can fulfill, pass those to `scoreGarments` or the engine's
+ * `rankGarments`.
  *
  * Each garment gets four components, exposed on the result: coverage-weighted
  * contrast, a vanish penalty for design colors within the print minimum
@@ -278,8 +279,7 @@ export function recommendProductColors(design: DesignSummary, options: Recommend
   const n = options.n ?? 5;
   if (!(Number.isInteger(n) && n > 0)) throw new RangeError(`n must be a positive integer, got ${n}`);
   const product = resolveProduct(options.product);
-  const availableOnly = options.availableOnly ?? true;
-  const colors = product.colors.filter(hasHex).filter((color) => !availableOnly || color.available);
+  const colors = product.colors.filter(hasHex);
   const picks = scoreGarments(design, colors, {
     product,
     ...(options.rules && { rules: options.rules }),

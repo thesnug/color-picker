@@ -3,8 +3,8 @@
  * tests/fixtures/engine/, as `<fixture>.expected.json` beside it:
  *
  * - `measurement`: the ink measurement (`check_print_legibility`).
- * - `verdicts`: the ink-legibility-v2 verdict on every stocked garment color.
- * - `ranking`: `recommend_product_colors` over every stocked color, in order.
+ * - `verdicts`: the ink-legibility-v2 verdict on every catalog garment color.
+ * - `ranking`: `recommend_product_colors` over every catalog color, in order.
  * - `pairs`: `rank_artwork_pairs` over the file (artwork `original`) and each
  *   Artwork Option as `artwork_options` writes it (artwork `<plan key>`): the
  *   order POD's Creative color study explores them in.

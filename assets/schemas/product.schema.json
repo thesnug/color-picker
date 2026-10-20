@@ -51,12 +51,8 @@
     "color": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "slug", "hex", "aliases", "family", "available", "source", "sourceDate"],
+      "required": ["name", "slug", "hex", "aliases", "family", "source", "sourceDate"],
       "allOf": [
-        {
-          "if": { "properties": { "hex": { "type": "null" } }, "required": ["hex"] },
-          "then": { "properties": { "available": { "const": false } } }
-        },
         {
           "if": { "properties": { "source": { "type": "string", "pattern": "^retail-chart:" } }, "required": ["source"] },
           "then": { "required": ["sourceUrl"] }
@@ -66,7 +62,7 @@
         "name": { "type": "string", "minLength": 1 },
         "slug": { "$ref": "#/$defs/slug" },
         "hex": {
-          "description": "Lowercase #rrggbb. Null only when available is false and no chart publishes a hex.",
+          "description": "Lowercase #rrggbb. Null only when no source publishes a hex.",
           "type": ["string", "null"],
           "pattern": "^#[0-9a-f]{6}$"
         },
@@ -78,10 +74,6 @@
         "family": {
           "description": "Broad color family used for grouping, lowercase.",
           "$ref": "#/$defs/slug"
-        },
-        "available": {
-          "description": "False for colors the print provider does not stock.",
-          "type": "boolean"
         },
         "source": {
           "description": "Where the hex came from. reviewed values are never overwritten by an import script.",

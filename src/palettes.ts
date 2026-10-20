@@ -42,7 +42,6 @@ export interface GarmentAnchor {
   slug: string;
   /** The product hex, lowercase `#rrggbb`. */
   hex: string;
-  available: boolean;
   /** Public garment image, when the product has one. */
   image?: { url: string; sha256: string };
 }
@@ -82,8 +81,6 @@ export interface ProductPalettesResult {
   product: { id: string; name: string };
   /** The resolved product color. Absent when the name matched none. */
   color?: ProductColor;
-  /** False when the print provider does not stock the color, so callers can warn. */
-  available?: boolean;
   /** The equivalents that contributed palettes, nearest first. */
   equivalents: PaletteEquivalent[];
   /**
@@ -124,7 +121,7 @@ export function palettesForProductColor(
       reason: `${product.name} has no color named ${JSON.stringify(colorNameOrSlug)}.`,
     };
   }
-  const found = { product: summary, color, available: color.available };
+  const found = { product: summary, color };
 
   const matches = equivalentsFor(product, color.slug)?.matches ?? [];
   const equivalents = matches
@@ -139,7 +136,6 @@ export function palettesForProductColor(
     name: color.name,
     slug: color.slug,
     hex: color.hex,
-    available: color.available,
     ...(color.image && { image: color.image }),
   };
 

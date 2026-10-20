@@ -17,7 +17,10 @@ export interface Swatch {
   index?: number;
   /** An extra line under the hex, for example a nearest-match distance. */
   note?: string;
-  /** False marks a product color the print provider does not stock. */
+  /**
+   * False marks a color the caller's own live stock check found the print
+   * provider cannot fulfill. The catalog holds no stock, so only callers set it.
+   */
   available?: boolean;
 }
 

@@ -16,9 +16,12 @@ export interface ArtworkCandidate {
   /** Human/contextual review of text, outlines and subject recognition. */
   legible: boolean;
   subjectRecognizable: boolean;
-  /** Provider-confirmed sizes for this color, checked before selection. */
+  /**
+   * Provider-confirmed sizes for this color, from the caller's live stock
+   * check. The catalog holds no stock, so this is the only stock evidence.
+   */
   availableSizes: readonly string[];
-  /** Provenance retained with the selection for approval review. */
+  /** When and where the caller checked `availableSizes`, kept with the selection for approval review. */
   sizeEvidence: { checkedAt: string; source: string };
 }
 export interface BatchDesign {
@@ -116,12 +119,12 @@ export function selectBatchColors(designs: readonly BatchDesign[], recent: reado
     if (groups.length > 8 || new Set(groups.map(g => g.name)).size !== groups.length || groups.some(g => !g.name.trim() || !(g.slugs?.length || g.families?.length))) {
       throw new RangeError(`${design.id}: supply at most eight uniquely named desired groups, each with slugs or families.`);
     }
-    const eligible = design.candidates.filter(c => c.legible && c.subjectRecognizable && c.recommendation.color.available && c.sizeEvidence?.checkedAt && c.sizeEvidence?.source && REQUIRED_SIZES.every(size => c.availableSizes?.includes(size)));
+    const eligible = design.candidates.filter(c => c.legible && c.subjectRecognizable && c.sizeEvidence?.checkedAt && c.sizeEvidence?.source && REQUIRED_SIZES.every(size => c.availableSizes?.includes(size)));
     if (eligible.some(c => !c.artworkId.trim() || !c.renditionId.trim() || !Number.isFinite(c.recommendation.score))) {
       throw new RangeError(`${design.id}: candidates need artwork/rendition IDs and finite scores.`);
     }
     const defaults = eligible.filter(c => c.recommendation.color.slug === design.defaultSlug).sort((a,b) => b.recommendation.score-a.recommendation.score);
-    if (!defaults[0]) throw new RangeError(`${design.id}: default is not a visually approved available candidate.`);
+    if (!defaults[0]) throw new RangeError(`${design.id}: default is not a visually approved candidate in stock in every required size.`);
     const picks: ArtworkCandidate[] = [];
     const add = (pick: ArtworkCandidate) => {
       picks.push(pick);

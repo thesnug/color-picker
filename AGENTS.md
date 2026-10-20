@@ -89,7 +89,8 @@ dependency graph is kept truthful as work proceeds.
 - `assets/colors.json` is the vendored Wada source and is never edited by hand;
   cleanups produce derived files.
 - Product hex values carry `source` and a date. `source: reviewed` values are never
-  overwritten by an import script. Unstocked colors carry `available: false`.
+  overwritten by an import script. The catalog holds no stock: POD's sellable-color
+  verdict decides what sells, and callers pass the engine only the garments to rank.
 - Garment images are referenced by public URL and SHA-256, never stored here.
 - Jev is used for semantic judgments only. Anything derivable is precomputed and
   committed.

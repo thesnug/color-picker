@@ -32,6 +32,7 @@ import {
   recolorView,
   type RecommendPick,
   recommendView,
+  STOCK_NOT_CHECKED,
   themeView,
   type View,
 } from "../cli/commands.js";
@@ -119,7 +120,15 @@ const productColors = z
   .array(z.string().min(1))
   .min(1)
   .optional()
-  .describe("Only these product colors, by name, slug, or alias. Default every stocked color.");
+  .describe(
+    "Only these product colors, by name, slug, or alias: pass the colors a live stock check passed. Default " +
+      "every catalog color, sold out or not.",
+  );
+
+/** The stock caveat in the description of every tool that suggests garment colors. */
+const STOCK_CAVEAT =
+  " This package holds no provider stock and checks none, so its colors may include ones sold out or " +
+  "discontinued; the reply's stock field says so. For POD Products, use POD's tools, which check live stock.";
 
 // ---------------------------------------------------------------------------
 // Tools
@@ -170,7 +179,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     },
     {
       name: "batch_product_colors",
-      description: "Select eight visually approved garment colors per design, using optional project-supplied desired groups and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Refuses an approved color the artwork fails the ink-legibility-v2 verdict on. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates.",
+      description: "Select eight visually approved garment colors per design, using optional project-supplied desired groups and reporting any unfilled groups. Use this for a final batch assortment after visual and provider S–3XL size review. Refuses an approved color the artwork fails the ink-legibility-v2 verdict on. Preserves the reviewed default and exact artwork/rendition assignments. Composition proofs and placement checks remain external approval gates. Stock comes only from the sizeAvailability evidence you supply; the catalog holds none. For POD Products, use POD's tools, which check live stock.",
       inputSchema: {
         designs: z.array(z.object({
           id: z.string().min(1), product: z.string().optional(), defaultSlug: z.string().min(1),
@@ -183,7 +192,7 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
           sizeAvailability: z.array(z.object({
             slug: z.string().min(1), sizes: z.array(z.enum(["S", "M", "L", "XL", "2XL", "3XL"])),
             checkedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), source: z.string().min(1),
-          })).describe("Current provider variant evidence per color; every required size must be available before selection."),
+          })).describe("Live provider variant evidence per color, from your own stock check; every required size must be in stock before selection. The catalog holds no stock."),
           artworks: z.array(z.object({
             artworkId: z.string().min(1), renditionId: z.string().min(1), designPath: z.string().min(1),
             approvedSlugs: z.array(z.string()).describe("Colors reviewed for legibility and subject recognition with this exact rendition. Each must also pass the ink-legibility-v2 verdict."),
@@ -207,14 +216,21 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
               const sizeEvidence = sizeBySlug.get(slug);
               if (!sizeEvidence) throw new InputError(`${input.id}: no provider size evidence for ${slug}.`);
               const pick = picks.find(p => p.color.slug === slug);
-              if (!pick) throw new InputError(`${input.id}: approved color ${slug} is unavailable or unknown.`);
+              if (!pick) throw new InputError(`${input.id}: approved color ${slug} is not a ${productId} color with a hex.`);
               if (!pick.legibility.pass) throw new InputError(`${input.id}: approved color ${slug} fails ink legibility with ${art.artworkId}: ${pick.legibility.reason}`);
               candidates.push({ artworkId: art.artworkId, renditionId: art.renditionId, recommendation: pick, legible: true, subjectRecognizable: true, availableSizes: sizeEvidence.sizes, sizeEvidence: { checkedAt: sizeEvidence.checkedAt, source: sizeEvidence.source } });
             }
           }
           batch.push({ id: input.id, product: productId, defaultSlug: input.defaultSlug, ...(input.desiredGroups && { desiredGroups: input.desiredGroups }), candidates });
         }
-        const result = selectBatchColors(batch, (recent as GarmentUse[] | undefined) ?? []);
+        const result = {
+          ...selectBatchColors(batch, (recent as GarmentUse[] | undefined) ?? []),
+          stock: {
+            checked: true,
+            source: "caller",
+            note: "Stock is the sizeAvailability evidence you supplied, kept on each pick as sizeEvidence; nothing here checked it. Re-check it live before publishing.",
+          },
+        };
         const swatches = result.selections.flatMap(selection => selection.picks.map(p => ({ hex: p.recommendation.color.hex, name: `${selection.designId}: ${p.recommendation.color.name} · ${p.artworkId}` })));
         return reply({ title: "Batch garment colors", json: result, text: () => JSON.stringify(result), sections: [{ svg: renderSwatchGrid(swatches, { title: "Batch garment colors (composition proofs required)" }) }] });
       },
@@ -264,9 +280,9 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
       description:
         "Get palettes for a garment color by its product name, such as the Comfort Colors 1717 color " +
         '"Pepper": the garment first, then ink colors that print legibly on it, each with its contrast. Use this ' +
-        "when someone names a shirt color and wants design colors for it. Warns when the print provider does not " +
-        "stock the color. Give a design and mood to re-rank the palettes by how well each suits the design's " +
-        "subject and mood.",
+        "when someone names a shirt color and wants design colors for it. Give a design and mood to re-rank the " +
+        "palettes by how well each suits the design's subject and mood." +
+        STOCK_CAVEAT,
       inputSchema: {
         name: z.string().describe('The product color\'s name, slug, or alias, such as "Pepper" or "blue-jean".'),
         product,
@@ -305,7 +321,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "penalty counts only ink the verdict calls lost, so a pale fill inside a dark outline is not penalized. " +
         "Each pick carries its score, plain-language reasons, and a warning for each lost ink. Use recolor_plans " +
         "or artwork_options alongside it when alternate inks may open more garment options, and rank_artwork_pairs " +
-        "for the order POD's Creative color study tries colors and Artwork Options in.",
+        "for the order POD's Creative color study tries colors and Artwork Options in." +
+        STOCK_CAVEAT,
       inputSchema: {
         designPath,
         designBase64,
@@ -348,7 +365,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "unless legible ink frames it (a fill inside an outline); a garment fails when a fifth of the ink is lost " +
         "or less than a fifth reads. Use this before proposing, approving, or publishing a design and garment " +
         "pair, and to explain why a pair is unreadable. Give product colors, garments with their own hexes " +
-        "(a provider's variants), or neither for every stocked color.",
+        "(a provider's variants), or neither for every catalog color." +
+        STOCK_CAVEAT,
       inputSchema: {
         designPath,
         designBase64,
@@ -382,7 +400,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "(for example pastel lettering for light shirts). Each option is either legible ink (each faint ink keeps " +
         "its hue and moves darker or lighter until it reads) or a Wada recolor keeping the design's lightness " +
         "order, screened on the measured pixels and kept only when it adds legible colors. Give outDir to write " +
-        "each recolored PNG. A recolor changes the artwork: show the options for review, never publish them.",
+        "each recolored PNG. A recolor changes the artwork: show the options for review, never publish them." +
+        STOCK_CAVEAT,
       inputSchema: {
         designPath,
         designBase64,
@@ -426,7 +445,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "approved art: the original, else a hue-keeping legible-ink option, else a Wada repaint. Colors a " +
         "hue-keeping artwork reads on come before colors only a Wada repaint reads on, each chosen by score less a " +
         "variety penalty, with the preferred color first when it reads. Use this to see which colors and inks a " +
-        "study will try first; recommend_product_colors ranks one artwork's garments instead.",
+        "study will try first; recommend_product_colors ranks one artwork's garments instead." +
+        STOCK_CAVEAT,
       inputSchema: {
         artworks: z
           .array(
@@ -490,7 +510,8 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
         "redrawing painterly art. Use this when the design's colors may change to suit the shirt. Each plan " +
         "carries its pigment substitution on the design's measured inks and the recolored design's " +
         "ink-legibility-v2 verdict on its garment. Give outDir to also write each recolored PNG by pigment " +
-        "substitution; photographic art is detected and left to the prompt.",
+        "substitution; photographic art is detected and left to the prompt." +
+        STOCK_CAVEAT,
       inputSchema: {
         designPath,
         designBase64,
@@ -579,9 +600,10 @@ export function toolDefinitions(store: ResultStore = new ResultStore(), options:
     {
       name: "list_products",
       description:
-        "List the garment products this package knows, or one product's colors with hex, family, and whether " +
-        "the catalog lists as available (not size-level stock). Use this to find a product ID or a color's exact name before calling " +
-        "the other tools, or to show someone a product's color range.",
+        "List the garment products this package knows, or one product's colors with hex and family. Use this to " +
+        "find a product ID or a color's exact name before calling the other tools, or to show someone a " +
+        "product's color range." +
+        STOCK_CAVEAT,
       inputSchema: {
         product: z
           .string()
@@ -671,26 +693,21 @@ function productsView(productId: string | undefined): View {
     throw new InputError((error as Error).message);
   }
   const title = `${found.brand} ${found.model} colors`;
-  const colors = found.colors.map(({ name, slug, hex, family, available, aliases }) => ({
+  const colors = found.colors.map(({ name, slug, hex, family, aliases }) => ({
     name,
     slug,
     hex,
     family,
-    available,
     aliases,
   }));
   return {
     title,
-    json: { id: found.id, name: found.name, printMethod: found.printMethod, colors },
-    text: () => colors.map((c) => `${c.name} ${c.hex ?? "hex unknown"}`).join("\n"),
+    json: { id: found.id, name: found.name, printMethod: found.printMethod, colors, stock: STOCK_NOT_CHECKED },
+    text: () => [...colors.map((c) => `${c.name} ${c.hex ?? "hex unknown"}`), `Stock: ${STOCK_NOT_CHECKED.note}`].join("\n"),
     sections: [
       {
         svg: renderSwatchGrid(
-          found.colors.filter(hasHex).map((c): Swatch => ({
-            hex: c.hex,
-            name: c.name,
-            ...(!c.available && { note: "not stocked" }),
-          })),
+          found.colors.filter(hasHex).map((c): Swatch => ({ hex: c.hex, name: c.name })),
           { title, columns: 8 },
         ),
       },

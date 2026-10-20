@@ -26,8 +26,6 @@ export interface CatalogGarment extends GarmentInput {
   family: string;
   /** Where the catalog's hex came from: `reviewed` hexes were checked against the garment. */
   source: ProductColorSource;
-  /** False for colors the print provider does not stock. */
-  available: boolean;
 }
 
 /** `Chalky Mint` → `chalky-mint`. */
@@ -50,24 +48,22 @@ export function garmentColor(garment: GarmentInput): GarmentColor & { hex: Hex; 
 }
 
 /**
- * A catalog product's garment colors with a hex, in product file order: the
- * stocked ones by default, every one with `availableOnly: false`.
+ * Every garment color of a catalog product that has a hex, in product file
+ * order. The catalog holds no stock, so this includes colors a print provider
+ * may not fulfill today: rank only the garments a live stock check passed.
  *
  * @param productId Defaults to the index's default product, Comfort Colors 1717.
  * @throws {Error} when the product ID is unknown.
  */
-export function garmentsFromProduct(productId?: string, options: { availableOnly?: boolean } = {}): CatalogGarment[] {
+export function garmentsFromProduct(productId?: string): CatalogGarment[] {
   const product = productId === undefined ? storedDefaultProduct() : storedProduct(productId);
-  const availableOnly = options.availableOnly ?? true;
   return product.colors
     .filter(hasHex)
-    .filter((c) => !availableOnly || c.available)
     .map((c) => ({
       colorName: c.name,
       hex: c.hex,
       slug: c.slug,
       family: c.family,
       source: c.source,
-      available: c.available,
     }));
 }

@@ -7,8 +7,9 @@
  * Colors 1717".
  *
  * Which colors exist comes from the blueprint's catalog variants for our print
- * provider, out-of-stock variants included: a color that is only temporarily out
- * of stock is still stocked. The catalog carries names but no hex, so swatches are
+ * provider, out-of-stock variants included. The file records names and hexes,
+ * never stock: whether a color sells today is POD's live verdict. The catalog
+ * carries names but no hex, so swatches are
  * read from the color option of existing shop products on the same blueprint, the
  * way POD's `refreshPrintifyProduct` (services/template-variant-refresh.ts) does,
  * checking one shop after another until every color has a swatch.
@@ -19,12 +20,13 @@
  *   - Otherwise the Printify hex wins and gets `source: printify`. `sourceDate`
  *     changes only when the hex or source changes, or on `--touch`, so a rerun
  *     against unchanged upstream data writes no diff.
- *   - A color in the file but not in Printify is set to `available: false` with the
- *     reason logged. It is never deleted.
+ *   - A color in the file but not in Printify is kept as it is, never deleted.
+ *     Its absence is logged on every run unless it is a retail-chart gap fill,
+ *     which Printify is expected not to list.
  *   - A `retail-chart:<site>` color (the gap fill for colors Printify does not
- *     stock) is left alone, `sourceUrl` and `sourceNote` included, until Printify returns
- *     it with a swatch. Then the Printify hex replaces the chart hex, `available`
- *     flips to true, `source` becomes `printify`, and the chart fields are dropped.
+ *     list) is left alone, `sourceUrl` and `sourceNote` included, until Printify returns
+ *     it with a swatch. Then the Printify hex replaces the chart hex, `source`
+ *     becomes `printify`, and the chart fields are dropped.
  *   - A Printify color with no swatch in any shop is logged and left as it is.
  *   - `family` is always recomputed from the hex with `colorFamily`, except for a
  *     color with no hex, which keeps the family it has.
@@ -171,14 +173,14 @@ export function mergeColors(
       if (hex !== undefined && hex !== current.hex) {
         log.push(`${name}: reviewed ${current.hex} kept; Printify now says ${hex}`);
       }
-      next = { ...current, available: true };
+      next = current;
     } else if (hex === undefined) {
       log.push(`${name}: in the Printify catalog but no shop product has a swatch for it; ${current ? "left as it is" : "not added"}`);
       if (!current) continue;
       next = current;
     } else {
       if (current?.source.startsWith("retail-chart:")) {
-        log.push(`${name}: now stocked by Printify; chart hex ${current.hex ?? "(none)"} replaced with ${hex}`);
+        log.push(`${name}: now listed by Printify; chart hex ${current.hex ?? "(none)"} replaced with ${hex}`);
       }
       const changed = !current || current.hex !== hex || current.source !== "printify";
       next = {
@@ -187,7 +189,6 @@ export function mergeColors(
         hex,
         aliases: current?.aliases ?? [],
         family: "",
-        available: true,
         source: "printify",
         sourceDate: changed || options.touch || !current ? options.today : current.sourceDate,
       };
@@ -202,10 +203,10 @@ export function mergeColors(
 
   for (const color of existing) {
     if (seen.has(color.slug)) continue;
-    if (color.available) {
-      log.push(`${color.name}: not in the Printify catalog for provider ${PRINT_PROVIDER_ID}; set available: false`);
+    if (!color.source.startsWith("retail-chart:")) {
+      log.push(`${color.name}: not in the Printify catalog for provider ${PRINT_PROVIDER_ID}; kept`);
     }
-    result.push(finish(withStudy({ ...color, available: false }, study.get(color.name.toLowerCase()))));
+    result.push(finish(withStudy(color, study.get(color.name.toLowerCase()))));
   }
 
   result.sort((a, b) => a.slug.localeCompare(b.slug));
@@ -234,7 +235,6 @@ function finish(color: ProductColor): ProductColor {
     hex: color.hex,
     aliases: color.aliases,
     family: color.hex === null ? color.family : colorFamily(color.hex, color.name),
-    available: color.available,
     source: color.source,
     sourceDate: color.sourceDate,
   };
@@ -267,7 +267,7 @@ async function printifyGet<T>(path: string, token: string, fetchImpl: Fetch): Pr
   }
 }
 
-/** Fetch every color Printify stocks for the blueprint and provider, with shop swatches where found. */
+/** Fetch every color Printify lists for the blueprint and provider, with shop swatches where found. */
 export async function fetchUpstream(token: string, fetchImpl: Fetch = fetch): Promise<UpstreamColor[]> {
   const { variants } = await printifyGet<{ variants: PrintifyVariant[] }>(
     `/catalog/blueprints/${BLUEPRINT_ID}/print_providers/${PRINT_PROVIDER_ID}/variants.json?show-out-of-stock=1`,
@@ -351,8 +351,7 @@ export async function main(argv: string[]): Promise<number> {
   });
 
   for (const line of log) process.stdout.write(`${line}\n`);
-  const available = colors.filter((c) => c.available).length;
-  process.stdout.write(`${upstream.length} colors from Printify; ${colors.length} in the file, ${available} available.\n`);
+  process.stdout.write(`${upstream.length} colors from Printify; ${colors.length} in the file.\n`);
 
   if (args.dryRun) return 0;
   writeFileSync(PRODUCT_FILE, `${JSON.stringify({ ...product, colors }, null, 2)}\n`);

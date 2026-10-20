@@ -185,7 +185,6 @@ function productOption(color: DescribedColor): OptionDescription {
     description.hex = c.hex;
     description.lightness = lightnessWord(c.hex);
   }
-  if (!c.available) description.stocked = false;
   return description;
 }
 

@@ -38,8 +38,8 @@ describe("the labeled designs fixture", () => {
     }
   });
 
-  it("only picks stocked garments of the default product, each once", () => {
-    const stocked = new Set(defaultProduct().colors.filter((c) => c.available && c.hex).map((c) => c.name));
+  it("only picks garments of the default product with a hex, each once", () => {
+    const stocked = new Set(defaultProduct().colors.filter((c) => c.hex).map((c) => c.name));
     for (const design of designs) {
       expect(design.picks.length, design.id).toBeGreaterThanOrEqual(3);
       expect(new Set(design.picks).size, design.id).toBe(design.picks.length);

@@ -144,20 +144,19 @@ export interface PrintArea {
  */
 export type ProductColorSource = "printify" | "reviewed" | `retail-chart:${string}`;
 
-/** One color of a product. */
+/**
+ * One color of a product. The catalog names colors and their hexes; it holds
+ * no stock. Whether a print provider can fulfill a color is the caller's to
+ * check, live, before it passes garments to rank.
+ */
 export interface ProductColor {
   name: string;
   slug: string;
-  /**
-   * Lowercase `#rrggbb`. Null only for an unstocked color (`available: false`)
-   * that no chart publishes a hex for.
-   */
+  /** Lowercase `#rrggbb`. Null only for a color no source publishes a hex for. */
   hex: string | null;
   aliases: string[];
   /** Broad color family used for grouping, lowercase. */
   family: string;
-  /** False for colors the print provider does not stock. */
-  available: boolean;
   source: ProductColorSource;
   /** When the hex was fetched or reviewed, `YYYY-MM-DD`. */
   sourceDate: string;
@@ -171,7 +170,7 @@ export interface ProductColor {
   sourceNote?: string;
 }
 
-/** A product color that has a hex. Every stocked color does. */
+/** A product color that has a hex. */
 export type ProductColorWithHex = ProductColor & { hex: string };
 
 /** True when the color has a hex to match, render, or print against. */

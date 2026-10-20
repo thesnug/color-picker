@@ -41,9 +41,10 @@ for exploratory suggestions. Continue the same native run after review.
    reviewed from score alone.
 3. Check the provider's current variant availability for S, M, L, XL, 2XL and
    3XL for every candidate color. Give `batch_product_colors` a `sizeAvailability`
-   entry per approved slug with `sizes`, `checkedAt` and `source`. A product's
-   catalog `available` flag is not proof of six-size availability. If evidence is
-   absent or incomplete, do not select that color.
+   entry per approved slug with `sizes`, `checkedAt` and `source`. This is the
+   only stock input: the catalog holds none. For POD Products, take it from POD's
+   tools, which check live stock. If evidence is absent or incomplete, do not
+   select that color.
    Call `batch_product_colors` with designs, defaultSlug, and artworks containing
    artworkId, renditionId, designPath (the prepared print file), and approvedSlugs.
    Include recent proposals as `recent` when available; disclose missing history.

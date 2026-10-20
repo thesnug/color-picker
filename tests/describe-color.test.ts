@@ -124,7 +124,7 @@ describe("describeToColor", () => {
     expect(scoreDescribeColor(result, [NONE_LABEL])).toEqual({ top1: true, top3: true });
   });
 
-  it("chooses among the product's colors, including unstocked ones", async () => {
+  it("chooses among every product color, with no stock flag", async () => {
     const client = fakeClient({ Brick: 0.7, Terracotta: 0.2, Chili: 0.05 });
     const result = await describeToColor("the brick shirt", { set: "product", cache, client });
     if (result.via !== "jev") throw new Error("expected a Jev result");
@@ -133,7 +133,8 @@ describe("describeToColor", () => {
 
     const criteria = (client.requests[0]!.questions.color as ChoiceQuestion).criteria;
     expect(Object.keys(criteria)).toHaveLength(defaultProduct().colors.length + 1);
-    expect(criteria.Emerald).toMatchObject({ stocked: false });
+    expect(criteria.Emerald).toMatchObject({ family: "green" });
+    for (const option of Object.values(criteria)) expect(option).not.toHaveProperty("stocked");
   });
 
   it("caches the answer, so a repeat needs no client or key", async () => {

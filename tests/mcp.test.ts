@@ -161,6 +161,29 @@ describe("mcp over stdio", () => {
     expect(readFileSync(reply.cardFile, "utf8")).toBe(reply.svg);
   }
 
+  /** A reply that suggests garment colors says plainly that provider stock was not checked. */
+  function expectStockNotChecked(reply: any) {
+    expect(reply.stock).toEqual({ checked: false, note: expect.stringMatching(/^Provider stock was not checked: .*use POD's tools/) });
+  }
+
+  it("tells every tool that suggests garment colors to send POD Products to POD's stock-checked tools", async () => {
+    const { tools } = await client.listTools();
+    const suggesting = [
+      "palettes_for_product_color",
+      "recommend_product_colors",
+      "check_print_legibility",
+      "artwork_options",
+      "rank_artwork_pairs",
+      "recolor_plans",
+      "list_products",
+      "batch_product_colors",
+    ];
+    for (const name of suggesting) {
+      const tool = tools.find((t) => t.name === name)!;
+      expect(tool.description, name).toMatch(/For POD Products, use POD's tools, which check live stock\./);
+    }
+  });
+
   it("lists every tool with a JSON schema and a description", async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([...TOOLS].sort());
@@ -194,6 +217,7 @@ describe("mcp over stdio", () => {
     expect(batch.selections[0].picks.every((p: any) => p.renditionId === "prepared-fixture")).toBe(true);
     expect(batch.repetition.current.total).toBe(8);
     expect(batch.selections[0].picks.every((p: any) => p.availableSizes.includes("3XL") && p.sizeEvidence.source === "fixture provider catalog")).toBe(true);
+    expect(batch.stock).toMatchObject({ checked: true, source: "caller" });
     expect(batch.cardFile).toBeTruthy();
     const report = await call("batch_repetition_report", { current: batch.repetition.current.garments.map(({ count, ...garment }: any) => garment) });
     expect(report.json().current.distinct).toBe(8);
@@ -219,6 +243,7 @@ describe("mcp over stdio", () => {
     const reply = (await call("palettes_for_product_color", { name: "Pepper", limit: 2 })).json();
     expect(reply.color.name).toBe("Pepper");
     expect(reply.palettes.length).toBeGreaterThan(0);
+    expectStockNotChecked(reply);
     expectSvg(reply);
   });
 
@@ -226,6 +251,7 @@ describe("mcp over stdio", () => {
     const fromPath = (await call("recommend_product_colors", { designPath: FLAT_MARK, n: 3 })).json();
     expect(fromPath.picks).toHaveLength(3);
     expect(fromPath.mood).toBeUndefined();
+    expectStockNotChecked(fromPath);
     expectSvg(fromPath);
 
     const base64 = `data:image/png;base64,${readFileSync(FLAT_MARK).toString("base64")}`;
@@ -265,6 +291,7 @@ describe("mcp over stdio", () => {
     expect(reply.plans[0].plausibility).toBeNull();
     // Each plan carries its pigment substitution and the recolored design's verdict on its garment.
     expect(reply.engine).toEqual({ version: ENGINE_VERSION, protocol: "ink-legibility-v2" });
+    expectStockNotChecked(reply);
     for (const plan of reply.plans) {
       expect(plan.legibility).toMatchObject({ protocol: "ink-legibility-v2", colorName: plan.color.name });
       if (!plan.merged) expect(plan.substitution.replacements.length).toBeGreaterThan(0);
@@ -287,6 +314,7 @@ describe("mcp over stdio", () => {
       ["Provider Navy", "#52525e", expect.any(Boolean)],
     ]);
     expect(reply.verdicts[1].reason).toMatch(/^#e8836b \(51% of the ink\) is 2\.\d\d:1 on Denim, under 3:1/);
+    expectStockNotChecked(reply);
     expectSvg(reply);
   });
 
@@ -301,6 +329,7 @@ describe("mcp over stdio", () => {
       for (const name of option.addsColors) expect(reply.legibleColors).not.toContain(name);
     }
     expect(readdirSync(outDir)).toHaveLength(reply.options.length);
+    expectStockNotChecked(reply);
     expectSvg(reply);
   });
 
@@ -327,6 +356,7 @@ describe("mcp over stdio", () => {
     const firstOption = leads.findIndex((p: any) => p.source !== "original");
     expect(firstOption).toBeGreaterThan(0);
     expect(leads.slice(firstOption).every((p: any) => p.source !== "original")).toBe(true);
+    expectStockNotChecked(reply);
     expectSvg(reply);
     const duplicate = await call("rank_artwork_pairs", {
       artworks: [
@@ -372,8 +402,10 @@ describe("mcp over stdio", () => {
     const product = (await call("list_products", { product: "comfort-colors-1717" })).json();
     expect(product.colors.length).toBeGreaterThan(60);
     expect(product.colors[0]).toEqual(
-      expect.objectContaining({ name: expect.any(String), hex: expect.any(String), available: expect.any(Boolean) }),
+      expect.objectContaining({ name: expect.any(String), hex: expect.any(String) }),
     );
+    expect(product.colors[0]).not.toHaveProperty("available");
+    expectStockNotChecked(product);
     expectSvg(product);
   });
 

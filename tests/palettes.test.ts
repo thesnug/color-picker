@@ -89,16 +89,11 @@ describe("palettesForProductColor", () => {
     for (const p of r.palettes) expect(p.colors).toHaveLength(3);
   });
 
-  it("works for unstocked colors and says so", () => {
-    const unstocked: Product = {
-      ...product,
-      colors: product.colors.map((c) => (c.slug === "blue-spruce" ? { ...c, available: false } : c)),
-    };
-    const r = palettesForProductColor("Blue Spruce", { product: unstocked });
-    expect(r.available).toBe(false);
+  it("carries no stock flag on the result or the garment anchor", () => {
+    const r = palettesForProductColor("Blue Spruce");
     expect(r.palettes.length).toBeGreaterThan(0);
-    expect(r.palettes[0]!.colors[0].available).toBe(false);
-    expect(palettesForProductColor("Blue Spruce").available).toBe(true);
+    expect(r).not.toHaveProperty("available");
+    expect(r.palettes[0]!.colors[0]).not.toHaveProperty("available");
   });
 
   it("returns a reason instead of throwing for an unknown color", () => {

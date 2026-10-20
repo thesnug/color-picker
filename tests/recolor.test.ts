@@ -33,7 +33,7 @@ beforeAll(async () => {
 });
 
 const product = defaultProduct();
-const everyColor = { n: product.colors.length, availableOnly: false };
+const everyColor = { n: product.colors.length };
 const lightness = (hex: string) => toOklab(hex).l;
 
 /** True when sorting the mapping by design lightness also sorts it by ink lightness. */
@@ -191,16 +191,10 @@ describe("recolorPlans", () => {
     expect(unflagged).toEqual([...unflagged].sort((a, b) => b - a));
   });
 
-  it("skips unstocked colors unless asked", () => {
-    const unstocked = new Set(product.colors.filter((c) => !c.available).map((c) => c.slug));
-    for (const plan of recolorPlans(flatMark, { n: product.colors.length })) {
-      expect(unstocked.has(plan.color.slug)).toBe(false);
-    }
-  });
-
-  it("includes chart-only colors with hex but skips colors without hex when unstocked are requested", () => {
+  it("plans for every product color with a hex, chart-only colors included", () => {
     const plans = recolorPlans(flatMark, everyColor);
-    const chartOnly = product.colors.filter((c) => !c.available && c.hex !== null).map((c) => c.slug);
+    const chartOnly = product.colors.filter((c) => c.source.startsWith("retail-chart:") && c.hex !== null).map((c) => c.slug);
+    expect(chartOnly.length).toBeGreaterThan(0);
     expect(plans.map((p) => p.color.slug)).toEqual(expect.arrayContaining(chartOnly));
     expect(plans.every((p) => p.color.hex !== null)).toBe(true);
     expect(plans).toHaveLength(product.colors.filter((c) => c.hex !== null).length);

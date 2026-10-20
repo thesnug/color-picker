@@ -387,7 +387,9 @@ describe("cli", () => {
         expect(json.pairs.some((p: { source: string }) => p.source === "legible-ink")).toBe(true);
         const text = capture();
         expect(await run(argv.filter((a) => a !== "--json"), text.io)).toBe(0);
-        expect(text.out().split("\n")[3]).toMatch(/^1\. Black · original \(original\) · score /);
+        const lines = text.out().split("\n");
+        expect(lines[2]).toMatch(/^Stock: Provider stock was not checked/);
+        expect(lines[4]).toMatch(/^1\. Black · original \(original\) · score /);
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
@@ -418,7 +420,8 @@ describe("cli", () => {
       expect(await run(argv, c.io)).toBe(0);
       const json = JSON.parse(c.out());
       expect(json.color.slug).toBe("grey");
-      expect(json.available).toBe(true);
+      expect(json).not.toHaveProperty("available");
+      expect(json.stock).toEqual({ checked: false, note: expect.stringMatching(/^Provider stock was not checked/) });
       expect(json.palettes.length).toBeGreaterThan(0);
       for (const p of json.palettes) {
         expect(p.colors).toHaveLength(2);

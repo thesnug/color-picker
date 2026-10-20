@@ -13,7 +13,6 @@ const color = {
   hex: "#4f4b48",
   aliases: [],
   family: "neutral",
-  available: true,
   source: "printify",
   sourceDate: "2026-09-24",
 };
@@ -29,7 +28,7 @@ describe("product loaders", () => {
     expect(loadProductIndex()).not.toHaveProperty("$schema");
   });
 
-  it("carries the 2026 chart-only colors as unstocked, with their chart", () => {
+  it("carries the 2026 chart-only colors with their chart and no stock flag", () => {
     const bySlug = new Map(defaultProduct().colors.map((c) => [c.slug, c]));
     for (const [slug, hex] of [
       ["dusk", "#735b6a"],
@@ -39,11 +38,11 @@ describe("product loaders", () => {
     ]) {
       expect(bySlug.get(slug!), slug).toMatchObject({
         hex,
-        available: false,
         source: expect.stringMatching(/^retail-chart:/),
         sourceUrl: expect.stringMatching(/^https:\/\//),
       });
     }
+    for (const c of defaultProduct().colors) expect(c, c.slug).not.toHaveProperty("available");
   });
 
   it("rejects IDs that are not in the index", () => {
@@ -83,7 +82,6 @@ describe("validateProducts", () => {
           name: "Emerald",
           slug: "emerald",
           hex: null,
-          available: false,
           source: "retail-chart:comfort-colors-2026",
           sourceUrl: "https://example.com/chart",
           sourceNote: "No chart publishes a hex.",
@@ -115,15 +113,13 @@ describe("validateProducts", () => {
     expect(validateProducts(dir)).toContainEqual(expect.stringMatching(/\/colors\/0 is reviewed but has no sourceDate/));
   });
 
-  it("fails on a null hex for a color that is available", () => {
-    write({ ...product(), colors: [{ ...color, hex: null }] });
-    expect(validateProducts(dir)).toContainEqual(
-      expect.stringMatching(/\/colors\/0 has no hex, so it must be available: false/),
-    );
+  it("fails on a stock flag: the catalog holds no stock", () => {
+    write({ ...product(), colors: [{ ...color, available: false }] });
+    expect(validateProducts(dir).join("\n")).toMatch(/\/colors\/0 must NOT have additional properties/);
   });
 
   it("fails on a retail chart color without its sourceUrl", () => {
-    write({ ...product(), colors: [{ ...color, available: false, source: "retail-chart:getcustom-store" }] });
+    write({ ...product(), colors: [{ ...color, source: "retail-chart:getcustom-store" }] });
     expect(validateProducts(dir).join("\n")).toMatch(/\/colors\/0 must have required property 'sourceUrl'/);
   });
 

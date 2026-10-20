@@ -23,7 +23,7 @@ beforeAll(async () => {
 });
 
 const product = defaultProduct();
-const everyColor = { n: product.colors.length, availableOnly: false };
+const everyColor = { n: product.colors.length };
 
 describe("recommendProductColors", () => {
   it("ranks dark garments first for the flat light-ink mark", () => {
@@ -101,18 +101,19 @@ describe("recommendProductColors", () => {
     expect(top!.reasons[0]).toMatch(/^The design's one color, #ffffff \(near .+\), clears 4\.5:1 on /);
   });
 
-  it("skips unstocked colors unless asked", () => {
-    const withUnstocked: Product = {
+  it("ranks every product color with a hex: the catalog holds no stock to filter on", () => {
+    const withExtra: Product = {
       ...product,
-      colors: [...product.colors, { ...product.colors[0]!, slug: "ghost", name: "Ghost", available: false }],
+      colors: [
+        ...product.colors,
+        { ...product.colors[0]!, slug: "ghost", name: "Ghost" },
+        { ...product.colors[0]!, slug: "blank", name: "Blank", hex: null },
+      ],
     };
-    const n = withUnstocked.colors.length;
-    expect(recommendProductColors(flatMark, { product: withUnstocked, n }).some((p) => p.color.slug === "ghost")).toBe(false);
-    expect(
-      recommendProductColors(flatMark, { product: withUnstocked, n, availableOnly: false }).some(
-        (p) => p.color.slug === "ghost",
-      ),
-    ).toBe(true);
+    const slugs = recommendProductColors(flatMark, { product: withExtra, n: withExtra.colors.length }).map((p) => p.color.slug);
+    expect(slugs).toContain("ghost");
+    expect(slugs).not.toContain("blank");
+    expect(slugs).toHaveLength(withExtra.colors.length - 1);
   });
 
   it("uses the default product and reads a product by ID", () => {

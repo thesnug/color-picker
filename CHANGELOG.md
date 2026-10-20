@@ -9,6 +9,19 @@ release's entry. See "Releases" in [AGENTS.md](AGENTS.md).
 
 - Bind POD local color approval to native production files and packet hashes;
   document narrow contrast warnings and unchanged numerical measurements (INT-2765).
+- **Breaking: the engine ranks colors and never decides stock** (INT-2891, part of
+  INT-2889). The static color-level `available` flag is gone from the product
+  catalog and `product.schema.json` (the schema now refuses it), and the
+  `availableOnly` option is gone from `garmentsFromProduct`, `recommendProductColors`
+  and `recolorPlans`, so each returns every catalog color with a hex. Callers pass
+  the garments to rank; POD passes only the colors its sellable-color verdict
+  allows. `ENGINE_VERSION` is 2.0.0: the recorded fixtures now judge and rank all
+  71 catalog colors with a hex, including the four chart-only ones. The import no
+  longer writes a stock flag and keeps colors Printify stops listing.
+  `batch_product_colors` takes stock only from the caller's `sizeAvailability`
+  evidence. Every other tool that suggests garment colors replies with
+  `stock: { checked: false, note }` (a `Stock:` line in the CLI), and the tool
+  descriptions and skill send POD Products to POD's tools, which check live stock.
 
 ## [0.6.0] - 2026-10-12
 

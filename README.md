@@ -115,9 +115,9 @@ through. The Wada colors to print on it follow. Palettes are ranked by the
 mean WCAG contrast of those ink colors against the garment hex, not against
 the Wada equivalent, because ink goes on the real shirt. Book palettes come
 before harmonies, and a combination reached through two equivalents appears
-once. `contrast` and `minContrast` are on every palette. Colors the provider
-does not stock still work, and the result carries `available: false` so
-callers can warn. Options: `product` (default Comfort Colors 1717), `limit`
+once. `contrast` and `minContrast` are on every palette. The catalog holds no
+stock, so any product color works whether or not the provider can fulfill it
+today. Options: `product` (default Comfort Colors 1717), `limit`
 (default 12), and `size` (the garment counts toward it).
 
 ### Design fingerprint
@@ -366,8 +366,10 @@ The score adds four components, each from 0 to 1 and exposed on `components`:
 The weights are `RECOMMEND_WEIGHTS`. Pass `weights` to change them, or call
 `scoreComponents(pick.components, weights)` to re-rank existing picks without
 analyzing the design again. Options: `product` (an ID or a loaded product;
-default Comfort Colors 1717) and `availableOnly` (default true).
-`scoreGarments` scores any garment colors the same way, unranked.
+default Comfort Colors 1717). Every product color with a hex is ranked: the
+catalog holds no stock, so to rank only the colors a provider can fulfill,
+check stock live and pass those colors to `scoreGarments`, which scores any
+garment colors the same way, unranked, or to the engine's `rankGarments`.
 
 This score cannot see outlines: a pale fill inside a dark outline counts as
 vanishing on a pale shirt. For a print file, rank with the engine's
@@ -632,8 +634,15 @@ To run it without installing it in a project, as the
 | `rank_artwork_pairs` | Order a design's and its Artwork Options' garment pairs as POD's Creative color study explores them |
 | `theme` | Build a light or dark web theme, with CSS, Tailwind, and design tokens |
 | `check_accessibility` | Check colors for WCAG and APCA contrast, print separation between colors, and color-vision safety |
-| `list_products` | List products, or one product's colors and stock |
+| `list_products` | List products, or one product's colors |
 | `render_card` | Render an earlier result, or a list of colors, as SVG or HTML |
+
+No tool checks provider stock, and the catalog holds none. Every tool that
+suggests garment colors replies with `stock: { checked: false, note }`, and the
+CLI prints the note as a `Stock:` line: some suggested colors may be sold out
+or discontinued. For POD Products, use POD's tools, which check live stock.
+`batch_product_colors` is the exception: it takes the caller's per-color size
+evidence and replies with `stock: { checked: true, source: "caller", note }`.
 
 Every tool replies with one JSON text block: the same result the CLI prints with
 `--json`, a `resultId`, and, for tools that return colors, an `svg` field holding
@@ -792,14 +801,14 @@ To add a product:
 2. Add `{ "id": "<id>", "name": "<display name>" }` to `products` in
    `assets/products/index.json`.
 3. Add colors. Each carries `source` (`printify`, `retail-chart:<name>`, or
-   `reviewed`) and a `sourceDate`. Colors the provider does not stock get
-   `"available": false`. A `retail-chart` color also carries the chart page as
+   `reviewed`) and a `sourceDate`. Colors carry no stock: POD's sellable-color
+   verdict decides what a provider can fulfill. A `retail-chart` color also carries the chart page as
    `sourceUrl`, and a `sourceNote` when the value is uncertain. `hex` may be `null`
-   only on an unstocked color that no chart publishes a hex for. Garment images are referenced by `image.url` and
+   only on a color no source publishes a hex for. Garment images are referenced by `image.url` and
    `image.sha256`, never stored in the repo. Never overwrite a `reviewed` color
    from an import.
 4. Run `npm run products:check`. It fails on schema errors, duplicate slugs, a
-   `reviewed` color without a date, a `null` hex on a stocked color, a
+   `reviewed` color without a date, a stock flag or other unknown field, a
    `retail-chart` color without its `sourceUrl`, or a file missing from the index. CI runs it
    too.
 5. Run `npm run products:equivalents` and commit the `<id>.equivalents.json` it
@@ -836,8 +845,9 @@ npm run products:equivalents:check  # exit 1 if stale
 
 `scripts/import-printify.ts` fills `assets/products/comfort-colors-1717.json` from
 Printify directly: blueprint 706 (Comfort Colors 1717) from print provider 99
-(Printify Choice), the provider on POD's 1717 template. The catalog lists which
-colors are stocked, including those temporarily out of stock. It has no hex values,
+(Printify Choice), the provider on POD's 1717 template. The Printify catalog lists
+which colors exist, out-of-stock ones included; the file records names and hexes,
+never stock. It has no hex values,
 so swatches come from the color option of existing shop products on the same
 blueprint, as POD does. See docs/DESIGN.md, "Hex provenance for Comfort Colors 1717".
 
@@ -855,12 +865,12 @@ npm run products:equivalents
   without writing.
 - `reviewed` colors keep their hex. When Printify's swatch differs, the script
   prints both values so the drift is visible.
-- A color that Printify no longer lists is set to `"available": false`, never
-  deleted, and the script says so.
-- `retail-chart` colors (chart-only colors Printify does not stock) are left
+- A color that Printify no longer lists is kept as it is, never deleted, and the
+  script says so on every run.
+- `retail-chart` colors (chart-only colors Printify does not list) are left
   alone until Printify returns them with a swatch. Then the Printify hex replaces
-  the chart hex, `available` becomes true, `source` becomes `printify`, and the
-  chart `sourceUrl` and `sourceNote` are dropped.
+  the chart hex, `source` becomes `printify`, and the chart `sourceUrl` and
+  `sourceNote` are dropped.
 - `--color-study` takes the path to the maker-method-picker's color study. For
   each color found there by name, its garment image `url` and `sha256` become
   `image` and its `colorAssetVersionId` becomes `pod`. Its hex values are not used.
